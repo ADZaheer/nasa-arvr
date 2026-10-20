@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Raycaster, Vector3, type Group, type Object3D } from 'three'
 import { DWELL_MS, dwellOccluders, dwellTargets } from './dwell'
+import { viewCamera } from './viewCamera'
 
 function visibleInTree(o: Object3D | null): boolean {
   for (; o; o = o.parent) if (!o.visible) return false
@@ -13,7 +14,8 @@ function visibleInTree(o: Object3D | null): boolean {
  * Works in VR (head gaze), handheld AR (screen centre) and phone gyro mode.
  */
 export function GazeDwell({ enabled, distance = 1 }: { enabled: boolean; distance?: number }) {
-  const camera = useThree((s) => s.camera)
+  const defaultCamera = useThree((s) => s.camera)
+  const gl = useThree((s) => s.gl)
   const ray = useMemo(() => new Raycaster(), [])
   const reticle = useRef<Group>(null)
   const st = useRef<{ target: Object3D | null; start: number; fired: boolean }>({ target: null, start: 0, fired: false })
@@ -26,6 +28,7 @@ export function GazeDwell({ enabled, distance = 1 }: { enabled: boolean; distanc
     if (!r) return
     r.visible = enabled
     if (!enabled) return
+    const camera = viewCamera(gl, defaultCamera)
     camera.getWorldPosition(o)
     camera.getWorldDirection(d)
     ray.set(o, d)

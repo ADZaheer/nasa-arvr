@@ -27,6 +27,7 @@ import type { Hotspot, SiteContent, ViewMode } from '../types'
 import { buildDiorama, buildRadialTerrain, getGroundTexture, sunDirection, useHeightField, vnoise, type HeightField } from './terrain'
 import { MarsSky, MARS_HORIZON } from './MarsSky'
 import { EYE_HEIGHT, MARS_G, input, player } from './player'
+import { viewCamera } from '../viewCamera'
 
 const DEG = Math.PI / 180
 
@@ -225,8 +226,8 @@ function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
   }, [h.id])
   useDwellTarget(hit, select)
 
-  useFrame(({ camera, clock }) => {
-    camera.getWorldPosition(tmp)
+  useFrame(({ camera, gl, clock }) => {
+    viewCamera(gl, camera).getWorldPosition(tmp)
     const d = tmp.distanceTo(base)
     // keep beacons a readable size on screen at any distance
     if (inner.current) inner.current.scale.setScalar(Math.max(1, d / 9))
@@ -444,7 +445,8 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
 /** VR: XR origin stands on the terrain; left stick walks, right stick snap-turns / teleports. */
 function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
   const origin = useRef<Group>(null)
-  const camera = useThree((s) => s.camera)
+  const defaultCamera = useThree((s) => s.camera)
+  const gl = useThree((s) => s.gl)
   const dir = useMemo(() => new Vector3(), [])
   const head = useMemo(() => new Vector3(), [])
   useXRControllerLocomotion(origin, { speed: 2 }, { type: 'snap', degrees: 30 })
@@ -457,6 +459,7 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
     clampToTerrain(hf, o.position)
     const ground = hf.heightAt(o.position.x, o.position.z)
     o.position.y = ground
+    const camera = viewCamera(gl, defaultCamera)
     camera.getWorldPosition(head)
     camera.getWorldDirection(dir)
     updatePlayerReadout(head.x, head.z, ground, dir, false)
@@ -473,9 +476,10 @@ function SuitPanelVR({ site }: { site: SiteContent }) {
   const target = useMemo(() => new Vector3(), [])
   const [heading, setHeading] = useState(0)
   const last = useRef(0)
-  useFrame(({ camera, clock }, dt) => {
+  useFrame(({ camera: defaultCamera, gl, clock }, dt) => {
     const o = g.current
     if (!o) return
+    const camera = viewCamera(gl, defaultCamera)
     camera.getWorldPosition(head)
     camera.getWorldDirection(fwd)
     fwd.y = 0

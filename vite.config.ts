@@ -8,6 +8,8 @@ const http = process.env.XR_HTTP === '1'
 
 export default defineConfig({
   plugins: http ? [react()] : [react(), basicSsl()],
+  // one three.js for everything (the ?emulate dev UI ships an older nested copy that breaks when mixed)
+  resolve: { dedupe: ['three'] },
   server: { host: true, port: 5173 },
   preview: { host: true, port: 4173 },
   build: { chunkSizeWarningLimit: 2500 },

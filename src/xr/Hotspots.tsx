@@ -8,6 +8,7 @@ import { useXRApp } from './store'
 import { useDwellTarget } from './dwell'
 import { KIND_COLORS } from './bodies'
 import { FONT_BOLD } from './font'
+import { viewCamera } from './viewCamera'
 
 const MAX_LABELS = 6
 const UP = new Vector3(0, 1, 0)
@@ -43,11 +44,11 @@ export function Hotspots({ content, geometry }: { content: BodyContent; geometry
   const last = useRef(0)
   const tmp = useMemo(() => ({ wp: new Vector3(), cam: new Vector3(), n: new Vector3() }), [])
 
-  useFrame(({ camera, clock }) => {
+  useFrame(({ camera, gl, clock }) => {
     const t = clock.elapsedTime
     if (t - last.current < 0.25) return
     last.current = t
-    camera.getWorldPosition(tmp.cam)
+    viewCamera(gl, camera).getWorldPosition(tmp.cam)
     const ranked: { id: string; dist: number }[] = []
     for (const p of placed) {
       const g = groups.current[p.h.id]

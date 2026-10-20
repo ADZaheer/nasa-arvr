@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { BackSide, Color, ShaderMaterial, Vector3, type Mesh } from 'three'
+import { viewCamera } from '../viewCamera'
 
 export const MARS_HORIZON = '#c99a76'
 
@@ -49,8 +50,8 @@ export function MarsSky({ sunDir, radius }: { sunDir: [number, number, number]; 
   )
 
   // Follow the viewer so the sky is "infinitely" far away.
-  useFrame(({ camera }) => {
-    if (ref.current) camera.getWorldPosition(ref.current.position)
+  useFrame(({ camera, gl }) => {
+    if (ref.current) viewCamera(gl, camera).getWorldPosition(ref.current.position)
   })
 
   return (
