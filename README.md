@@ -16,6 +16,21 @@ npm run check:content
 
 Phones and headsets need HTTPS for WebXR and motion sensors, so the dev server uses `@vitejs/plugin-basic-ssl` with `--host`. `XR_HTTP=1 npx vite --port 5174` serves plain HTTP for localhost-only testing.
 
+## Testing in VR
+
+1. **No headset (laptop):** open `https://localhost:5173/xr?emulate`.
+   - It installs a simulated Meta Quest 3 (Meta's IWER emulator), and **Enter VR** / **Enter AR** appear.
+   - The on-screen panels move the headset and controllers, and have buttons for trigger and sticks.
+2. **Meta Quest (standalone):**
+   - Put the headset on the same Wi-Fi as the laptop.
+   - In Quest Browser, open `https://<laptop-LAN-IP>:5173/xr` and accept the certificate warning (Advanced → Proceed).
+   - Tap **Enter VR**.
+3. **PC VR** (Quest Link / Air Link / SteamVR): open `https://localhost:5173/xr` in Chrome or Edge on the PC, then press **Enter VR**.
+
+VR controls:
+- Point the controller ray and press trigger to select, or look at a pin for 1.5 s (gaze dwell).
+- On the surface: left stick walks, right stick snap-turns, and pushing the right stick forward aims a teleport arc.
+
 ## What picks which experience (`XRRoot`)
 
 1. If `navigator.xr.isSessionSupported('immersive-vr')` → **Enter VR**. Controllers and hand rays, plus 1.5 s gaze dwell. The info card is drawn in 3D.
