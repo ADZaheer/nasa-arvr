@@ -1,0 +1,75 @@
+:root {
+  --bg: #05060f;
+  --panel: rgba(11, 16, 32, 0.92);
+  --line: rgba(143, 180, 255, 0.25);
+  --text: #eef2ff;
+  --muted: #aab4cc;
+  --accent: #2f6fed;
+  --fact: #4fd1ff;
+  font-family: Roboto, system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
+.xr-root { position: fixed; inset: 0; }
+.xr-root canvas { touch-action: none; }
+
+.hud { position: absolute; inset: 0; pointer-events: none; padding: max(12px, env(safe-area-inset-top)) 16px 16px; }
+.hud > * { pointer-events: auto; }
+.hud--ar { position: fixed; }
+.hud__bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.hud__title { display: flex; gap: 10px; align-items: center; }
+.brand { font-weight: 500; letter-spacing: 0.04em; font-size: 15px; }
+.crumb { font-weight: 500; font-size: 17px; }
+.hud__modes { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.btn {
+  font: inherit; font-size: 14px; color: var(--text); background: rgba(29, 42, 74, 0.9);
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; min-height: 40px;
+}
+.btn:hover { background: #3b5bdb; }
+.btn--primary { background: var(--accent); border-color: transparent; }
+.btn--ghost { background: transparent; }
+.icon-btn { font-size: 22px; line-height: 1; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px 8px; }
+.link-btn { background: none; border: 0; color: var(--fact); padding: 4px 0; cursor: pointer; font: inherit; font-size: 14px; }
+
+.notice { display: inline-block; margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--panel); font-size: 14px; }
+.notice--warn { border: 1px solid #ffb347; }
+.hint { position: absolute; left: 16px; bottom: 16px; margin: 0; font-size: 13px; color: var(--muted); }
+
+.body-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; max-width: 640px; }
+.badge { font-size: 12px; color: #ffcc55; border: 1px solid #ffcc55; border-radius: 999px; padding: 3px 9px; }
+.chip { font: inherit; font-size: 13px; color: var(--muted); background: rgba(11, 16, 32, 0.7); border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+.chip--live { color: var(--text); border-color: var(--fact); }
+.chip:hover { background: #1d2a4a; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; font-size: 12px; color: var(--muted); align-items: center; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; }
+.credit { flex-basis: 100%; opacity: 0.8; }
+
+.info-card {
+  position: absolute; right: 16px; bottom: 16px; width: min(380px, calc(100vw - 32px));
+  max-height: calc(100% - 120px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px);
+}
+.info-card__top { display: flex; justify-content: space-between; align-items: center; }
+.kind-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid; border-radius: 999px; padding: 2px 8px; }
+.info-card h2 { margin: 8px 0 6px; font-size: 20px; font-weight: 500; }
+.info-card__short { margin: 0 0 4px; font-size: 15px; line-height: 1.45; }
+.info-card__detail { margin: 6px 0; font-size: 14px; line-height: 1.5; color: #c3cbe0; }
+.info-card__source { font-size: 13px; color: var(--muted); margin: 8px 0 12px; }
+.info-card__source a { color: #8fb4ff; }
+.info-card__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.toast {
+  position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .info-card { left: 16px; right: 16px; width: auto; bottom: 12px; max-height: 55%; }
+  .hint { display: none; }
+  .toast { bottom: auto; top: 70px; }
+}
