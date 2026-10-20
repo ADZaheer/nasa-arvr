@@ -10,6 +10,7 @@ import { GazeDwell } from './GazeDwell'
 import { GyroControls } from './GyroControls'
 import { ARPlacement } from './ARPlacement'
 import { Hud } from './Hud'
+import { SurfaceScene } from './surface/SurfaceScene'
 
 /** Keeps the app's view mode in sync with the WebXR session / gyro toggle. */
 function ModeSync() {
@@ -23,29 +24,40 @@ function ModeSync() {
   return null
 }
 
-/** Camera for non-immersive modes: OrbitControls on desktop, fixed origin for gyro look-around. */
-function CameraRig({ hub }: { hub: boolean }) {
+type SceneKind = 'hub' | 'body' | 'surface'
+
+/** Camera for non-immersive modes: OrbitControls on desktop, fixed origin for gyro look-around. Surface mode drives its own camera. */
+function CameraRig({ kind }: { kind: SceneKind }) {
   const mode = useXRApp((s) => s.mode)
   const camera = useThree((s) => s.camera)
+  const hub = kind === 'hub'
   useEffect(() => {
+    if (kind === 'surface') return
     if (mode === 'desktop') {
       camera.position.set(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
       camera.lookAt(0, 0, 0)
     } else if (mode === 'gyro') {
       camera.position.set(0, 0, 0)
     }
-  }, [mode, hub, camera])
-  return mode === 'desktop' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} /> : null
+  }, [mode, hub, kind, camera])
+  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} /> : null
 }
 
-/** Where the scene sits for each mode. Content is authored with body radius = 1 (hub radius ≈ 3.2). */
-function Stage({ hub, children }: { hub: boolean; children: ReactNode }) {
+/** Where the scene sits for each mode. Hub/body content is authored with body radius = 1 (hub radius ≈ 3.2);
+ *  surface content is in real metres, so it is only moved for the AR tabletop diorama. */
+function Stage({ kind, children }: { kind: SceneKind; children: ReactNode }) {
   const mode = useXRApp((s) => s.mode)
   const anchor = useXRApp((s) => s.arAnchor)
+  const hub = kind === 'hub'
   let position: [number, number, number] = [0, 0, 0]
   let scale = 1
   let visible = true
-  if (mode === 'gyro') position = [0, 0, hub ? -6.5 : -3.6]
+  if (kind === 'surface') {
+    if (mode === 'ar') {
+      visible = anchor !== null
+      if (anchor) position = [anchor[0], anchor[1] + 0.01, anchor[2]]
+    }
+  } else if (mode === 'gyro') position = [0, 0, hub ? -6.5 : -3.6]
   else if (mode === 'vr') {
     position = [0, 1.3, hub ? -1.3 : -1.25]
     scale = hub ? 0.3 : 0.36
@@ -64,34 +76,49 @@ function Stage({ hub, children }: { hub: boolean; children: ReactNode }) {
 /**
  * Entry point of the AR/VR module. Picks the best experience per device:
  * Enter VR / Enter AR (WebXR) → phone gyro look-around → desktop OrbitControls.
+ * Scenes: Solar System hub → body explorer → standing on the surface.
  */
 export function XRRoot() {
   const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
   const mode = useXRApp((s) => s.mode)
-  const hub = !bodyId
+  const kind: SceneKind = siteId ? 'surface' : bodyId ? 'body' : 'hub'
+  const space = kind !== 'surface' && mode !== 'ar'
 
   return (
     <div className="xr-root">
       <Canvas
-        camera={{ fov: 55, near: 0.01, far: 300, position: [0, 0.4, 3.4] }}
+        camera={{ fov: 60, near: 0.01, far: 300, position: [0, 0.4, 3.4] }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
         onPointerMissed={() => useXRApp.getState().selectHotspot(null)}
       >
         <XR store={xrStore}>
           <ModeSync />
-          {mode !== 'ar' && (
+          {space && (
             <>
               <color attach="background" args={['#05060f']} />
               <Stars radius={80} depth={40} count={4000} factor={4} saturation={0} fade />
             </>
           )}
-          <ambientLight intensity={0.35} />
-          <directionalLight position={[5, 2, 4]} intensity={2.4} />
-          <CameraRig hub={hub} />
+          {(kind !== 'surface' || mode === 'ar') && (
+            <>
+              <ambientLight intensity={0.35} />
+              <directionalLight position={[5, 2, 4]} intensity={2.4} />
+            </>
+          )}
+          <CameraRig kind={kind} />
           {mode === 'gyro' && <GyroControls />}
           {mode === 'ar' && <ARPlacement />}
-          <Stage hub={hub}>{bodyId ? <BodyExplorer key={bodyId} id={bodyId} vr={mode === 'vr'} /> : <SolarSystemHub tilt={mode === 'vr' || mode === 'gyro' ? 0.35 : 0} />}</Stage>
+          <Stage kind={kind}>
+            {kind === 'surface' ? (
+              <SurfaceScene key={siteId} siteId={siteId!} mode={mode} />
+            ) : bodyId ? (
+              <BodyExplorer key={bodyId} id={bodyId} vr={mode === 'vr'} />
+            ) : (
+              <SolarSystemHub tilt={mode === 'vr' || mode === 'gyro' ? 0.35 : 0} />
+            )}
+          </Stage>
           <GazeDwell enabled={mode !== 'desktop'} distance={mode === 'gyro' ? 1.5 : 0.8} />
           {mode === 'ar' && (
             <XRDomOverlay className="dom-overlay">

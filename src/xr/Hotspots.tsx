@@ -30,7 +30,7 @@ export function Hotspots({ content, geometry }: { content: BodyContent; geometry
       if (h.anchor.type === 'latlon') {
         const pos = latLonToVec3(h.anchor.lat, h.anchor.lon, 1.002)
         out.push({ h, pos, normal: pos.clone().normalize() })
-      } else if (geometry) {
+      } else if (h.anchor.type === 'mesh' && geometry) {
         const { point, normal } = snapToSurface(geometry, h.anchor.point)
         out.push({ h, pos: point, normal })
       }

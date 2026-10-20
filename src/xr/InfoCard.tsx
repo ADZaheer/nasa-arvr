@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Text } from '@react-three/drei'
 import { useXRApp } from './store'
-import { useBodyContent } from './content'
+import { useBodyContent, useSiteContent } from './content'
 import { askGuide, backToSource } from './events'
 import { KIND_COLORS } from './bodies'
 import { FONT, FONT_BOLD } from './font'
@@ -16,9 +16,25 @@ export const KIND_LABEL: Record<HotspotKind, string> = {
 
 function useSelectedHotspot(): Hotspot | null {
   const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
   const hotspotId = useXRApp((s) => s.hotspotId)
-  const content = useBodyContent(bodyId)
-  return content?.hotspots.find((h) => h.id === hotspotId) ?? null
+  const body = useBodyContent(siteId ? null : bodyId)
+  const site = useSiteContent(siteId)
+  return (siteId ? site : body)?.hotspots.find((h) => h.id === hotspotId) ?? null
+}
+
+/** Extra action: from orbit, stand on the surface here; on the surface, walk to the beacon. */
+function placeAction(h: Hotspot): { label: string; run: () => void } | null {
+  const s = useXRApp.getState()
+  if (h.anchor.type === 'site') {
+    const { x, z } = h.anchor
+    return { label: 'Walk there', run: () => s.requestGoTo({ x, z }) }
+  }
+  if (h.site && !s.siteId) {
+    const site = h.site
+    return { label: 'Stand here', run: () => s.selectSite(site, h.body) }
+  }
+  return null
 }
 
 const ask = (h: Hotspot) => askGuide({ body: h.body, hotspotId: h.id, guidePrompt: h.guidePrompt })
@@ -29,6 +45,7 @@ export function InfoCardPanel() {
   const [expanded, setExpanded] = useState(false)
   useEffect(() => setExpanded(false), [h?.id])
   if (!h) return null
+  const action = placeAction(h)
   return (
     <aside className="info-card" role="dialog" aria-label={h.title}>
       <div className="info-card__top">
@@ -58,17 +75,29 @@ export function InfoCardPanel() {
         <button className="btn" onClick={() => backToSource(h.body, h.id)}>
           Back to source image
         </button>
+        {action && (
+          <button className="btn btn--accent" onClick={action.run}>
+            {action.label}
+          </button>
+        )}
       </div>
     </aside>
   )
 }
 
 /** In-world card for VR (DOM is not visible inside a headset). Units are stage-local (body radius = 1). */
-export function InfoCard3D({ position = [1.55, 0.25, 0.25] as [number, number, number] }) {
+export function InfoCard3D({
+  position = [1.55, 0.25, 0.25],
+  rotation = [0, -0.45, 0],
+}: {
+  position?: [number, number, number]
+  rotation?: [number, number, number]
+}) {
   const h = useSelectedHotspot()
   const [expanded, setExpanded] = useState(false)
   useEffect(() => setExpanded(false), [h?.id])
   if (!h) return null
+  const action = placeAction(h)
 
   const W = 1.3
   const pad = 0.08
@@ -87,11 +116,12 @@ export function InfoCard3D({ position = [1.55, 0.25, 0.25] as [number, number, n
   const yDetail = expanded ? at(0.66) : 0
   const ySource = at(0.14)
   const yButtons = at(0.12) - 0.05
+  const yAction = yButtons - 0.15
 
   return (
-    <group position={position} rotation={[0, -0.45, 0]}>
-      <mesh position={[0, 0, -0.005]}>
-        <planeGeometry args={[W, H]} />
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, action ? -0.08 : 0, -0.005]}>
+        <planeGeometry args={[W, H + (action ? 0.16 : 0)]} />
         <meshBasicMaterial color="#0b1020" transparent opacity={0.92} />
       </mesh>
       <Text font={FONT_BOLD} position={[left, yKind, 0]} fontSize={0.045} color={KIND_COLORS[h.kind]} anchorX="left" anchorY="top">
@@ -122,6 +152,7 @@ export function InfoCard3D({ position = [1.55, 0.25, 0.25] as [number, number, n
       </Text>
       <Button3D label="Ask the guide" position={[-W / 4 + 0.02, yButtons, 0]} width={0.56} height={0.11} color="#2f6fed" onClick={() => ask(h)} />
       <Button3D label="Back to source image" position={[W / 4 - 0.02, yButtons, 0]} width={0.56} height={0.11} onClick={() => backToSource(h.body, h.id)} />
+      {action && <Button3D label={action.label} position={[0, yAction, 0]} width={W - 0.16} height={0.11} color="#b5562b" onClick={action.run} />}
     </group>
   )
 }

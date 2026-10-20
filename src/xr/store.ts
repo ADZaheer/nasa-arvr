@@ -8,6 +8,8 @@ import type { GuideRequest, ViewMode } from './types'
 export interface XRAppState {
   /** null = Solar System hub */
   bodyId: string | null
+  /** Surface site being stood on (content/sites/<id>.json); bodyId is then that site's body. */
+  siteId: string | null
   /** Spectral band selected in the web viewer (e.g. a SPHEREx band); passed through for now. */
   band: string | null
   /** Observation / source-image id selected in the web viewer; passed through for now. */
@@ -22,11 +24,17 @@ export interface XRAppState {
   shapeIsIllustration: boolean
   lastGuideRequest: GuideRequest | null
   toast: string | null
+  /** Surface mode: request to move the player to a point (consumed by the player controller). */
+  goTo: { x: number; z: number; exact?: boolean } | null
+  /** Surface mode: yaw (rad) added to phone-gyro heading so the start view faces the scene. */
+  headingOffset: number
 
   selectBody: (id: string | null) => void
   setBand: (band: string | null) => void
   setObservation: (obs: string | null) => void
+  selectSite: (id: string, body: string) => void
   selectHotspot: (id: string | null) => void
+  requestGoTo: (p: { x: number; z: number; exact?: boolean } | null) => void
   setHovered: (id: string | null) => void
   setMode: (mode: ViewMode) => void
   setGyroEnabled: (on: boolean) => void
@@ -39,6 +47,9 @@ let toastTimer: ReturnType<typeof setTimeout> | undefined
 
 export const useXRApp = create<XRAppState>((set) => ({
   bodyId: null,
+  siteId: null,
+  goTo: null,
+  headingOffset: 0,
   band: null,
   observation: null,
   hotspotId: null,
@@ -50,7 +61,10 @@ export const useXRApp = create<XRAppState>((set) => ({
   lastGuideRequest: null,
   toast: null,
 
-  selectBody: (id) => set((s) => (s.bodyId === id ? s : { bodyId: id, hotspotId: null, hoveredId: null, shapeIsIllustration: false })),
+  selectBody: (id) =>
+    set((s) => (s.bodyId === id && !s.siteId ? s : { bodyId: id, siteId: null, hotspotId: null, hoveredId: null, shapeIsIllustration: false })),
+  selectSite: (id, body) => set((s) => (s.siteId === id ? s : { siteId: id, bodyId: body, hotspotId: null, hoveredId: null })),
+  requestGoTo: (goTo) => set({ goTo }),
   setBand: (band) => set({ band }),
   setObservation: (observation) => set({ observation }),
   selectHotspot: (hotspotId) => set({ hotspotId }),

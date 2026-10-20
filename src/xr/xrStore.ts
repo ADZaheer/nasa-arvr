@@ -7,6 +7,8 @@ import { createXRStore } from '@react-three/xr'
  */
 export const xrStore = createXRStore({
   emulate: false,
+  // right controller: push the stick forward to aim a teleport arc (surface mode); left stick walks
+  controller: { right: { teleportPointer: true } },
   offerSession: false,
   hitTest: true,
   domOverlay: true,

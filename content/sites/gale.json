@@ -1,0 +1,150 @@
+{
+  "id": "gale",
+  "body": "mars",
+  "name": "Gale Crater floor",
+  "region": "Gale Crater, Mars – Mount Sharp on the horizon",
+  "terrain": {
+    "url": "/terrain/gale.bin",
+    "gridW": 512,
+    "gridH": 375,
+    "widthUnits": 761.3,
+    "depthUnits": 558.021,
+    "zMinUnits": 0,
+    "zMaxUnits": 34.181,
+    "metersPerUnit": 481,
+    "verticalMetersPerUnit": 195,
+    "detailAmplitude": 0.5,
+    "viewRadius": 200000
+  },
+  "terrainCredit": "Terrain: NASA 3D Resources \"Curiosity Landing Site\" elevation model of Gale Crater, scaled so Mount Sharp is ~5 km tall. Coarse far away; rocks, colours and sky are artistic.",
+  "spawn": {
+    "x": 14756,
+    "z": -13905,
+    "lookAt": {
+      "x": 1075,
+      "z": 23683
+    }
+  },
+  "sun": {
+    "azimuthDeg": 150,
+    "elevationDeg": 25
+  },
+  "fogDensity": 0.000022,
+  "dioramaExaggeration": 6,
+  "conditions": [
+    {
+      "label": "Gravity",
+      "value": "0.38 g (3.71 m/s²)"
+    },
+    {
+      "label": "Air",
+      "value": "Very thin, mostly carbon dioxide"
+    },
+    {
+      "label": "Equator at noon",
+      "value": "~24 °C at your feet, ~0 °C at your head"
+    },
+    {
+      "label": "Day length",
+      "value": "24.6 hours"
+    }
+  ],
+  "conditionsSource": {
+    "label": "NASA Science – Mars Facts",
+    "url": "https://science.nasa.gov/mars/facts/"
+  },
+  "hotspots": [
+    {
+      "id": "mount-sharp",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 1075,
+        "z": 23683,
+        "y": 200
+      },
+      "title": "Mount Sharp (Aeolis Mons)",
+      "short": "A 5-km-tall mountain of layered rock in the middle of Gale Crater. Curiosity has been climbing it since 2014.",
+      "detail": "Mount Sharp is built from stacked layers of sediment. Each layer records conditions on ancient Mars, so by climbing, Curiosity reads history in order, from wetter times near the base toward drier times higher up. The mountain is about 40 km away from where you stand in this model.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Curiosity science",
+        "url": "https://science.nasa.gov/mission/msl-curiosity/science/"
+      },
+      "guidePrompt": "Why is Mount Sharp made of layers, and what does climbing it tell Curiosity about Mars' past?"
+    },
+    {
+      "id": "landing-area",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 14751,
+        "z": -13898
+      },
+      "title": "On the crater floor",
+      "short": "Curiosity has been exploring Gale Crater since landing in August 2012, studying rocks, soil and air.",
+      "detail": "Gale was chosen because orbiters showed water-related minerals and thick layers at the foot of Mount Sharp. Curiosity drills rocks and analyses samples inside its own onboard laboratory. You are standing on the crater floor between the crater wall and the mountain; this is not the exact landing point.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Curiosity",
+        "url": "https://science.nasa.gov/mission/msl-curiosity/"
+      },
+      "guidePrompt": "Why did NASA choose Gale Crater as Curiosity's landing site?"
+    },
+    {
+      "id": "clay-unit",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 5179,
+        "z": 12407,
+        "y": 50
+      },
+      "title": "The clay-bearing unit",
+      "short": "A region on Mount Sharp's slopes with a unique story about the history of water.",
+      "detail": "Clay minerals usually form when rock spends a long time in contact with water. Curiosity studied this band on the mountain's flank to learn how long water persisted at Gale and how the environment changed. The pin shows the general direction, not the exact location.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Curiosity science",
+        "url": "https://science.nasa.gov/mission/msl-curiosity/science/"
+      },
+      "guidePrompt": "What do clay minerals on Mount Sharp tell us about water on ancient Mars?"
+    },
+    {
+      "id": "organics",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 15206,
+        "z": -13845
+      },
+      "title": "Largest organic molecules on Mars",
+      "short": "Ancient mudstone in Gale holds the largest organic compounds found on Mars, possibly pieces of fatty acids.",
+      "detail": "Curiosity's onboard lab detected long carbon-chain molecules in a drilled mudstone sample. Scientists hypothesise they may be fragments of fatty acids. Such molecules can be made by life but also by non-biological chemistry, so this is not evidence of life on its own. The pin location is illustrative.",
+      "kind": "candidate",
+      "source": {
+        "label": "NASA Science – Curiosity",
+        "url": "https://science.nasa.gov/mission/msl-curiosity/"
+      },
+      "guidePrompt": "What organic molecules did Curiosity find in Gale Crater, and why don't they prove life existed?"
+    },
+    {
+      "id": "whats-real-gale",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 14763,
+        "z": -13899
+      },
+      "title": "What's real in this scene?",
+      "short": "The crater and Mount Sharp come from a NASA elevation model; nearby rocks, colours and sky are artistic.",
+      "detail": "The elevation model covers all of Gale Crater, so distant hills are real in shape but coarse, about half a kilometre per sample. The ground at your feet, the rocks, lighting and sky are generated to give a feeling of standing there. Mars' gravity is 38% of Earth's, so try jumping.",
+      "kind": "illustration",
+      "source": {
+        "label": "NASA 3D Resources",
+        "url": "https://science.nasa.gov/3d-resources/"
+      },
+      "guidePrompt": "How big is Gale Crater and how far could an astronaut see standing on its floor?"
+    }
+  ]
+}

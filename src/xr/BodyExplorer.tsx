@@ -2,7 +2,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Billboard, Text, useGLTF, useTexture } from '@react-three/drei'
 import { SRGBColorSpace, SphereGeometry, type BufferGeometry, type Group, type Mesh } from 'three'
-import { useBodyContent } from './content'
+import { useBodyContent, useSitesForBody } from './content'
 import { BODY_BY_ID } from './bodies'
 import { makeLumpyGeometry } from './geo'
 import { useXRApp } from './store'
@@ -115,6 +115,7 @@ function Asteroid({ model, onGeometry, onIllustration }: { model?: string; onGeo
  */
 export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   const content = useBodyContent(id)
+  const sites = useSitesForBody(vr ? id : null)
   const info = BODY_BY_ID[id]
   const spin = useRef<Group>(null)
   const [geometry, setGeometry] = useState<BufferGeometry | null>(null)
@@ -168,6 +169,9 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
         <>
           <InfoCard3D />
           <Button3D label="◂ Solar System" position={[0, -1.35, 0.2]} width={0.6} height={0.13} onClick={() => useXRApp.getState().selectBody(null)} />
+          {sites.map((s, i) => (
+            <Button3D key={s.id} label={`Stand at ${s.name}`} position={[-1.55, 0.3 - i * 0.18, 0.3]} width={0.95} height={0.13} color="#b5562b" onClick={() => useXRApp.getState().selectSite(s.id, s.body)} />
+          ))}
         </>
       )}
     </group>

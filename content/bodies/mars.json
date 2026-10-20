@@ -8,56 +8,92 @@
     {
       "id": "olympus-mons",
       "body": "mars",
-      "anchor": { "type": "latlon", "lat": 18.65, "lon": -133.8 },
+      "anchor": {
+        "type": "latlon",
+        "lat": 18.65,
+        "lon": -133.8
+      },
       "title": "Olympus Mons",
       "short": "The largest volcano in the solar system, roughly three times taller than Mount Everest.",
       "detail": "Olympus Mons is a shield volcano built by long-lived lava flows. It rises about 25 km above the surrounding plains and is wide enough to cover a US state such as Arizona. Mars' lower gravity and lack of moving tectonic plates let lava pile up in one place for a very long time.",
       "kind": "fact",
-      "source": { "label": "NASA Science – Mars Facts", "url": "https://science.nasa.gov/mars/facts/" },
+      "source": {
+        "label": "NASA Science – Mars Facts",
+        "url": "https://science.nasa.gov/mars/facts/"
+      },
       "guidePrompt": "Explain why Olympus Mons on Mars grew so much taller than any volcano on Earth."
     },
     {
       "id": "valles-marineris",
       "body": "mars",
-      "anchor": { "type": "latlon", "lat": -13.9, "lon": -59.2 },
+      "anchor": {
+        "type": "latlon",
+        "lat": -13.9,
+        "lon": -59.2
+      },
       "title": "Valles Marineris",
       "short": "A canyon system over 4,000 km long and up to 7 km deep, dwarfing the Grand Canyon.",
       "detail": "Valles Marineris stretches about a fifth of the way around Mars. It is thought to have formed mainly as the crust cracked and pulled apart near the Tharsis volcanic region, later widened by landslides and erosion. On Earth it would span roughly the width of the United States.",
       "kind": "fact",
-      "source": { "label": "NASA Science – Valles Marineris", "url": "https://science.nasa.gov/resource/valles-marineris-the-grand-canyon-of-mars/" },
+      "source": {
+        "label": "NASA Science – Valles Marineris",
+        "url": "https://science.nasa.gov/resource/valles-marineris-the-grand-canyon-of-mars/"
+      },
       "guidePrompt": "How did Valles Marineris form, and how does it compare with the Grand Canyon?"
     },
     {
       "id": "gale-crater",
       "body": "mars",
-      "anchor": { "type": "latlon", "lat": -5.4, "lon": 137.8 },
+      "anchor": {
+        "type": "latlon",
+        "lat": -5.4,
+        "lon": 137.8
+      },
       "title": "Gale Crater – Curiosity",
       "short": "Curiosity rover landed here in August 2012 and is climbing the layered Mount Sharp.",
       "detail": "Gale Crater holds Mount Sharp (Aeolis Mons), a mound of sedimentary layers about 5 km high. Curiosity found evidence that the crater once held lakes and streams, and that ancient Mars had the chemical ingredients and conditions that could have supported microbial life.",
       "kind": "fact",
-      "source": { "label": "NASA Science – Curiosity (MSL)", "url": "https://science.nasa.gov/mission/msl-curiosity/" },
-      "guidePrompt": "What has the Curiosity rover learned about ancient water in Gale Crater?"
+      "source": {
+        "label": "NASA Science – Curiosity (MSL)",
+        "url": "https://science.nasa.gov/mission/msl-curiosity/"
+      },
+      "guidePrompt": "What has the Curiosity rover learned about ancient water in Gale Crater?",
+      "site": "gale"
     },
     {
       "id": "jezero-cheyava-falls",
       "body": "mars",
-      "anchor": { "type": "latlon", "lat": 18.4, "lon": 77.5 },
+      "anchor": {
+        "type": "latlon",
+        "lat": 18.4,
+        "lon": 77.5
+      },
       "title": "Jezero Crater – potential biosignature",
       "short": "Perseverance found a rock with features that could be a sign of ancient life — not confirmed.",
       "detail": "Jezero was once a lake fed by a river delta. Perseverance, which landed in February 2021, sampled a rock nicknamed Cheyava Falls whose 'leopard spot' textures and minerals are a potential biosignature. NASA stresses non-biological explanations are still possible; studying the sample on Earth would be needed to know.",
       "kind": "candidate",
-      "source": { "label": "NASA – Potential biosignature announcement", "url": "https://www.nasa.gov/news-release/nasa-says-mars-rover-discovered-potential-biosignature-last-year/" },
+      "source": {
+        "label": "NASA – Potential biosignature announcement",
+        "url": "https://www.nasa.gov/news-release/nasa-says-mars-rover-discovered-potential-biosignature-last-year/"
+      },
       "guidePrompt": "What is a potential biosignature, and why is the Cheyava Falls rock not yet proof of life on Mars?"
     },
     {
       "id": "north-polar-cap",
       "body": "mars",
-      "anchor": { "type": "latlon", "lat": 85, "lon": 0 },
+      "anchor": {
+        "type": "latlon",
+        "lat": 85,
+        "lon": 0
+      },
       "title": "North polar ice cap",
       "short": "A permanent cap of water ice that gains a seasonal coat of frozen carbon dioxide each winter.",
       "detail": "Mars' polar caps are layered deposits of water ice and dust. In winter, carbon dioxide from the atmosphere freezes onto them as dry ice, then returns to the air in spring. The layers record past climate swings, much like ice cores on Earth.",
       "kind": "fact",
-      "source": { "label": "NASA Science – Mars Facts", "url": "https://science.nasa.gov/mars/facts/" },
+      "source": {
+        "label": "NASA Science – Mars Facts",
+        "url": "https://science.nasa.gov/mars/facts/"
+      },
       "guidePrompt": "What are Mars' polar ice caps made of and how do they change with the seasons?"
     }
   ]

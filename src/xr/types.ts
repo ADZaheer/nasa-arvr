@@ -4,6 +4,8 @@ export type HotspotAnchor =
   | { type: 'latlon'; lat: number; lon: number }
   /** Direction from the body centre in model space (north = +Y); snapped onto the mesh surface at runtime. */
   | { type: 'mesh'; point: [number, number, number] }
+  /** Surface sites: metres east (x) / south (z) of the terrain centre; y = metres above the ground. */
+  | { type: 'site'; x: number; z: number; y?: number }
 
 export interface Hotspot {
   id: string
@@ -17,6 +19,42 @@ export interface Hotspot {
   kind: HotspotKind
   source: { label: string; url: string }
   guidePrompt: string
+  /** Optional surface site id (content/sites/<id>.json) the user can "stand" at from this hotspot. */
+  site?: string
+}
+
+export interface SiteTerrain {
+  url: string
+  gridW: number
+  gridH: number
+  widthUnits: number
+  depthUnits: number
+  zMinUnits: number
+  zMaxUnits: number
+  metersPerUnit: number
+  verticalMetersPerUnit: number
+  /** amplitude (m) of procedural fine relief added near the viewer */
+  detailAmplitude: number
+  /** how far (m) the terrain mesh, fog and far plane reach */
+  viewRadius: number
+}
+
+/** A place on a body's surface the user can stand on (content/sites/<id>.json). */
+export interface SiteContent {
+  id: string
+  body: string
+  name: string
+  region: string
+  terrain: SiteTerrain
+  terrainCredit: string
+  spawn: { x: number; z: number; lookAt: { x: number; z: number } }
+  sun: { azimuthDeg: number; elevationDeg: number }
+  fogDensity: number
+  dioramaExaggeration: number
+  rover?: { name: string; model: string; x: number; z: number; yawDeg: number; sizeM: number; credit: string }
+  conditions: { label: string; value: string }[]
+  conditionsSource: { label: string; url: string }
+  hotspots: Hotspot[]
 }
 
 export interface BodyContent {

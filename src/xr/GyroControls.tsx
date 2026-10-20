@@ -17,6 +17,8 @@ export function GyroControls() {
       q0: new Quaternion(),
       q1: new Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), // camera looks out the back of the device
       zee: new Vector3(0, 0, 1),
+      yee: new Vector3(0, 1, 0),
+      qh: new Quaternion(),
     }),
     [],
   )
@@ -45,11 +47,13 @@ export function GyroControls() {
     const r = reading.current
     if (!r) return
     const orient = MathUtils.degToRad((screen.orientation?.angle ?? 0) as number)
-    const { euler, q0, q1, zee } = tmp
+    const { euler, q0, q1, zee, yee, qh } = tmp
     euler.set(MathUtils.degToRad(r.b), MathUtils.degToRad(r.a - (alpha0.current ?? 0)), -MathUtils.degToRad(r.g), 'YXZ')
     camera.quaternion.setFromEuler(euler)
     camera.quaternion.multiply(q1)
     camera.quaternion.multiply(q0.setFromAxisAngle(zee, -orient))
+    // surface mode: start facing the scene's point of interest
+    camera.quaternion.premultiply(qh.setFromAxisAngle(yee, useXRApp.getState().headingOffset))
   })
 
   return null

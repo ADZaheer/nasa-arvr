@@ -23,10 +23,42 @@ Phones and headsets need HTTPS for WebXR and motion sensors, so the dev server u
 3. On a touch device with orientation sensors → **Look around (motion)**. This is gyro look-around and asks for permission on iOS. Tap pins, or hold the centre dot on one.
 4. Otherwise → desktop OrbitControls with mouse hover and click.
 
+## Stand on the surface (`src/xr/surface/`)
+
+From the Mars globe, pick **Stand on the surface → Victoria Crater / Gale Crater floor**, or press **Stand here** on the Gale Crater hotspot. You land at human scale on terrain built from NASA elevation models.
+
+- **Victoria Crater** (Meridiani Planum): you stand on the rim next to NASA's Opportunity rover model, looking down into the ~800 m crater.
+- **Gale Crater floor**: Mount Sharp rises about 5 km, roughly 40 km away.
+
+How you move depends on the device:
+
+| Device | Moving around |
+| --- | --- |
+| Desktop | `W A S D` / arrows to walk, `Shift` to run, `Space` to jump (Mars gravity is 3.71 m/s², so jumps last much longer), drag to look |
+| Phone | "Look around (motion)" turns your view with the phone; hold **▲ Walk** to walk where you look; **Jump** button |
+| VR | Real scale. Left stick walks, right stick snap-turns; push the right stick forward to aim a teleport arc. A "suit computer" panel follows below your gaze |
+| AR | A 60 cm tabletop diorama of the whole site, with heights exaggerated and labelled |
+
+Other features:
+- **Astronaut HUD:** visor vignette, compass, suit readout (gravity, air, temperature, day length, from NASA Mars Facts), and distance from the landing spot.
+- **Beacons:** glowing markers that stay readable at any distance. "Walk there" moves you next to one.
+
+### How it's built
+- **Heightmaps:** `scripts/stl-to-heightmap.mjs` rasterises NASA's 3D-print terrain STLs into 16-bit heightmaps in `public/terrain/*.bin`.
+- **Real-world scales:** set per site in `content/sites/<id>.json`:
+  - Victoria is scaled to its ~800 m width.
+  - Gale is scaled so Mount Sharp is ~5 km tall.
+  - Gale's flat 3D-print label tab (top-right corner) was masked out.
+- **Terrain mesh:** a radial "clipmap" that's dense at your feet and reaches the horizon. It rebuilds in ~20 ms after you walk 40 m. Procedural fine relief, rocks, colours and the dusty sky are artistic, and an "illustration" beacon in each site says so.
+- **Site schema:** `{ id, body, name, region, terrain{…scales}, spawn{x,z,lookAt}, sun, fogDensity, rover?, conditions[], hotspots[] }`. Hotspots use `anchor: { "type": "site", "x", "z", "y"? }` in metres (x east, z south of the terrain centre).
+- **Linking from orbit:** a body hotspot can link to a site with `"site": "<id>"`.
+- **Approximate placement:** the STLs' compass orientation isn't documented, so site-hotspot positions (e.g. Cape Verde) and the Gale spawn are approximate and are described that way in the text.
+
 ## Routes and shared store
 
 - `/xr` is the Solar System hub. It's labelled "not to scale".
 - `/xr/body/:id?band=…&obs=…` is the body explorer. The web viewer can deep-link here.
+- `/xr/surface/:siteId` stands you on a surface site (`victoria`, `gale`).
 - `useXRApp` (zustand, `src/xr/store.ts`) holds `bodyId`, `band`, `observation`, `hotspotId`, `mode`, etc. In dev builds it is also available as `window.__xrApp`.
 
 ## Events for other modules
@@ -54,6 +86,8 @@ Phones and headsets need HTTPS for WebXR and motion sensors, so the dev server u
 | File | Origin |
 | --- | --- |
 | `public/textures/mars.jpg` | NASA 3D Resources, `Images and Textures/Mars/Mars.jpg` (public domain, 1440×720 equirectangular, centred on 0° lon) |
+| `public/terrain/victoria.bin`, `gale.bin` | NASA 3D Resources, `3D Printing/Mars - Victoria Crater` and `3D Printing/Curiosity Landing Site` STLs, rasterised with `scripts/stl-to-heightmap.mjs` |
+| `public/models/opportunity.glb` | NASA 3D Resources, `3D Models/Mars Exploration Rover - Opportunity (MER-B)` |
 | `public/models/bennu.glb` | NASA 3D Resources, `3D Printing/Asteroid 101955 Bennu` STL, converted with `scripts/stl-to-glb.mjs` (centred, unit radius, STL +Z → +Y) |
 
 If an asteroid's model file is missing, the explorer shows a procedural lumpy rock labelled "illustration".

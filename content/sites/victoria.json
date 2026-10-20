@@ -1,0 +1,177 @@
+{
+  "id": "victoria",
+  "body": "mars",
+  "name": "Victoria Crater",
+  "region": "Meridiani Planum, Mars",
+  "terrain": {
+    "url": "/terrain/victoria.bin",
+    "gridW": 512,
+    "gridH": 512,
+    "widthUnits": 304,
+    "depthUnits": 304,
+    "zMinUnits": -7.433,
+    "zMaxUnits": 20.145,
+    "metersPerUnit": 3,
+    "verticalMetersPerUnit": 2.8,
+    "detailAmplitude": 0.35,
+    "viewRadius": 6000
+  },
+  "terrainCredit": "Terrain: NASA 3D Resources \"Mars – Victoria Crater\" elevation model, scaled to the crater's ~800 m width. Rocks, colours and sky are artistic.",
+  "spawn": {
+    "x": -277.5,
+    "z": -272.5,
+    "lookAt": {
+      "x": -23,
+      "z": -18
+    }
+  },
+  "sun": {
+    "azimuthDeg": 210,
+    "elevationDeg": 32
+  },
+  "fogDensity": 0.0009,
+  "dioramaExaggeration": 2,
+  "rover": {
+    "name": "Opportunity",
+    "model": "/models/opportunity.glb",
+    "x": -273,
+    "z": -280,
+    "yawDeg": 120,
+    "sizeM": 2.3,
+    "credit": "Rover model: NASA 3D Resources (MER-B Opportunity)"
+  },
+  "conditions": [
+    {
+      "label": "Gravity",
+      "value": "0.38 g (3.71 m/s²)"
+    },
+    {
+      "label": "Air",
+      "value": "Very thin, mostly carbon dioxide"
+    },
+    {
+      "label": "Equator at noon",
+      "value": "~24 °C at your feet, ~0 °C at your head"
+    },
+    {
+      "label": "Day length",
+      "value": "24.6 hours"
+    }
+  ],
+  "conditionsSource": {
+    "label": "NASA Science – Mars Facts",
+    "url": "https://science.nasa.gov/mars/facts/"
+  },
+  "hotspots": [
+    {
+      "id": "opportunity-rover",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -273,
+        "z": -280,
+        "y": 1.2
+      },
+      "title": "Opportunity rover",
+      "short": "Opportunity reached Victoria in September 2006 after a 21-month drive, and stayed for about two years.",
+      "detail": "Opportunity landed on Meridiani Planum in 2004. It exceeded its planned life expectancy by 60 times and had driven more than 45 km by the end of its mission in Perseverance Valley. This model is parked on the rim for scale; it is about the size of a golf cart.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "How did the Opportunity rover last 60 times longer than planned, and what did it find at Victoria Crater?"
+    },
+    {
+      "id": "entry-point",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -262,
+        "z": -257
+      },
+      "title": "Where Opportunity drove in",
+      "short": "On 11 September 2007 Opportunity drove down into the crater and stayed inside for almost a year.",
+      "detail": "The team waited a full year, studying the rim, before risking the drive down the slope. Inside, Opportunity examined the layered rock exposed in the crater wall and its soil. The pin marks the approximate area of the alcove the rover used, not the exact wheel tracks.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "Why did Opportunity drive into Victoria Crater, and what did the layered walls reveal?"
+    },
+    {
+      "id": "cape-verde",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -23,
+        "z": -405
+      },
+      "title": "Cape Verde promontory",
+      "short": "One of the rocky points of Victoria's scalloped rim. Opportunity drove onto it soon after arriving.",
+      "detail": "Victoria's rim is cut into bays and promontories, giving views down layered cliffs. Opportunity captured famous vistas of the crater from Cape Verde. The location of this pin is approximate; walk along the rim to see how the scallops alternate.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "What makes Victoria Crater's rim scalloped, and what can layered cliffs like Cape Verde tell us?"
+    },
+    {
+      "id": "crater-floor",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -23,
+        "z": -18
+      },
+      "title": "Victoria's floor",
+      "short": "Victoria is about 800 m across, wider and deeper than any crater either rover had examined before.",
+      "detail": "Victoria is an impact crater that has been widened by erosion over a long time. Its depth exposes a stack of rock layers that let scientists read back through Meridiani's history, much like reading pages in a book. The floor ahead of you is roughly 70 m below the rim in this model.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "How do impact craters like Victoria help scientists read Mars' history in rock layers?"
+    },
+    {
+      "id": "dusty-sky",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -240,
+        "z": -235,
+        "y": 45
+      },
+      "title": "A hazy, red sky",
+      "short": "To human eyes the Martian sky looks hazy and reddish because of dust suspended in the thin air.",
+      "detail": "Mars' atmosphere is very thin and mostly carbon dioxide, but fine dust is lifted high by winds and occasional planet-wide dust storms. After a big storm it can take months for the dust to settle. The sky colours in this scene are an artistic approximation.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Mars Facts",
+        "url": "https://science.nasa.gov/mars/facts/"
+      },
+      "guidePrompt": "Why is the sky on Mars hazy and red during the day instead of blue?"
+    },
+    {
+      "id": "whats-real",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -282,
+        "z": -267
+      },
+      "title": "What's real in this scene?",
+      "short": "The ground shape comes from a NASA elevation model; rocks, colours, sky and fine bumps are artistic.",
+      "detail": "The crater's shape comes from NASA's 3D-print elevation model of Victoria, scaled to its real width. Small rocks, surface texture, lighting and the sky are generated to give a sense of being there. Distances are approximate, and you can jump higher here because Mars' gravity is only 38% of Earth's.",
+      "kind": "illustration",
+      "source": {
+        "label": "NASA 3D Resources",
+        "url": "https://science.nasa.gov/3d-resources/"
+      },
+      "guidePrompt": "How do scientists build 3D elevation models of places on Mars from orbiter images?"
+    }
+  ]
+}
