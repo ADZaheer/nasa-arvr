@@ -17,16 +17,18 @@ export function QualityGovernor() {
   const { dpr, tier } = useQuality()
   const hz = useStore(xrStore, (s) => s.frameRate)
   const session = useStore(xrStore, (s) => s.session)
+  const scene = useXRApp((s) => `${s.bodyId}:${s.siteId}`)
   const st = useRef({ start: performance.now(), frames: 0, slow: 0, cooldownUntil: 0 })
 
   useEffect(() => {
     if (!session) setDpr(Math.min(window.devicePixelRatio || 1, dpr))
   }, [dpr, session, setDpr])
 
-  // reset the measurement whenever the tier or session changes
+  // reset the measurement whenever the tier, session or scene changes; loading textures and compiling
+  // shaders right after a change causes hitches that shouldn't count against the device
   useEffect(() => {
-    st.current = { start: performance.now(), frames: 0, slow: 0, cooldownUntil: performance.now() + 4000 }
-  }, [tier, session])
+    st.current = { start: performance.now(), frames: 0, slow: 0, cooldownUntil: performance.now() + 10000 }
+  }, [tier, session, scene])
 
   useFrame(() => {
     const s = st.current
