@@ -3,6 +3,7 @@ import { Text } from '@react-three/drei'
 import type { Mesh } from 'three'
 import { useDwellTarget } from './dwell'
 import { FONT_BOLD } from './font'
+import { pressFeedback } from './feedback'
 
 /** A flat 3D button usable with XR rays/hands, mouse, touch and gaze dwell. */
 export function Button3D({
@@ -40,6 +41,7 @@ export function Button3D({
         }}
         onClick={(e) => {
           e.stopPropagation()
+          pressFeedback()
           onClick()
         }}
       >

@@ -6,7 +6,7 @@ import { player } from './surface/player'
 export type MenuTab = 'travel' | 'display' | 'comfort' | 'info'
 export const MENU_TABS: { id: MenuTab; label: string }[] = [
   { id: 'travel', label: 'Travel' },
-  { id: 'display', label: 'Display' },
+  { id: 'display', label: 'Visuals' },
   { id: 'comfort', label: 'Comfort' },
   { id: 'info', label: 'Info' },
 ]
@@ -32,9 +32,21 @@ export type ChoiceSpec = { kind: 'choice'; key: keyof XRSettings; label: string;
 export type ControlSpec = SliderSpec | ToggleSpec | ChoiceSpec
 
 const pct = (v: number) => `${Math.round(v * 100)}%`
+const timeLabel = (t: number) => (t < 0.08 ? 'Sunrise' : t > 0.92 ? 'Sunset' : t < 0.42 ? 'Morning' : t < 0.58 ? 'Noon' : 'Afternoon')
 export const DISPLAY_CONTROLS: ControlSpec[] = [
-  { kind: 'slider', key: 'labels', label: 'Labels', min: 0, max: 1, format: pct },
-  { kind: 'toggle', key: 'pins', label: 'Pins & beacons' },
+  {
+    kind: 'choice',
+    key: 'quality',
+    label: 'Graphics quality',
+    options: [
+      { value: 'auto', label: 'Auto' },
+      { value: 'low', label: 'Low' },
+      { value: 'medium', label: 'Med' },
+      { value: 'high', label: 'High' },
+      { value: 'ultra', label: 'Ultra' },
+    ],
+  },
+  { kind: 'slider', key: 'timeOfDay', label: 'Time of day', min: 0, max: 1, format: timeLabel, surfaceOnly: true },
   { kind: 'slider', key: 'exposure', label: 'Brightness', min: 0.5, max: 1.6, format: pct },
   { kind: 'slider', key: 'haze', label: 'Mars haze', min: 0, max: 2, format: pct, surfaceOnly: true },
   { kind: 'toggle', key: 'showFps', label: 'FPS meter' },
@@ -51,6 +63,9 @@ export const COMFORT_CONTROLS: ControlSpec[] = [
     ],
   },
   { kind: 'slider', key: 'moveSpeed', label: 'Move speed', min: 0.5, max: 2, format: (v) => `${v.toFixed(1)}×` },
+  { kind: 'slider', key: 'labels', label: 'Labels', min: 0, max: 1, format: pct },
+  { kind: 'toggle', key: 'pins', label: 'Pins & beacons' },
+  { kind: 'toggle', key: 'sound', label: 'Sound' },
 ]
 
 const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']

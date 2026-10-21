@@ -114,3 +114,44 @@ Other features:
 If an asteroid's model file is missing, the explorer shows a procedural lumpy rock labelled "illustration".
 
 Bennu's mesh-anchor directions are approximate. The STL's axis convention isn't documented, so check them against OSIRIS-REx maps before the demo.
+
+## Graphics quality (Auto / Low / Medium / High / Ultra)
+
+Set it in the wrist menu or ⚙ Menu → Visuals.
+- **Auto** picks a level from the device: Quest/headsets → Medium, phones → Low/Medium, laptops by GPU → Medium/High/Ultra.
+- Auto steps down one level if fps stays under ~80% of the target for 4 s (`src/xr/QualityGovernor.tsx`).
+- Levels are defined in `src/xr/quality.ts`.
+
+| | Low | Medium | High | Ultra |
+|---|---|---|---|---|
+| Ground textures (PBR) | procedural | 512 | 1K | 2K |
+| Rocks | 250 | 600 | 900 | 1400 |
+| Sun shadows | – | – | 1024 | 2048 |
+| Dust particles / dust devils | – | 600 / 1 | 2000 / 2 | 6000 / 3 |
+| Star map / Mars relief | 1K / – | 2K / 1K | 4K / 2K | 4K / 2K |
+| Desktop effects | – | – | bloom, SMAA, vignette | + ambient occlusion |
+
+**VR caps:** in a headset the screen effects are off and shadows are 1024 at most. Particles and terrain are reduced, because every frame is drawn twice at a fixed 72 Hz.
+
+Measured CPU per frame in the emulated Quest at Victoria (on a laptop): Low 1.6 ms, Medium 1.9 ms, High 3.7 ms.
+
+### Visual features
+- **Mars surface:**
+  - PBR ground blended from gravel, dust and rock by slope and patches, with baked ambient occlusion.
+  - Scanned-rock material on the rocks, and sun shadows that follow you.
+  - Time-of-day sky (Visuals → Time of day), including the blue Martian sunset.
+- **Particles:**
+  - Wind-blown dust and sunlit motes, and dust devils.
+  - Footstep and landing dust puffs; desktop/phone arrival is a descent from 250 m.
+  - Bennu pebble ejections, as seen by OSIRIS-REx.
+- **Space:** the real Milky Way star map, Mars relief from MOLA topography with an atmosphere rim, and an animated Sun with corona.
+- **Polish:**
+  - Fade-through-black between scenes (VR-safe), teal glowing tracked hands, controller haptics.
+  - Synthesised sound (Mars wind, space hum, footsteps, clicks), off by default; Comfort → Sound turns it on.
+
+### Asset sources (rebuild with `node scripts/build-assets.mjs <sourceDir>`)
+| Output | Source |
+|---|---|
+| `public/textures/ground/*` | Poly Haven CC0: `rock_ground_02`, `red_sand`, `rock_boulder_dry` (greyscale detail, tinted in shader) |
+| `public/textures/space/starmap_*.jpg` | NASA SVS Deep Star Maps 2020, `starmap_2020_4k.exr` (public domain), tone-mapped |
+| `public/textures/mars_normal_*.png` | NASA PDS MGS MOLA MEGDR `megt90n000cb` (4 px/deg topography), ×12 relief |

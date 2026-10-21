@@ -3,6 +3,7 @@ import { Text } from '@react-three/drei'
 import type { ThreeEvent } from '@react-three/fiber'
 import { MeshBasicMaterial, Vector3, type Mesh } from 'three'
 import { FONT, FONT_BOLD } from './font'
+import { pressFeedback } from './feedback'
 
 /**
  * Small 3D UI kit for in-world panels (wrist menu). Works with controller rays, hand rays (pinch),
@@ -57,6 +58,7 @@ export function Tile({ label, active, onPress, position, width = 0.9, height = 0
         {...bind}
         onClick={(e) => {
           e.stopPropagation()
+          pressFeedback()
           onPress()
         }}
       >
@@ -86,6 +88,7 @@ export function Toggle3D({ label, value, onChange, position, width = 2.1 }: {
           {...bind}
           onClick={(e) => {
             e.stopPropagation()
+            pressFeedback()
             onChange(!value)
           }}
         >

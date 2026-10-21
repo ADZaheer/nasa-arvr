@@ -134,7 +134,7 @@ export function buildRadialTerrain(hf: HeightField, cx: number, cz: number, rMax
   g.setAttribute('uv', new BufferAttribute(uv, 2))
   g.setIndex(index)
   g.computeVertexNormals()
-  colorize(g)
+  colorize(g, hf)
   g.computeBoundingSphere()
   return g
 }
@@ -153,21 +153,47 @@ export function buildDiorama(hf: HeightField, size: number, exaggeration: number
   return g
 }
 
-function colorize(g: BufferGeometry) {
+const smooth = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+  return t * t * (3 - 2 * t)
+}
+
+/**
+ * Vertex colours (Mars palette), plus:
+ * - baked ambient occlusion when a height field is given: ground lower than its surroundings (hollows,
+ *   crater floors and walls) is darkened, ridges slightly brightened. Free at runtime on every tier.
+ * - a 'mask' attribute (x = fine dust cover, y = bare rock on slopes) used by the PBR ground material.
+ */
+function colorize(g: BufferGeometry, hf?: HeightField) {
   const p = g.attributes.position, n = g.attributes.normal
   const col = new Float32Array(p.count * 3)
+  const mask = new Float32Array(p.count * 2)
   const c = new Color()
+  const R = [3, 9, 24]
   for (let i = 0; i < p.count; i++) {
     const slope = 1 - n.getY(i) // 0 flat … 1 vertical
     const x = p.getX(i), z = p.getZ(i)
     const patch = vnoise(x / 37, z / 37) * 0.5 + 0.5
+    const rock = smooth(0.12, 0.4, slope)
     c.copy(DUST).lerp(DARK, patch * 0.45).lerp(ROCK, Math.min(1, slope * 2.2))
-    const grain = 0.92 + vnoise(x / 5.3, z / 5.3) * 0.08
-    col[i * 3] = c.r * grain
-    col[i * 3 + 1] = c.g * grain
-    col[i * 3 + 2] = c.b * grain
+    let shade = 0.92 + vnoise(x / 5.3, z / 5.3) * 0.08
+    if (hf) {
+      const h0 = hf.baseAt(x, z)
+      let occ = 0
+      for (const r of R) {
+        const avg = (hf.baseAt(x + r, z) + hf.baseAt(x - r, z) + hf.baseAt(x, z + r) + hf.baseAt(x, z - r)) / 4
+        occ += (avg - h0) / r // positive in hollows, negative on ridges
+      }
+      shade *= Math.min(1.08, Math.max(0.62, 1 - occ * 0.9))
+    }
+    col[i * 3] = c.r * shade
+    col[i * 3 + 1] = c.g * shade
+    col[i * 3 + 2] = c.b * shade
+    mask[i * 2] = smooth(0.45, 0.75, patch + vnoise(x / 9, z / 9) * 0.15) * (1 - rock)
+    mask[i * 2 + 1] = rock
   }
   g.setAttribute('color', new BufferAttribute(col, 3))
+  g.setAttribute('mask', new BufferAttribute(mask, 2))
 }
 
 let groundTex: CanvasTexture | null = null

@@ -7,6 +7,7 @@ import { hasContent } from './content'
 import { useXRApp } from './store'
 import { useDwellTarget } from './dwell'
 import { FONT, FONT_BOLD } from './font'
+import { Sun } from './space'
 
 const GOLDEN = 2.39996
 
@@ -51,14 +52,11 @@ function HubBody({ b, position }: { b: BodyInfo; position: [number, number, numb
 
   return (
     <group position={position}>
+      {b.kind === 'star' && <Sun radius={b.size} />}
       <group ref={spin} scale={s}>
         <mesh>
           <sphereGeometry args={[b.size, 32, 24]} />
-          {b.kind === 'star' ? (
-            <meshBasicMaterial color={b.color} toneMapped={false} />
-          ) : (
-            <meshStandardMaterial color={b.color} roughness={1} emissive={b.color} emissiveIntensity={hover ? 0.35 : 0.12} />
-          )}
+          <meshStandardMaterial color={b.color} roughness={1} emissive={b.color} emissiveIntensity={hover ? 0.35 : 0.12} visible={b.kind !== 'star'} />
         </mesh>
         {b.rings && (
           <mesh rotation={[-Math.PI / 2 + 0.4, 0, 0]}>

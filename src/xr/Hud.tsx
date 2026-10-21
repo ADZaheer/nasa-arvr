@@ -149,7 +149,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {mode === 'desktop' && !inAR && (
         <p className="hint">
           {surface
-            ? 'W A S D walk · Shift run · Space jump (38% gravity!) · drag to look · click a beacon'
+            ? 'W A S D walk · Q/E turn · Shift run · Space jump (38% gravity!) · drag to look · click a beacon'
             : bodyId
               ? 'Drag to rotate · scroll to zoom · click a glowing pin'
               : 'Drag to rotate · click a body (● = has hotspots)'}

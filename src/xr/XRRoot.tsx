@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls, Stars } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import { XR, XRDomOverlay, XROrigin, useXR } from '@react-three/xr'
 import { xrStore } from './xrStore'
 import { useXRApp } from './store'
@@ -13,6 +13,10 @@ import { Hud } from './Hud'
 import { SurfaceScene } from './surface/SurfaceScene'
 import { PERF, PerfHud, PerfProbe } from './PerfMeter'
 import { WristMenu } from './WristMenu'
+import { QualityGovernor } from './QualityGovernor'
+import { StarSky } from './space'
+import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
+import { useQuality } from './quality'
 
 /** Brightness setting → renderer tone-mapping exposure. */
 function ExposureSync() {
@@ -95,6 +99,7 @@ export function XRRoot() {
   const siteId = useXRApp((s) => s.siteId)
   const mode = useXRApp((s) => s.mode)
   const showFps = useXRApp((s) => s.settings.showFps)
+  const q = useQuality()
   const kind: SceneKind = siteId ? 'surface' : bodyId ? 'body' : 'hub'
   const space = kind !== 'surface' && mode !== 'ar'
 
@@ -104,12 +109,18 @@ export function XRRoot() {
         camera={{ fov: 60, near: 0.01, far: 300, position: [0, 0.4, 3.4] }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
+        shadows
         onPointerMissed={() => useXRApp.getState().selectHotspot(null)}
       >
         <XR store={xrStore}>
           <ModeSync />
           {(PERF || showFps) && <PerfProbe />}
           <ExposureSync />
+          <QualityGovernor />
+          <HandStyler />
+          <SoundDirector kind={kind} />
+          <ScreenEffects q={q} tier={q.tier} />
+          <TransitionVeil sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
           {/* the surface VR walker has its own moving origin (with the wrist menu inside it) */}
           {(mode === 'vr' || mode === 'ar') && !(kind === 'surface' && mode === 'vr') && (
             <XROrigin>
@@ -119,7 +130,7 @@ export function XRRoot() {
           {space && (
             <>
               <color attach="background" args={['#05060f']} />
-              <Stars radius={80} depth={40} count={4000} factor={4} saturation={0} fade />
+              <StarSky size={q.stars} />
             </>
           )}
           {(kind !== 'surface' || mode === 'ar') && (

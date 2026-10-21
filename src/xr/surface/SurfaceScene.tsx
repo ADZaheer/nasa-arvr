@@ -16,6 +16,7 @@ import {
   type InstancedMesh,
   type Mesh,
   type PerspectiveCamera,
+  type DirectionalLight,
 } from 'three'
 import { useSiteContent } from '../content'
 import { useXRApp } from '../store'
@@ -26,8 +27,11 @@ import { InfoCard3D } from '../InfoCard'
 import { Button3D } from '../Button3D'
 import { ErrorBoundary } from '../ErrorBoundary'
 import type { Hotspot, SiteContent, ViewMode } from '../types'
-import { buildDiorama, buildRadialTerrain, getGroundTexture, sunDirection, useHeightField, vnoise, type HeightField } from './terrain'
-import { MarsSky, MARS_HORIZON } from './MarsSky'
+import { buildDiorama, buildRadialTerrain, useHeightField, vnoise, type HeightField } from './terrain'
+import { MarsSky, marsSky } from './MarsSky'
+import { useGroundMaterial, useRockMaterial } from './materials'
+import { DustDevils, DustField, FootstepDust, emitPuff } from './particles'
+import { useQuality, type TierParams } from '../quality'
 import { EYE_HEIGHT, MARS_G, input, player } from './player'
 import { withBVH } from '../bvh'
 import type { TerrainBuildRequest, TerrainBuildResult } from './terrain.worker'
@@ -35,6 +39,10 @@ import { viewCamera } from '../viewCamera'
 import { WristMenu } from '../WristMenu'
 
 const DEG = Math.PI / 180
+
+/** Desktop / phone arrival: a short descent from orbit-ish height (VR fades in instead, to avoid motion sickness). */
+const LANDING_SECONDS = 3.2
+const LANDING_HEIGHT = 250
 
 function spawnYaw(site: SiteContent) {
   const { x, z, lookAt } = site.spawn
@@ -48,6 +56,7 @@ function spawnYaw(site: SiteContent) {
 export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode }) {
   const site = useSiteContent(siteId)
   const pins = useXRApp((s) => s.settings.pins)
+  const q = useQuality()
   const hf = useHeightField(site)
 
   useLayoutEffect(() => {
@@ -64,13 +73,16 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
 
   return (
     <>
-      <SurfaceEnvironment site={site} />
-      <Terrain site={site} hf={hf} teleport={mode === 'vr'} />
-      <Rocks site={site} hf={hf} lite={mode === 'vr'} />
+      <SurfaceEnvironment site={site} q={q} />
+      <Terrain site={site} hf={hf} teleport={mode === 'vr'} q={q} />
+      <Rocks site={site} hf={hf} q={q} />
+      <DustField count={q.dust} />
+      <DustDevils count={q.devils} hf={hf} particles={mode === 'vr' ? 500 : 1100} />
+      {q.bursts && <FootstepDust hf={hf} />}
       {site.rover && (
         <ErrorBoundary fallback={null}>
           <Suspense fallback={null}>
-            <Rover rover={site.rover} hf={hf} />
+            <Rover rover={site.rover} hf={hf} shadows={q.shadow > 0} />
           </Suspense>
         </ErrorBoundary>
       )}
@@ -95,11 +107,18 @@ function Notice({ text }: { text: string }) {
   )
 }
 
-function SurfaceEnvironment({ site }: { site: SiteContent }) {
+/**
+ * Sky, fog, sunlight and shadows for the chosen time of day. The shadow camera is a ~70 m box that
+ * follows you (snapped to its texel grid so shadows don't shimmer); size per quality tier, off on Low/Medium VR.
+ */
+function SurfaceEnvironment({ site, q }: { site: SiteContent; q: TierParams }) {
   const haze = useXRApp((s) => s.settings.haze)
+  const timeOfDay = useXRApp((s) => s.settings.timeOfDay)
   const camera = useThree((s) => s.camera) as PerspectiveCamera
-  const sun = useMemo(() => sunDirection(site.sun.azimuthDeg, site.sun.elevationDeg), [site])
+  const sky = useMemo(() => marsSky(timeOfDay), [timeOfDay])
   const far = site.terrain.viewRadius * 1.2
+  const sun = useRef<DirectionalLight>(null)
+  const span = 36
   useEffect(() => {
     const prev = { near: camera.near, far: camera.far }
     camera.near = 0.05
@@ -111,19 +130,43 @@ function SurfaceEnvironment({ site }: { site: SiteContent }) {
       camera.updateProjectionMatrix()
     }
   }, [camera, far])
+
+  useFrame(() => {
+    const l = sun.current
+    if (!l) return
+    const texel = (span * 2) / Math.max(1, q.shadow)
+    const cx = Math.round(player.x / texel) * texel, cz = Math.round(player.z / texel) * texel
+    const cy = player.ground
+    l.target.position.set(cx, cy, cz)
+    l.position.set(cx + sky.sunDir[0] * 200, cy + sky.sunDir[1] * 200, cz + sky.sunDir[2] * 200)
+    l.target.updateMatrixWorld()
+  })
+
   return (
     <>
-      <fogExp2 attach="fog" args={[MARS_HORIZON, site.fogDensity * haze]} />
-      <MarsSky sunDir={sun} radius={far * 0.8} />
-      <hemisphereLight args={['#d9b08c', '#5e3522', 0.9]} />
-      <directionalLight position={[sun[0] * 100, sun[1] * 100, sun[2] * 100]} intensity={2.3} color="#fff0dc" />
+      <fogExp2 attach="fog" args={[sky.horizon, site.fogDensity * haze]} />
+      <MarsSky sky={sky} radius={far * 0.8} />
+      <hemisphereLight args={['#d9b08c', '#5e3522', sky.ambient]} />
+      <directionalLight
+        key={q.shadow}
+        ref={sun}
+        intensity={sky.light}
+        color={sky.lightColor}
+        castShadow={q.shadow > 0}
+        shadow-mapSize={[q.shadow || 1, q.shadow || 1]}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.04}
+        shadow-camera-left={-span}
+        shadow-camera-right={span}
+        shadow-camera-top={span}
+        shadow-camera-bottom={-span}
+        shadow-camera-near={10}
+        shadow-camera-far={420}
+      />
     </>
   )
 }
 
-/** Terrain detail: lighter in VR (rendered twice per frame, once per eye, at a fixed 72 Hz budget). */
-const TERRAIN_RINGS = { desktop: 170, vr: 120 }
-const TERRAIN_SEGS = { desktop: 256, vr: 160 }
 
 function geometryFromArrays(r: TerrainBuildResult): BufferGeometry {
   const g = new BufferGeometry()
@@ -131,6 +174,7 @@ function geometryFromArrays(r: TerrainBuildResult): BufferGeometry {
   g.setAttribute('normal', new BufferAttribute(r.normal, 3))
   g.setAttribute('uv', new BufferAttribute(r.uv, 2))
   g.setAttribute('color', new BufferAttribute(r.color, 3))
+  g.setAttribute('mask', new BufferAttribute(r.mask, 2))
   g.setIndex(new BufferAttribute(r.index, 1))
   g.computeBoundingSphere()
   return g
@@ -141,10 +185,10 @@ function geometryFromArrays(r: TerrainBuildResult): BufferGeometry {
  * It has no pointer handlers, so XR pointers never test its ~40–90k triangles. Teleport aims at a small,
  * low-detail collider with a BVH instead.
  */
-function Terrain({ site, hf, teleport }: { site: SiteContent; hf: HeightField; teleport: boolean }) {
+function Terrain({ site, hf, teleport, q }: { site: SiteContent; hf: HeightField; teleport: boolean; q: TierParams }) {
   const [center, setCenter] = useState<[number, number]>([site.spawn.x, site.spawn.z])
   const [geometry, setGeometry] = useState<BufferGeometry | null>(null)
-  const quality = teleport ? 'vr' : 'desktop'
+  const material = useGroundMaterial(q.textures)
   const [worker, setWorker] = useState<Worker | null>(null)
   const requestId = useRef(0)
   // created in an effect (not useMemo) so React StrictMode's mount/unmount/mount gets a live worker
@@ -171,11 +215,11 @@ function Terrain({ site, hf, teleport }: { site: SiteContent; hf: HeightField; t
       cx: center[0],
       cz: center[1],
       rMax: site.terrain.viewRadius,
-      rings: TERRAIN_RINGS[quality],
-      segs: TERRAIN_SEGS[quality],
+      rings: q.terrainRings,
+      segs: q.terrainSegs,
     }
     worker.postMessage(req)
-  }, [worker, site, center, quality])
+  }, [worker, site, center, q.terrainRings, q.terrainSegs])
   useEffect(() => () => setGeometry((old) => (old?.dispose(), null)), [])
 
   // re-centre the fine detail on the player after they walk away
@@ -186,9 +230,7 @@ function Terrain({ site, hf, teleport }: { site: SiteContent; hf: HeightField; t
   return (
     <>
       {geometry && (
-        <mesh geometry={geometry} pointerEvents="none">
-          <meshStandardMaterial vertexColors map={getGroundTexture()} roughness={1} metalness={0} />
-        </mesh>
+        <mesh geometry={geometry} material={material} pointerEvents="none" receiveShadow />
       )}
       {teleport && <TeleportCollider hf={hf} center={center} />}
     </>
@@ -216,22 +258,22 @@ function seeded(seed: number) {
   }
 }
 
-/** Scattered basalt rocks around the landing spot (procedural, "artistic"). */
-/** In VR (rendered per eye at a fixed frame budget) rocks use a 20-triangle shape instead of 80. */
-function Rocks({ site, hf, lite }: { site: SiteContent; hf: HeightField; lite: boolean }) {
-  const COUNT = 900
+/** Scattered basalt rocks around the landing spot (procedural shapes, scanned-rock material). Count and detail follow the quality tier. */
+function Rocks({ site, hf, q }: { site: SiteContent; hf: HeightField; q: TierParams }) {
+  const COUNT = q.rocks
+  const material = useRockMaterial(q.textures)
   const ref = useRef<InstancedMesh>(null)
   const geometry = useMemo(() => {
-    const g = new IcosahedronGeometry(1, lite ? 0 : 1)
+    const g = new IcosahedronGeometry(1, q.rockDetail)
     const p = g.attributes.position
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i), y = p.getY(i), z = p.getZ(i)
-      const d = 1 + 0.28 * vnoise(x * 2.3 + 11, y * 2.1 + z * 1.7)
+      const d = 1 + 0.28 * vnoise(x * 2.3 + 11, y * 2.1 + z * 1.7) + 0.08 * vnoise(x * 7.1 - 3, z * 6.3 + y * 5.2)
       p.setXYZ(i, x * d, y * d, z * d)
     }
     g.computeVertexNormals()
     return g
-  }, [lite])
+  }, [q.rockDetail])
   useLayoutEffect(() => {
     const m = ref.current
     if (!m) return
@@ -255,15 +297,13 @@ function Rocks({ site, hf, lite }: { site: SiteContent; hf: HeightField; lite: b
     }
     m.instanceMatrix.needsUpdate = true
     m.computeBoundingSphere()
-  }, [site, hf, geometry])
+  }, [site, hf, geometry, COUNT])
   return (
-    <instancedMesh ref={ref} args={[geometry, undefined, COUNT]}>
-      <meshStandardMaterial color="#5e3b2b" roughness={1} flatShading />
-    </instancedMesh>
+    <instancedMesh key={COUNT} ref={ref} args={[geometry, material, COUNT]} castShadow={q.shadow > 0} receiveShadow={q.shadow > 0} />
   )
 }
 
-function Rover({ rover, hf }: { rover: NonNullable<SiteContent['rover']>; hf: HeightField }) {
+function Rover({ rover, hf, shadows }: { rover: NonNullable<SiteContent['rover']>; hf: HeightField; shadows: boolean }) {
   const { scene } = useGLTF(rover.model)
   const obj = useMemo(() => {
     const c = scene.clone(true)
@@ -271,8 +311,12 @@ function Rover({ rover, hf }: { rover: NonNullable<SiteContent['rover']>; hf: He
     c.scale.setScalar(rover.sizeM / Math.max(size.x, size.z))
     const b = new Box3().setFromObject(c)
     c.position.set(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2)
+    c.traverse((o) => {
+      o.castShadow = shadows
+      o.receiveShadow = shadows
+    })
     return c
-  }, [scene, rover])
+  }, [scene, rover, shadows])
   return (
     <group position={[rover.x, hf.heightAt(rover.x, rover.z), rover.z]} rotation={[0, rover.yawDeg * DEG, 0]}>
       <primitive object={obj} />
@@ -411,13 +455,13 @@ function spawnPitch(site: SiteContent, hf: HeightField) {
 function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: boolean }) {
   const camera = useThree((s) => s.camera)
   const gl = useThree((s) => s.gl)
-  const st = useRef({ x: site.spawn.x, z: site.spawn.z, yaw: spawnYaw(site), pitch: spawnPitch(site, hf), vy: 0, jy: 0 })
+  const st = useRef({ x: site.spawn.x, z: site.spawn.z, yaw: spawnYaw(site), pitch: spawnPitch(site, hf), vy: 0, jy: 0, descent: LANDING_SECONDS })
   const gyroRef = useRef(gyro)
   gyroRef.current = gyro
   const dir = useMemo(() => new Vector3(), [])
 
   useEffect(() => {
-    st.current = { x: site.spawn.x, z: site.spawn.z, yaw: spawnYaw(site), pitch: spawnPitch(site, hf), vy: 0, jy: 0 }
+    st.current = { x: site.spawn.x, z: site.spawn.z, yaw: spawnYaw(site), pitch: spawnPitch(site, hf), vy: 0, jy: 0, descent: LANDING_SECONDS }
   }, [site, hf])
 
   useEffect(() => {
@@ -440,7 +484,7 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
     const keys: Record<string, keyof typeof input> = {
       KeyW: 'forward', ArrowUp: 'forward', KeyS: 'back', ArrowDown: 'back',
       KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right',
-      ShiftLeft: 'run', ShiftRight: 'run', Space: 'jump',
+      ShiftLeft: 'run', ShiftRight: 'run', Space: 'jump', KeyQ: 'turnLeft', KeyE: 'turnRight',
     }
     const key = (on: boolean) => (e: KeyboardEvent) => {
       const k = keys[e.code]
@@ -491,8 +535,15 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
       fx = -Math.sin(s.yaw)
       fz = -Math.cos(s.yaw)
     }
-    const mf = (input.forward ? 1 : 0) - (input.back ? 1 : 0)
-    const mr = (input.right ? 1 : 0) - (input.left ? 1 : 0)
+    // landing descent: drop in from ~250 m above the landing spot, easing to a soft touchdown
+    if (s.descent > 0) {
+      s.descent = Math.max(0, s.descent - dt)
+      if (s.descent === 0) emitPuff(s.x, hf.heightAt(s.x, s.z), s.z, 70, 2.4)
+    }
+    const landing = s.descent > 0
+    if (!gyroRef.current) s.yaw += ((input.turnLeft ? 1 : 0) - (input.turnRight ? 1 : 0)) * 1.6 * dt
+    const mf = landing ? 0 : (input.forward ? 1 : 0) - (input.back ? 1 : 0)
+    const mr = landing ? 0 : (input.right ? 1 : 0) - (input.left ? 1 : 0)
     if (mf || mr) {
       const speed = (input.run ? 4.5 : 1.6) * useXRApp.getState().settings.moveSpeed
       const L = Math.hypot(mf, mr)
@@ -501,7 +552,7 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
       clampToTerrain(hf, s)
     }
     // low-gravity jump: same push as on Earth, but Mars pulls only 38% as hard
-    if (input.jump && s.jy === 0) s.vy = 2.6
+    if (input.jump && s.jy === 0 && !landing) s.vy = 2.6
     input.jump = false
     if (s.vy !== 0 || s.jy > 0) {
       s.vy -= MARS_G * dt
@@ -512,7 +563,9 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
       }
     }
     const ground = hf.heightAt(s.x, s.z)
-    camera.position.set(s.x, ground + EYE_HEIGHT + s.jy, s.z)
+    const k = s.descent / LANDING_SECONDS
+    const drop = landing ? LANDING_HEIGHT * k * k * k : 0
+    camera.position.set(s.x, ground + EYE_HEIGHT + s.jy + drop, s.z)
     if (!gyroRef.current) {
       camera.rotation.order = 'YXZ'
       camera.rotation.set(s.pitch, s.yaw, 0)

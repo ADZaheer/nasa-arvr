@@ -16,6 +16,8 @@ export const input = {
   right: false,
   run: false,
   jump: false,
+  turnLeft: false,
+  turnRight: false,
 }
 
 /** Mars surface gravity, m/s² */

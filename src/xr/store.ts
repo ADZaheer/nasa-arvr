@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { GuideRequest, ViewMode } from './types'
+import { detectTier, type QualitySetting, type Tier } from './quality'
 
 /** User settings from the wrist menu (VR/AR) and the on-screen ⚙ menu. */
 export interface XRSettings {
@@ -17,9 +18,15 @@ export interface XRSettings {
   turn: 'snap30' | 'snap45' | 'smooth'
   /** show the fps meter */
   showFps: boolean
+  /** graphics quality: auto or a fixed tier */
+  quality: QualitySetting
+  /** Mars surface time of day: 0 sunrise … 0.5 noon … 1 sunset */
+  timeOfDay: number
+  /** ambience + UI sounds (off by default: judging rooms vary) */
+  sound: boolean
 }
 
-export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false }
+export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false }
 
 /**
  * Shared app state for the XR module. The web viewer can read/write the same store
@@ -50,6 +57,8 @@ export interface XRAppState {
   headingOffset: number
   settings: XRSettings
   menuOpen: boolean
+  /** tier chosen by auto quality (device detection, then lowered by the frame-rate governor) */
+  autoTier: Tier
 
   selectBody: (id: string | null) => void
   setBand: (band: string | null) => void
@@ -85,6 +94,7 @@ export const useXRApp = create<XRAppState>((set) => ({
   headingOffset: 0,
   settings: loadSettings(),
   menuOpen: false,
+  autoTier: detectTier(),
   band: null,
   observation: null,
   hotspotId: null,

@@ -142,7 +142,7 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .menu-controls em { float: right; font-style: normal; color: #2bb8b0; }
 .menu-controls input[type='range'] { width: 100%; accent-color: #2bb8b0; }
 .menu-controls input[type='checkbox'] { width: 20px; height: 20px; accent-color: #2bb8b0; }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px; }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 4px; margin-top: 4px; }
 .menu-info { margin: 0; display: grid; gap: 8px; font-size: 13px; }
 .menu-info dt { color: #8fd9d3; font-size: 11px; }
 .menu-info dd { margin: 0; }

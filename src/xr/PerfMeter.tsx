@@ -48,7 +48,7 @@ export function PerfProbe() {
       perfStats.cpuMs = +(s.cpuSum / s.frames).toFixed(1)
       perfStats.maxCpuMs = +s.cpuMax.toFixed(1)
       perfStats.calls = gl.info.render.calls
-      perfStats.triangles = gl.info.render.triangles
+      perfStats.triangles = Number.isFinite(gl.info.render.triangles) ? gl.info.render.triangles : 0
       perfStats.hz = hz ?? 0
       s.frames = 0
       s.cpuSum = 0

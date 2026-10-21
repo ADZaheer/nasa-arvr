@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Billboard, Text, useGLTF, useTexture } from '@react-three/drei'
-import { SRGBColorSpace, SphereGeometry, type BufferGeometry, type Group, type Mesh } from 'three'
+import { SRGBColorSpace, SphereGeometry, Vector2, type BufferGeometry, type Group, type Mesh } from 'three'
 import { useBodyContent, useSitesForBody } from './content'
 import { BODY_BY_ID } from './bodies'
 import { makeLumpyGeometry } from './geo'
@@ -13,6 +13,9 @@ import { Button3D } from './Button3D'
 import { ErrorBoundary } from './ErrorBoundary'
 import { withBVH } from './bvh'
 import { FONT, FONT_BOLD } from './font'
+import { useQuality } from './quality'
+import { Atmosphere } from './space'
+import { BennuEjecta } from './surface/particles'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
 const block = (e: ThreeEvent<PointerEvent | MouseEvent>) => e.stopPropagation()
@@ -29,15 +32,28 @@ function BodyMesh({ geometry, children }: { geometry: BufferGeometry; children: 
 
 const sphere = withBVH(new SphereGeometry(1, 96, 64))
 
-function TexturedPlanet({ url }: { url: string }) {
+function TexturedPlanet({ url, relief }: { url: string; relief?: string }) {
   const map = useTexture(url)
   map.colorSpace = SRGBColorSpace
   map.anisotropy = 8
   return (
     <BodyMesh geometry={sphere}>
-      <meshStandardMaterial map={map} roughness={1} metalness={0} />
+      {relief ? (
+        <Suspense fallback={<meshStandardMaterial map={map} roughness={1} metalness={0} />}>
+          <ReliefMaterial map={map} relief={relief} />
+        </Suspense>
+      ) : (
+        <meshStandardMaterial map={map} roughness={1} metalness={0} />
+      )}
     </BodyMesh>
   )
+}
+
+/** Real topography as lighting: normal map from the MGS MOLA laser-altimeter grid (scripts/build-assets.mjs). */
+function ReliefMaterial({ map, relief }: { map: ReturnType<typeof useTexture>; relief: string }) {
+  const normalMap = useTexture(relief)
+  normalMap.anisotropy = 8
+  return <meshStandardMaterial map={map as never} normalMap={normalMap} normalScale={new Vector2(1.2, 1.2)} roughness={0.95} metalness={0} />
 }
 
 function PlainPlanet({ color }: { color: string }) {
@@ -116,6 +132,7 @@ function Asteroid({ model, onGeometry, onIllustration }: { model?: string; onGeo
  */
 export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   const content = useBodyContent(id)
+  const q = useQuality()
   const sites = useSitesForBody(vr ? id : null)
   const info = BODY_BY_ID[id]
   const spin = useRef<Group>(null)
@@ -148,15 +165,17 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
         ) : content?.texture ? (
           <ErrorBoundary fallback={<PlainPlanet color={color} />}>
             <Suspense fallback={<PlainPlanet color={color} />}>
-              <TexturedPlanet url={content.texture} />
+              <TexturedPlanet url={content.texture} relief={id === 'mars' && q.marsRelief ? `/textures/mars_normal_${q.marsRelief}.png` : undefined} />
             </Suspense>
           </ErrorBoundary>
         ) : (
           content !== undefined && <PlainPlanet color={color} />
         )}
         {content && <Hotspots content={content} geometry={geometry} />}
+        {id === 'bennu' && q.bursts && <BennuEjecta surface={geometry ? (geometry.attributes.position.array as Float32Array) : null} />}
       </group>
 
+      {id === 'mars' && <Atmosphere color="#e3a07a" intensity={0.9} />}
       <Billboard position={[0, 1.38, 0]}>
         <Text font={FONT_BOLD} fontSize={0.16} color="#ffffff" anchorY="bottom" outlineWidth={0.006} outlineColor="#000">
           {name}
