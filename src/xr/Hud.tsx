@@ -6,6 +6,7 @@ import { requestGyroPermission, useDeviceCaps } from './device'
 import { BODIES, BODY_BY_ID, KIND_COLORS } from './bodies'
 import { hasContent, useBodyContent, useSiteContent, useSitesForBody } from './content'
 import { InfoCardPanel, KIND_LABEL } from './InfoCard'
+import { MenuPanel } from './MenuPanel'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
 
@@ -157,6 +158,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {mode === 'gyro' && <p className="hint">Move your phone to look around · tap a pin or hold the centre dot on it</p>}
       {surface && inAR && <p className="notice">Tabletop model of {site?.name}. Exit AR and use Enter VR or Look around to stand on it.</p>}
 
+      {(!session || inAR) && <MenuPanel />}
       <InfoCardPanel />
       {toast && (
         <div className="toast" role="status">

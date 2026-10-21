@@ -1,6 +1,26 @@
 import { create } from 'zustand'
 import type { GuideRequest, ViewMode } from './types'
 
+/** User settings from the wrist menu (VR/AR) and the on-screen ⚙ menu. */
+export interface XRSettings {
+  /** label opacity 0..1 (0 hides labels) */
+  labels: number
+  /** show hotspot pins / surface beacons */
+  pins: boolean
+  /** tone-mapping exposure (brightness) */
+  exposure: number
+  /** Mars surface haze multiplier */
+  haze: number
+  /** movement speed multiplier */
+  moveSpeed: number
+  /** VR turning: snap degrees, or smooth */
+  turn: 'snap30' | 'snap45' | 'smooth'
+  /** show the fps meter */
+  showFps: boolean
+}
+
+export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false }
+
 /**
  * Shared app state for the XR module. The web viewer can read/write the same store
  * (selected body, band, observation) or deep-link via /xr/body/:id?band=…&obs=…
@@ -28,6 +48,8 @@ export interface XRAppState {
   goTo: { x: number; z: number; exact?: boolean } | null
   /** Surface mode: yaw (rad) added to phone-gyro heading so the start view faces the scene. */
   headingOffset: number
+  settings: XRSettings
+  menuOpen: boolean
 
   selectBody: (id: string | null) => void
   setBand: (band: string | null) => void
@@ -35,12 +57,23 @@ export interface XRAppState {
   selectSite: (id: string, body: string) => void
   selectHotspot: (id: string | null) => void
   requestGoTo: (p: { x: number; z: number; exact?: boolean } | null) => void
+  setSetting: <K extends keyof XRSettings>(key: K, value: XRSettings[K]) => void
+  setMenuOpen: (open: boolean) => void
   setHovered: (id: string | null) => void
   setMode: (mode: ViewMode) => void
   setGyroEnabled: (on: boolean) => void
   setArAnchor: (p: [number, number, number] | null) => void
   setLastGuideRequest: (r: GuideRequest) => void
   showToast: (msg: string | null) => void
+}
+
+const SETTINGS_KEY = 'cosmic-xr-settings'
+function loadSettings(): XRSettings {
+  try {
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }
+  } catch {
+    return { ...DEFAULT_SETTINGS }
+  }
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined
@@ -50,6 +83,8 @@ export const useXRApp = create<XRAppState>((set) => ({
   siteId: null,
   goTo: null,
   headingOffset: 0,
+  settings: loadSettings(),
+  menuOpen: false,
   band: null,
   observation: null,
   hotspotId: null,
@@ -65,6 +100,17 @@ export const useXRApp = create<XRAppState>((set) => ({
     set((s) => (s.bodyId === id && !s.siteId ? s : { bodyId: id, siteId: null, hotspotId: null, hoveredId: null, shapeIsIllustration: false })),
   selectSite: (id, body) => set((s) => (s.siteId === id ? s : { siteId: id, bodyId: body, hotspotId: null, hoveredId: null })),
   requestGoTo: (goTo) => set({ goTo }),
+  setSetting: (key, value) =>
+    set((s) => {
+      const settings = { ...s.settings, [key]: value }
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+      } catch {
+        /* private mode etc. */
+      }
+      return { settings }
+    }),
+  setMenuOpen: (menuOpen) => set({ menuOpen }),
   setBand: (band) => set({ band }),
   setObservation: (observation) => set({ observation }),
   selectHotspot: (hotspotId) => set({ hotspotId }),

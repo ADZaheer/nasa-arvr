@@ -38,6 +38,7 @@ export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
 
 function HubBody({ b, position }: { b: BodyInfo; position: [number, number, number] }) {
   const [hover, setHover] = useState(false)
+  const labels = useXRApp((s) => s.settings.labels)
   const hit = useRef<Mesh>(null)
   const spin = useRef<Group>(null)
   const explorable = hasContent(b.id)
@@ -94,6 +95,9 @@ function HubBody({ b, position }: { b: BodyInfo; position: [number, number, numb
       <Billboard position={[0, -Math.max(b.size, 0.05) - 0.06, 0]}>
         <Text
           font={hover ? FONT_BOLD : FONT}
+          fillOpacity={hover ? 1 : labels}
+          outlineOpacity={hover ? 1 : labels}
+          visible={hover || labels > 0.02}
           fontSize={hover ? 0.1 : 0.075}
           color={explorable ? '#ffffff' : '#aab4cc'}
           anchorY="top"

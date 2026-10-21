@@ -118,3 +118,34 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
   position: fixed; right: 8px; bottom: 8px; z-index: 50; pointer-events: none;
   font: 12px/1.3 ui-monospace, Consolas, monospace; color: #7cff9b; background: rgba(0, 0, 0, 0.6); padding: 4px 8px; border-radius: 6px;
 }
+
+/* ---- expedition menu (on-screen twin of the VR wrist menu) ---- */
+.menu-fab { position: absolute; top: max(60px, calc(env(safe-area-inset-top) + 52px)); right: 16px; }
+.menu-panel {
+  position: absolute; top: max(60px, calc(env(safe-area-inset-top) + 52px)); right: 16px; width: min(320px, calc(100vw - 32px));
+  max-height: calc(100% - 140px); overflow: auto; z-index: 5;
+  background: rgba(6, 23, 25, 0.94); border: 1px solid rgba(43, 184, 176, 0.45); border-radius: 14px; padding: 10px 12px 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.menu-panel header { display: flex; justify-content: space-between; align-items: center; color: #2bb8b0; }
+.menu-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 8px 0 10px; }
+.menu-tabs button, .menu-list button, .seg button {
+  font: inherit; font-size: 13px; color: #dff7f5; background: #0c2a2e; border: 1px solid transparent; border-radius: 8px; padding: 7px 6px; cursor: pointer;
+}
+.menu-tabs button.on, .menu-list button.on, .seg button.on { background: #2bb8b0; color: #021c1e; font-weight: 500; }
+.menu-list { display: grid; gap: 6px; }
+.menu-list button { text-align: left; padding: 9px 10px; }
+.menu-controls { display: grid; gap: 12px; font-size: 13px; }
+.menu-controls label { display: grid; gap: 4px; }
+.menu-controls label.row { grid-template-columns: 1fr auto; align-items: center; }
+.menu-controls label.off { opacity: 0.5; }
+.menu-controls em { float: right; font-style: normal; color: #2bb8b0; }
+.menu-controls input[type='range'] { width: 100%; accent-color: #2bb8b0; }
+.menu-controls input[type='checkbox'] { width: 20px; height: 20px; accent-color: #2bb8b0; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px; }
+.menu-info { margin: 0; display: grid; gap: 8px; font-size: 13px; }
+.menu-info dt { color: #8fd9d3; font-size: 11px; }
+.menu-info dd { margin: 0; }
+.menu-info a { color: #8fb4ff; }
+.menu-tip { margin: 10px 0 0; font-size: 11px; color: var(--muted); }
+@media (max-width: 600px) { .menu-fab, .menu-panel { top: 104px; } }

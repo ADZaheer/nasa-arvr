@@ -19,12 +19,13 @@ export const xrStore = createXRStore({
   },
   foveation: 1,
   // only the pointers we use: rays everywhere, a teleport arc on the right stick (surface mode).
-  // Grab / touch pointers are disabled: each extra pointer costs scene intersection tests every frame.
+  // Grab pointers are disabled (each pointer costs scene intersection tests every frame; raycasts use a BVH).
+  // Hands keep the touch pointer so you can poke the wrist menu with a fingertip.
   controller: {
     default: { grabPointer: false },
     right: { grabPointer: false, teleportPointer: true },
   },
-  hand: { grabPointer: false, touchPointer: false },
+  hand: { grabPointer: false },
   offerSession: false,
   hitTest: true,
   domOverlay: true,

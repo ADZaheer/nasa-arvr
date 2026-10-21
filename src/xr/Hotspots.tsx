@@ -25,6 +25,7 @@ interface Placed {
  * plus gaze dwell. Only the MAX_LABELS nearest camera-facing pins show labels at once.
  */
 export function Hotspots({ content, geometry }: { content: BodyContent; geometry: BufferGeometry | null }) {
+  const pins = useXRApp((st) => st.settings.pins)
   const placed = useMemo<Placed[]>(() => {
     const out: Placed[] = []
     for (const h of content.hotspots) {
@@ -70,6 +71,7 @@ export function Hotspots({ content, geometry }: { content: BodyContent; geometry
 
   const labelSet = useMemo(() => new Set(labelled.split('|')), [labelled])
 
+  if (!pins) return null
   return (
     <group>
       {placed.map((p) => (
@@ -82,6 +84,7 @@ export function Hotspots({ content, geometry }: { content: BodyContent; geometry
 function Pin({ p, showLabel, groupRef }: { p: Placed; showLabel: boolean; groupRef: (g: Group | null) => void }) {
   const { h } = p
   const hovered = useXRApp((s) => s.hoveredId === h.id)
+  const labels = useXRApp((s) => s.settings.labels)
   const selected = useXRApp((s) => s.hotspotId === h.id)
   const hit = useRef<Mesh>(null)
   const glow = useRef<Mesh>(null)
@@ -147,11 +150,13 @@ function Pin({ p, showLabel, groupRef }: { p: Placed; showLabel: boolean; groupR
         <sphereGeometry args={[0.075, 12, 12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      {(showLabel || hovered || selected) && (
+      {((showLabel && labels > 0.02) || hovered || selected) && (
         <Billboard position={[0, 0.12, 0]}>
           <Text
             font={FONT_BOLD}
             fontSize={hovered || selected ? 0.06 : 0.048}
+            fillOpacity={hovered || selected ? 1 : labels}
+            outlineOpacity={hovered || selected ? 1 : labels}
             color="#ffffff"
             outlineWidth={0.005}
             outlineColor="#000000"

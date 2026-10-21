@@ -32,6 +32,7 @@ import { EYE_HEIGHT, MARS_G, input, player } from './player'
 import { withBVH } from '../bvh'
 import type { TerrainBuildRequest, TerrainBuildResult } from './terrain.worker'
 import { viewCamera } from '../viewCamera'
+import { WristMenu } from '../WristMenu'
 
 const DEG = Math.PI / 180
 
@@ -46,6 +47,7 @@ function spawnYaw(site: SiteContent) {
  */
 export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode }) {
   const site = useSiteContent(siteId)
+  const pins = useXRApp((s) => s.settings.pins)
   const hf = useHeightField(site)
 
   useLayoutEffect(() => {
@@ -72,7 +74,7 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
           </Suspense>
         </ErrorBoundary>
       )}
-      {site.hotspots.map((h) => (
+      {pins && site.hotspots.map((h) => (
         <Beacon key={h.id} h={h} hf={hf} />
       ))}
       {mode === 'vr' ? <VRWalker site={site} hf={hf} /> : <Walker site={site} hf={hf} gyro={mode === 'gyro'} />}
@@ -94,6 +96,7 @@ function Notice({ text }: { text: string }) {
 }
 
 function SurfaceEnvironment({ site }: { site: SiteContent }) {
+  const haze = useXRApp((s) => s.settings.haze)
   const camera = useThree((s) => s.camera) as PerspectiveCamera
   const sun = useMemo(() => sunDirection(site.sun.azimuthDeg, site.sun.elevationDeg), [site])
   const far = site.terrain.viewRadius * 1.2
@@ -110,7 +113,7 @@ function SurfaceEnvironment({ site }: { site: SiteContent }) {
   }, [camera, far])
   return (
     <>
-      <fogExp2 attach="fog" args={[MARS_HORIZON, site.fogDensity]} />
+      <fogExp2 attach="fog" args={[MARS_HORIZON, site.fogDensity * haze]} />
       <MarsSky sunDir={sun} radius={far * 0.8} />
       <hemisphereLight args={['#d9b08c', '#5e3522', 0.9]} />
       <directionalLight position={[sun[0] * 100, sun[1] * 100, sun[2] * 100]} intensity={2.3} color="#fff0dc" />
@@ -281,6 +284,7 @@ const noFogText = new MeshBasicMaterial({ fog: false, toneMapped: false })
 
 /** A point of interest on the surface: glowing beacon that stays readable at any distance. */
 function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
+  const labels = useXRApp((s) => s.settings.labels)
   const a = h.anchor.type === 'site' ? h.anchor : { x: 0, z: 0, y: 0 }
   const lift = a.y ?? 0
   const base = useMemo(() => new Vector3(a.x, hf.heightAt(a.x, a.z) + lift, a.z), [a.x, a.z, lift, hf])
@@ -354,14 +358,16 @@ function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
           <sphereGeometry args={[pole ? 0.6 : 0.45, 10, 10]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
+        {(labels > 0.02 || hovered || selected) && (
         <Billboard position={[0, orbY + 0.35, 0]}>
-          <Text font={FONT_BOLD} material={noFogText} fontSize={hovered || selected ? 0.2 : 0.16} color="#ffffff" outlineWidth={0.012} outlineColor="#000000" anchorY="bottom" maxWidth={2.4} textAlign="center">
+          <Text font={FONT_BOLD} material={noFogText} fillOpacity={hovered || selected ? 1 : labels} outlineOpacity={hovered || selected ? 1 : labels} fontSize={hovered || selected ? 0.2 : 0.16} color="#ffffff" outlineWidth={0.012} outlineColor="#000000" anchorY="bottom" maxWidth={2.4} textAlign="center">
             {h.title}
           </Text>
-          <Text font={FONT} material={noFogText} position={[0, -0.02, 0]} fontSize={0.11} color="#e6d7c8" outlineWidth={0.008} outlineColor="#000000" anchorY="top">
+          <Text font={FONT} material={noFogText} fillOpacity={hovered || selected ? 1 : labels} outlineOpacity={hovered || selected ? 1 : labels} position={[0, -0.02, 0]} fontSize={0.11} color="#e6d7c8" outlineWidth={0.008} outlineColor="#000000" anchorY="top">
             {distLabel}
           </Text>
         </Billboard>
+        )}
       </group>
     </group>
   )
@@ -488,7 +494,7 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
     const mf = (input.forward ? 1 : 0) - (input.back ? 1 : 0)
     const mr = (input.right ? 1 : 0) - (input.left ? 1 : 0)
     if (mf || mr) {
-      const speed = input.run ? 4.5 : 1.6
+      const speed = (input.run ? 4.5 : 1.6) * useXRApp.getState().settings.moveSpeed
       const L = Math.hypot(mf, mr)
       s.x += ((fx * mf - fz * mr) / L) * speed * dt
       s.z += ((fz * mf + fx * mr) / L) * speed * dt
@@ -524,7 +530,9 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
   const gl = useThree((s) => s.gl)
   const dir = useMemo(() => new Vector3(), [])
   const head = useMemo(() => new Vector3(), [])
-  useXRControllerLocomotion(origin, { speed: 2 }, { type: 'snap', degrees: 30 })
+  const moveSpeed = useXRApp((s) => s.settings.moveSpeed)
+  const turn = useXRApp((s) => s.settings.turn)
+  useXRControllerLocomotion(origin, { speed: 2 * moveSpeed }, turn === 'smooth' ? { type: 'smooth', speed: 1.6 } : { type: 'snap', degrees: turn === 'snap45' ? 45 : 30 })
 
   useFrame(() => {
     const o = origin.current
@@ -540,7 +548,11 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
     updatePlayerReadout(head.x, head.z, ground, dir, false)
   })
 
-  return <XROrigin ref={origin} position={[site.spawn.x, hf.heightAt(site.spawn.x, site.spawn.z), site.spawn.z]} rotation={[0, spawnYaw(site), 0]} />
+  return (
+    <XROrigin ref={origin} position={[site.spawn.x, hf.heightAt(site.spawn.x, site.spawn.z), site.spawn.z]} rotation={[0, spawnYaw(site), 0]}>
+      <WristMenu />
+    </XROrigin>
+  )
 }
 
 /** VR "suit computer": a panel that lazily follows your gaze, below eye level, plus the 3D info card. */
