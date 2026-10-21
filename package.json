@@ -7,7 +7,8 @@
     "dev": "vite --host",
     "build": "npm run check:content && tsc --noEmit && vite build",
     "preview": "vite preview --host",
-    "check:content": "node scripts/check-content.mjs"
+    "check:content": "node scripts/check-content.mjs",
+    "vr": "npm run build && vite preview --host"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.3.0",

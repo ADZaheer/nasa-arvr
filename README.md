@@ -27,6 +27,12 @@ Phones and headsets need HTTPS for WebXR and motion sensors, so the dev server u
    - Tap **Enter VR**.
 3. **PC VR** (Quest Link / Air Link / SteamVR): open `https://localhost:5173/xr` in Chrome or Edge on the PC, then press **Enter VR**.
 
+Use **`npm run vr`** for headset testing. It builds and serves the optimized production bundle on `https://<LAN-IP>:4173`. The dev server (`npm run dev`, port 5173) runs unminified React and three.js in dev mode, which is noticeably slower in a headset.
+
+Add **`?perf`** to any URL to show fps / target Hz / CPU ms / draw calls / triangles, including inside VR. The Quest should hold 72 fps at 72 Hz. The app requests 72 Hz with maximum foveation (`src/xr/xrStore.ts`).
+
+If the headset can't reach the laptop (e.g. campus Wi-Fi that isolates devices), connect the Quest by USB and run `adb reverse tcp:4173 tcp:4173`. Then open `https://localhost:4173/xr` in Quest Browser.
+
 VR controls:
 - Point the controller ray and press trigger to select, or look at a pin for 1.5 s (gaze dwell).
 - On the surface: left stick walks, right stick snap-turns, and pushing the right stick forward aims a teleport arc.
