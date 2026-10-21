@@ -174,6 +174,7 @@ function SuitReadout({ site, credit }: { site: SiteContent; credit?: string }) {
   const [state, setState] = useState({ heading: 0, walked: 0, air: false })
   useEffect(() => {
     const t = setInterval(() => {
+      if (xrStore.getState().session) return // not visible inside the headset
       setState({
         heading: Math.round(player.heading),
         walked: Math.round(Math.hypot(player.x - site.spawn.x, player.z - site.spawn.z)),

@@ -11,6 +11,7 @@ import { Hotspots } from './Hotspots'
 import { InfoCard3D } from './InfoCard'
 import { Button3D } from './Button3D'
 import { ErrorBoundary } from './ErrorBoundary'
+import { withBVH } from './bvh'
 import { FONT, FONT_BOLD } from './font'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
@@ -26,7 +27,7 @@ function BodyMesh({ geometry, children }: { geometry: BufferGeometry; children: 
   )
 }
 
-const sphere = new SphereGeometry(1, 96, 64)
+const sphere = withBVH(new SphereGeometry(1, 96, 64))
 
 function TexturedPlanet({ url }: { url: string }) {
   const map = useTexture(url)
@@ -54,7 +55,7 @@ function GltfAsteroid({ url, onGeometry }: { url: string; onGeometry: (g: Buffer
     scene.traverse((o) => {
       if (!g && (o as Mesh).isMesh) g = (o as Mesh).geometry
     })
-    return g as BufferGeometry | null
+    return g ? withBVH(g as BufferGeometry) : null
   }, [scene])
   useEffect(() => {
     if (geometry) onGeometry(geometry)
@@ -68,7 +69,7 @@ function GltfAsteroid({ url, onGeometry }: { url: string; onGeometry: (g: Buffer
 }
 
 function LumpyAsteroid({ onGeometry }: { onGeometry: (g: BufferGeometry) => void }) {
-  const geometry = useMemo(() => makeLumpyGeometry(3), [])
+  const geometry = useMemo(() => withBVH(makeLumpyGeometry(3)), [])
   useEffect(() => onGeometry(geometry), [geometry, onGeometry])
   return (
     <BodyMesh geometry={geometry}>

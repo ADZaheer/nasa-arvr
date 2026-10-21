@@ -11,6 +11,7 @@ import { GyroControls } from './GyroControls'
 import { ARPlacement } from './ARPlacement'
 import { Hud } from './Hud'
 import { SurfaceScene } from './surface/SurfaceScene'
+import { PERF, PerfHud, PerfProbe } from './PerfMeter'
 
 /** Keeps the app's view mode in sync with the WebXR session / gyro toggle. */
 function ModeSync() {
@@ -95,6 +96,7 @@ export function XRRoot() {
       >
         <XR store={xrStore}>
           <ModeSync />
+          {PERF && <PerfProbe />}
           {space && (
             <>
               <color attach="background" args={['#05060f']} />
@@ -128,6 +130,7 @@ export function XRRoot() {
         </XR>
       </Canvas>
       {mode !== 'ar' && <Hud />}
+      {PERF && <PerfHud />}
     </div>
   )
 }

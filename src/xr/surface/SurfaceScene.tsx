@@ -5,6 +5,8 @@ import { TeleportTarget, XROrigin, useXRControllerLocomotion } from '@react-thre
 import {
   AdditiveBlending,
   Box3,
+  BufferAttribute,
+  BufferGeometry,
   IcosahedronGeometry,
   Matrix4,
   MeshBasicMaterial,
@@ -27,6 +29,8 @@ import type { Hotspot, SiteContent, ViewMode } from '../types'
 import { buildDiorama, buildRadialTerrain, getGroundTexture, sunDirection, useHeightField, vnoise, type HeightField } from './terrain'
 import { MarsSky, MARS_HORIZON } from './MarsSky'
 import { EYE_HEIGHT, MARS_G, input, player } from './player'
+import { withBVH } from '../bvh'
+import type { TerrainBuildRequest, TerrainBuildResult } from './terrain.worker'
 import { viewCamera } from '../viewCamera'
 
 const DEG = Math.PI / 180
@@ -60,7 +64,7 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
     <>
       <SurfaceEnvironment site={site} />
       <Terrain site={site} hf={hf} teleport={mode === 'vr'} />
-      <Rocks site={site} hf={hf} />
+      <Rocks site={site} hf={hf} lite={mode === 'vr'} />
       {site.rover && (
         <ErrorBoundary fallback={null}>
           <Suspense fallback={null}>
@@ -114,21 +118,91 @@ function SurfaceEnvironment({ site }: { site: SiteContent }) {
   )
 }
 
+/** Terrain detail: lighter in VR (rendered twice per frame, once per eye, at a fixed 72 Hz budget). */
+const TERRAIN_RINGS = { desktop: 170, vr: 120 }
+const TERRAIN_SEGS = { desktop: 256, vr: 160 }
+
+function geometryFromArrays(r: TerrainBuildResult): BufferGeometry {
+  const g = new BufferGeometry()
+  g.setAttribute('position', new BufferAttribute(r.position, 3))
+  g.setAttribute('normal', new BufferAttribute(r.normal, 3))
+  g.setAttribute('uv', new BufferAttribute(r.uv, 2))
+  g.setAttribute('color', new BufferAttribute(r.color, 3))
+  g.setIndex(new BufferAttribute(r.index, 1))
+  g.computeBoundingSphere()
+  return g
+}
+
+/**
+ * Visible ground: built in a Web Worker and swapped in when ready, so re-centring never stalls a frame.
+ * It has no pointer handlers, so XR pointers never test its ~40–90k triangles. Teleport aims at a small,
+ * low-detail collider with a BVH instead.
+ */
 function Terrain({ site, hf, teleport }: { site: SiteContent; hf: HeightField; teleport: boolean }) {
   const [center, setCenter] = useState<[number, number]>([site.spawn.x, site.spawn.z])
-  const geometry = useMemo(() => buildRadialTerrain(hf, center[0], center[1], site.terrain.viewRadius), [hf, center, site])
-  useEffect(() => () => geometry.dispose(), [geometry])
+  const [geometry, setGeometry] = useState<BufferGeometry | null>(null)
+  const quality = teleport ? 'vr' : 'desktop'
+  const [worker, setWorker] = useState<Worker | null>(null)
+  const requestId = useRef(0)
+  // created in an effect (not useMemo) so React StrictMode's mount/unmount/mount gets a live worker
+  useEffect(() => {
+    const w = new Worker(new URL('./terrain.worker.ts', import.meta.url), { type: 'module' })
+    setWorker(w)
+    return () => w.terminate()
+  }, [])
+
+  useEffect(() => {
+    if (!worker) return
+    const id = ++requestId.current
+    worker.onmessage = (e: MessageEvent<TerrainBuildResult>) => {
+      if (e.data.id !== requestId.current) return
+      const g = geometryFromArrays(e.data)
+      setGeometry((old) => {
+        old?.dispose()
+        return g
+      })
+    }
+    const req: TerrainBuildRequest = {
+      id,
+      terrain: site.terrain,
+      cx: center[0],
+      cz: center[1],
+      rMax: site.terrain.viewRadius,
+      rings: TERRAIN_RINGS[quality],
+      segs: TERRAIN_SEGS[quality],
+    }
+    worker.postMessage(req)
+  }, [worker, site, center, quality])
+  useEffect(() => () => setGeometry((old) => (old?.dispose(), null)), [])
+
   // re-centre the fine detail on the player after they walk away
   useFrame(() => {
     if (Math.hypot(player.x - center[0], player.z - center[1]) > 40) setCenter([player.x, player.z])
   })
-  const mesh = (
-    <mesh geometry={geometry}>
-      <meshStandardMaterial vertexColors map={getGroundTexture()} roughness={1} metalness={0} />
-    </mesh>
+
+  return (
+    <>
+      {geometry && (
+        <mesh geometry={geometry} pointerEvents="none">
+          <meshStandardMaterial vertexColors map={getGroundTexture()} roughness={1} metalness={0} />
+        </mesh>
+      )}
+      {teleport && <TeleportCollider hf={hf} center={center} />}
+    </>
   )
-  if (!teleport) return mesh
-  return <TeleportTarget onTeleport={(p) => useXRApp.getState().requestGoTo({ x: p.x, z: p.z, exact: true })}>{mesh}</TeleportTarget>
+}
+
+/** Invisible, low-detail ground (≈6k triangles, 400 m radius) with a BVH: what the VR teleport arc hits. */
+function TeleportCollider({ hf, center }: { hf: HeightField; center: [number, number] }) {
+  const geometry = useMemo(() => withBVH(buildRadialTerrain(hf, center[0], center[1], 400, 48, 64)), [hf, center])
+  useEffect(() => () => geometry.dispose(), [geometry])
+  return (
+    <TeleportTarget onTeleport={(p) => useXRApp.getState().requestGoTo({ x: p.x, z: p.z, exact: true })}>
+      <mesh geometry={geometry}>
+        <meshBasicMaterial colorWrite={false} depthWrite={false} />
+      </mesh>
+    </TeleportTarget>
+  )
 }
 
 function seeded(seed: number) {
@@ -140,11 +214,12 @@ function seeded(seed: number) {
 }
 
 /** Scattered basalt rocks around the landing spot (procedural, "artistic"). */
-function Rocks({ site, hf }: { site: SiteContent; hf: HeightField }) {
+/** In VR (rendered per eye at a fixed frame budget) rocks use a 20-triangle shape instead of 80. */
+function Rocks({ site, hf, lite }: { site: SiteContent; hf: HeightField; lite: boolean }) {
   const COUNT = 900
   const ref = useRef<InstancedMesh>(null)
   const geometry = useMemo(() => {
-    const g = new IcosahedronGeometry(1, 1)
+    const g = new IcosahedronGeometry(1, lite ? 0 : 1)
     const p = g.attributes.position
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i), y = p.getY(i), z = p.getZ(i)
@@ -153,7 +228,7 @@ function Rocks({ site, hf }: { site: SiteContent; hf: HeightField }) {
     }
     g.computeVertexNormals()
     return g
-  }, [])
+  }, [lite])
   useLayoutEffect(() => {
     const m = ref.current
     if (!m) return
@@ -177,7 +252,7 @@ function Rocks({ site, hf }: { site: SiteContent; hf: HeightField }) {
     }
     m.instanceMatrix.needsUpdate = true
     m.computeBoundingSphere()
-  }, [site, hf])
+  }, [site, hf, geometry])
   return (
     <instancedMesh ref={ref} args={[geometry, undefined, COUNT]}>
       <meshStandardMaterial color="#5e3b2b" roughness={1} flatShading />
@@ -232,7 +307,7 @@ function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
     // keep beacons a readable size on screen at any distance
     if (inner.current) inner.current.scale.setScalar(Math.max(1, d / 9))
     if (glow.current) glow.current.scale.setScalar((hovered || selected ? 1.6 : 1) * (1 + 0.15 * Math.sin(clock.elapsedTime * 3)))
-    if (clock.elapsedTime - last.current > 0.5) {
+    if (clock.elapsedTime - last.current > 1) {
       last.current = clock.elapsedTime
       const r = d < 1000 ? Math.round(d) : Math.round(d / 100) * 100
       if (r !== dist) setDist(r)
