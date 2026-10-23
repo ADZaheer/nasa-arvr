@@ -9,7 +9,9 @@ import { BODY_BY_ID } from './bodies'
 import { useSiteContent } from './content'
 import { FONT, FONT_BOLD } from './font'
 import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
-import { Choice3D, Label, Slider3D, TEAL, Tile, Toggle3D } from './ui3d'
+import { Appear, Button, Choice3D, GlassPanel, Icon, Label, Slider3D, TEAL, Tile, Toggle3D, UI, roundedRect, uiMat, type IconName } from './ui3d'
+
+const TAB_ICON: Record<MenuTab, IconName> = { travel: 'travel', missions: 'missions', display: 'visuals', comfort: 'comfort', audio: 'audio', info: 'info' }
 import { ALL_GOALS } from './missions'
 import { activeMissions } from './MissionTracker'
 
@@ -85,8 +87,10 @@ function WristAnchor({ space, isHand, controller }: { space: XRSpace; isHand: bo
       <XRSpaceGroup space={space}>
         <group ref={anchor} />
       </XRSpaceGroup>
-      <group ref={panel} visible={shown}>
-        {shown && <MenuPanel3D />}
+      <group ref={panel}>
+        <Appear open={shown} from={0.6}>
+          <MenuPanel3D />
+        </Appear>
       </group>
     </>
   )
@@ -94,25 +98,21 @@ function WristAnchor({ space, isHand, controller }: { space: XRSpace; isHand: bo
 
 function MenuPanel3D() {
   const [tab, setTab] = useState<MenuTab>('travel')
-  const W = 2.6, H = 3.5
+  const W = 2.6, H = 3.75
+  const tabW = (W - 0.2) / MENU_TABS.length
   return (
     <group scale={0.07}>
-      <mesh position={[0, 0, -0.01]}>
-        <planeGeometry args={[W, H]} />
-        <meshBasicMaterial color="#061719" transparent opacity={0.88} fog={false} toneMapped={false} />
-      </mesh>
-      <mesh position={[0, H / 2 - 0.14, 0]}>
-        <planeGeometry args={[W, 0.28]} />
-        <meshBasicMaterial color={TEAL} fog={false} toneMapped={false} />
-      </mesh>
-      <Text font={FONT_BOLD} material={noFog} position={[-W / 2 + 0.12, H / 2 - 0.14, 0.005]} fontSize={0.14} color="#021c1e" anchorX="left" anchorY="middle">
-        Expedition Menu
+      <GlassPanel width={W} height={H} radius={0.18} rim={0.014} />
+      <Icon name="pin" size={0.16} color={TEAL} position={[-W / 2 + 0.2, H / 2 - 0.2, 0.004]} />
+      <Text font={FONT_BOLD} material={noFog} position={[-W / 2 + 0.36, H / 2 - 0.2, 0.005]} fontSize={UI.type.title} color={UI.text} anchorX="left" anchorY="middle">
+        Expedition
       </Text>
-      <PinButton position={[W / 2 - 0.42, H / 2 - 0.14, 0.005]} />
+      <PinButton position={[W / 2 - 0.5, H / 2 - 0.2, 0.005]} />
+      <mesh geometry={roundedRect(W - 0.16, 0.5, 0.16)} material={uiMat('#13232b')} position={[0, H / 2 - 0.66, -0.004]} />
       {MENU_TABS.map((t, i) => (
-        <Tile key={t.id} label={t.label} active={tab === t.id} onPress={() => setTab(t.id)} position={[-W / 2 + 0.1 + ((W - 0.2) / MENU_TABS.length) * (i + 0.5), H / 2 - 0.5, 0]} width={(W - 0.2) / MENU_TABS.length - 0.03} height={0.26} />
+        <Button key={t.id} label={t.label} icon={TAB_ICON[t.id]} stack active={tab === t.id} onPress={() => setTab(t.id)} position={[-W / 2 + 0.1 + tabW * (i + 0.5), H / 2 - 0.66, 0]} width={tabW - 0.04} height={0.44} />
       ))}
-      <group position={[0, H / 2 - 0.85, 0]}>
+      <group position={[0, H / 2 - 1.12, 0]}>
         {tab === 'travel' && <TravelPage />}
         {tab === 'missions' && <MissionsPage />}
         {tab === 'display' && <ControlsPage controls={DISPLAY_CONTROLS} />}
@@ -126,7 +126,7 @@ function MenuPanel3D() {
 
 function PinButton({ position }: { position: [number, number, number] }) {
   const open = useXRApp((s) => s.menuOpen)
-  return <Tile label={open ? 'Close' : 'Keep open'} active={open} onPress={() => useXRApp.getState().setMenuOpen(!open)} position={position} width={0.75} height={0.22} />
+  return <Button label={open ? 'Close' : 'Keep open'} icon={open ? 'close' : 'pin'} active={open} onPress={() => useXRApp.getState().setMenuOpen(!open)} position={position} width={0.85} height={0.24} />
 }
 
 /** Current missions with checkmarks; overall progress; restart the training. */

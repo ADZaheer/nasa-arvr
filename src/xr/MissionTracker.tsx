@@ -7,6 +7,7 @@ import { useXRApp } from './store'
 import { xrStore } from './xrStore'
 import { viewCamera } from './viewCamera'
 import { FONT, FONT_BOLD } from './font'
+import { GlassPanel, Icon, UI } from './ui3d'
 import { MISSIONS, missionContext, missionsFor, type Mission } from './missions'
 import { playChime } from './feedback'
 import { player } from './surface/player'
@@ -122,15 +123,9 @@ function MissionCard3D() {
   if (!shown) return null
   return (
     <group ref={g} renderOrder={3000}>
-      <mesh position={[0, 0, -0.005]} renderOrder={3000}>
-        <planeGeometry args={[0.62, 0.2]} />
-        <meshBasicMaterial color={shown.done ? '#0f3d2c' : '#071a1c'} transparent opacity={0.88} fog={false} toneMapped={false} depthTest={false} />
-      </mesh>
-      <mesh position={[-0.31 + 0.006, 0, -0.004]} renderOrder={3001}>
-        <planeGeometry args={[0.012, 0.2]} />
-        <meshBasicMaterial color={shown.done ? '#5ee39a' : '#2bb8b0'} fog={false} toneMapped={false} depthTest={false} />
-      </mesh>
-      <Text font={FONT} material={noFog} position={[-0.285, 0.068, 0]} fontSize={0.022} color={shown.done ? '#5ee39a' : '#8fd9d3'} anchorX="left" anchorY="middle" renderOrder={3002}>
+      <GlassPanel width={0.62} height={0.2} radius={0.035} rim={0.003} overlay tint={shown.done ? '#0f3d2c' : UI.glass} />
+      <Icon name={shown.done ? 'check' : 'missions'} size={0.03} color={shown.done ? UI.good : UI.accent} position={[-0.27, 0.068, 0.001]} overlay />
+      <Text font={FONT} material={noFog} position={[-0.245, 0.068, 0]} fontSize={0.022} color={shown.done ? '#5ee39a' : '#8fd9d3'} anchorX="left" anchorY="middle" renderOrder={3002}>
         {`${shown.done ? 'MISSION GOAL COMPLETE ✓' : 'MISSION'} · ${shown.mission} · ${shown.progress}`}
       </Text>
       <Text font={FONT_BOLD} material={noFog} position={[-0.285, 0.02, 0]} fontSize={0.036} maxWidth={0.56} color="#ffffff" anchorX="left" anchorY="middle" renderOrder={3002}>

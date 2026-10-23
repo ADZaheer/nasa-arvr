@@ -25,6 +25,7 @@ import { KIND_COLORS } from '../bodies'
 import { FONT, FONT_BOLD } from '../font'
 import { InfoCard3D } from '../InfoCard'
 import { Button3D } from '../Button3D'
+import { GlassPanel, Icon, UI } from '../ui3d'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { DEFAULT_ENVIRONMENT, type Hotspot, type SiteContent, type SiteEnvironment, type SiteModel, type ViewMode } from '../types'
 import { EarthInSky, SpaceSun, StarSky } from '../space'
@@ -717,17 +718,15 @@ function SuitPanelVR({ site }: { site: SiteContent }) {
   return (
     <group ref={g}>
       <group position={[0, -0.42, 0]} rotation={[-0.35, 0, 0]} scale={0.5}>
-        <mesh position={[0, 0, -0.01]}>
-          <planeGeometry args={[1.5, 0.62]} />
-          <meshBasicMaterial color="#0b1020" transparent opacity={0.85} fog={false} />
-        </mesh>
-        <Text font={FONT_BOLD} material={noFogText} position={[-0.68, 0.25, 0]} fontSize={0.065} color="#ffffff" anchorX="left" anchorY="top">
+        <GlassPanel width={1.5} height={0.62} radius={0.07} rim={0.006} />
+        <Icon name="visuals" size={0.05} color={UI.accent} position={[-0.7, 0.218, 0.002]} />
+        <Text font={FONT_BOLD} material={noFogText} position={[-0.66, 0.25, 0]} fontSize={0.06} color="#ffffff" anchorX="left" anchorY="top">
           {`${site.name} · heading ${heading}° ${cardinal}`}
         </Text>
         <Text font={FONT} material={noFogText} position={[-0.68, 0.15, 0]} fontSize={0.042} color="#d7def0" anchorX="left" anchorY="top" lineHeight={1.35} maxWidth={1.36}>
           {lines}
         </Text>
-        <Button3D label="◂ Back to orbit" position={[0.45, -0.22, 0]} width={0.5} height={0.1} onClick={() => useXRApp.getState().selectBody(site.body)} />
+        <Button3D label="Back to orbit" icon="back" position={[0.45, -0.22, 0]} width={0.5} height={0.1} onClick={() => useXRApp.getState().selectBody(site.body)} />
       </group>
       <group position={[0.55, 0.1, 0.05]} scale={0.42}>
         <InfoCard3D position={[0, 0, 0]} rotation={[0, -0.35, 0]} />

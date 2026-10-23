@@ -10,4 +10,5 @@ export async function startEmulator(): Promise<void> {
   const device = new XRDevice(metaQuest3)
   device.installRuntime({ forceInstall: true })
   device.installDevUI(DevUI)
+  ;(window as unknown as { __xrDevice: unknown }).__xrDevice = device
 }

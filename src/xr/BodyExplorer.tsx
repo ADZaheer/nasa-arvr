@@ -190,9 +190,9 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
       {vr && (
         <>
           <InfoCard3D />
-          <Button3D label="◂ Solar System" position={[0, -1.35, 0.2]} width={0.6} height={0.13} onClick={() => useXRApp.getState().selectBody(null)} />
+          <Button3D label="Solar System" icon="back" position={[0, -1.35, 0.2]} width={0.6} height={0.13} onClick={() => useXRApp.getState().selectBody(null)} />
           {sites.map((s, i) => (
-            <Button3D key={s.id} label={`Stand at ${s.name}`} position={[-1.55, 0.3 - i * 0.18, 0.3]} width={0.95} height={0.13} color="#b5562b" onClick={() => useXRApp.getState().selectSite(s.id, s.body)} />
+            <Button3D key={s.id} icon="walk" label={`Stand at ${s.name}`} position={[-1.55, 0.3 - i * 0.18, 0.3]} width={0.95} height={0.13} color="#b5562b" onClick={() => useXRApp.getState().selectSite(s.id, s.body)} />
           ))}
         </>
       )}

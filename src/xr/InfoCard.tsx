@@ -6,7 +6,7 @@ import { askGuide, backToSource } from './events'
 import { KIND_COLORS } from './bodies'
 import { FONT, FONT_BOLD } from './font'
 import { Button3D } from './Button3D'
-import { PopIn } from './ui3d'
+import { GlassPanel, PopIn, roundedRect, uiMat } from './ui3d'
 import type { Hotspot, HotspotKind } from './types'
 
 export const KIND_LABEL: Record<HotspotKind, string> = {
@@ -122,14 +122,12 @@ export function InfoCard3D({
   return (
     <group position={position} rotation={rotation}>
       <PopIn key={h.id}>
-      <mesh position={[0, action ? -0.08 : 0, -0.005]}>
-        <planeGeometry args={[W, H + (action ? 0.16 : 0)]} />
-        <meshBasicMaterial color="#0b1020" transparent opacity={0.92} />
-      </mesh>
-      <Text font={FONT_BOLD} position={[left, yKind, 0]} fontSize={0.045} color={KIND_COLORS[h.kind]} anchorX="left" anchorY="top">
+      <GlassPanel width={W} height={H + (action ? 0.16 : 0)} radius={0.07} rim={0.006} position={[0, action ? -0.08 : 0, 0]} />
+      <mesh geometry={roundedRect(0.025, 0.025, 0.0125)} material={uiMat(KIND_COLORS[h.kind])} position={[left + 0.0125, yKind - 0.022, 0]} />
+      <Text font={FONT_BOLD} position={[left + 0.045, yKind, 0]} fontSize={0.04} color={KIND_COLORS[h.kind]} anchorX="left" anchorY="top">
         {KIND_LABEL[h.kind].toUpperCase()}
       </Text>
-      <Button3D label="×" position={[W / 2 - 0.08, yKind - 0.03, 0]} width={0.09} height={0.09} onClick={() => useXRApp.getState().selectHotspot(null)} />
+      <Button3D icon="close" position={[W / 2 - 0.08, yKind - 0.03, 0]} width={0.1} height={0.1} onClick={() => useXRApp.getState().selectHotspot(null)} />
       <Text font={FONT_BOLD} position={[left, yTitle, 0]} fontSize={0.08} maxWidth={W - 2 * pad} color="#ffffff" anchorX="left" anchorY="top" lineHeight={1.15}>
         {h.title}
       </Text>
@@ -141,7 +139,7 @@ export function InfoCard3D({
         position={[left + 0.2, yMore - 0.05, 0]}
         width={0.4}
         height={0.09}
-        color="#121a33"
+        icon={expanded ? 'back' : 'next'}
         onClick={() => setExpanded((v) => !v)}
       />
       {expanded && (
@@ -152,9 +150,9 @@ export function InfoCard3D({
       <Text font={FONT} position={[left, ySource, 0]} fontSize={0.036} maxWidth={W - 2 * pad} color="#8fb4ff" anchorX="left" anchorY="top">
         {`Source: ${h.source.label}\n${h.source.url}`}
       </Text>
-      <Button3D label="Ask the guide" position={[-W / 4 + 0.02, yButtons, 0]} width={0.56} height={0.11} color="#2f6fed" onClick={() => ask(h)} />
+      <Button3D label="Ask the guide" icon="info" position={[-W / 4 + 0.02, yButtons, 0]} width={0.56} height={0.11} color="#2f6fed" onClick={() => ask(h)} />
       <Button3D label="Back to source image" position={[W / 4 - 0.02, yButtons, 0]} width={0.56} height={0.11} onClick={() => backToSource(h.body, h.id)} />
-      {action && <Button3D label={action.label} position={[0, yAction, 0]} width={W - 0.16} height={0.11} color="#b5562b" onClick={action.run} />}
+      {action && <Button3D label={action.label} position={[0, yAction, 0]} width={W - 0.16} height={0.11} color="#b5562b" icon="walk" onClick={action.run} />}
       </PopIn>
     </group>
   )
