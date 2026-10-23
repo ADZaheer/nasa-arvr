@@ -206,3 +206,24 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
   position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 15; pointer-events: none;
   padding: 6px 14px; border-radius: 999px; font-size: 13px; background: rgba(60, 40, 8, 0.85); color: #ffcc55; border: 1px solid rgba(255, 204, 85, 0.4);
 }
+.seg--lang { margin-left: auto; margin-right: 8px; }
+.seg--lang button { padding: 2px 8px; font-size: 12px; }
+
+/* ---- guided tour ---- */
+.tour-caption {
+  position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 19; width: min(620px, calc(100vw - 32px));
+  display: grid; gap: 6px; padding: 14px 18px; background: rgba(6, 16, 22, 0.9); border: 1px solid rgba(43, 184, 176, 0.45); border-radius: 18px;
+  animation: tour-in 0.35s ease-out;
+}
+.tour-caption strong { font-size: 18px; font-weight: 500; }
+.tour-caption p { margin: 0; line-height: 1.5; color: #d6e4ea; font-size: 14px; }
+.tour-caption__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #6fe7dc; }
+.tour-caption__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.tour-dots { display: flex; gap: 5px; }
+.tour-dots i { width: 7px; height: 7px; border-radius: 50%; background: #2a3f48; }
+.tour-dots i.on { background: #6fe7dc; }
+.tour-dots i.done { background: #2bb8b0; }
+.tour-progress { height: 3px; border-radius: 2px; background: #1b2c2e; overflow: hidden; }
+.tour-progress i { display: block; height: 100%; width: 0; background: #2bb8b0; }
+@keyframes tour-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .tour-caption { animation: none; } }

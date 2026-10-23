@@ -10,6 +10,7 @@ import { KIND_COLORS } from './bodies'
 import { FONT_BOLD } from './font'
 import { viewCamera } from './viewCamera'
 import { hoverFeedback, pressFeedback } from './feedback'
+import { localHotspot } from './i18n'
 
 const MAX_LABELS = 6
 const UP = new Vector3(0, 1, 0)
@@ -86,6 +87,7 @@ function Pin({ p, showLabel, groupRef }: { p: Placed; showLabel: boolean; groupR
   const { h } = p
   const hovered = useXRApp((s) => s.hoveredId === h.id)
   const labels = useXRApp((s) => s.settings.labels)
+  const lang = useXRApp((s) => s.settings.lang)
   const selected = useXRApp((s) => s.hotspotId === h.id)
   const hit = useRef<Mesh>(null)
   const glow = useRef<Mesh>(null)
@@ -167,7 +169,7 @@ function Pin({ p, showLabel, groupRef }: { p: Placed; showLabel: boolean; groupR
             maxWidth={0.9}
             textAlign="center"
           >
-            {h.title}
+            {localHotspot(h, lang).title}
           </Text>
         </Billboard>
       )}

@@ -10,6 +10,7 @@ import { beginScene, beginTask, endTask, reportProblem, retryScene, useLoading, 
 import { Appear, Button, GlassPanel, Icon, Label, UI } from './ui3d'
 import { useSitesForBody } from './content'
 import { FONT, FONT_BOLD } from './font'
+import { t } from './i18n'
 
 /** Motion of the VR player (0 = still, 1 = fast), written by the VR walker, read by the comfort vignette. */
 export const comfort = { motion: 0 }
@@ -74,7 +75,7 @@ export function LoadingPanelVR() {
   return (
     <group ref={g} renderOrder={10002}>
       <Text font={FONT_BOLD} material={mat} fontSize={0.028} color="#ffffff" anchorX="center" anchorY="bottom" renderOrder={10002}>
-        {`Preparing ${label}…`}
+        {t('Preparing {x}…', { x: t(label) })}
       </Text>
       <mesh position={[0, -0.02, 0]} renderOrder={10002}>
         <planeGeometry args={[0.24, 0.006]} />
@@ -167,16 +168,17 @@ export function Prefetcher() {
   return null
 }
 
-export const PROBLEM_TEXT: Record<Problem['kind'], { title: (what: string) => string; body: string }> = {
-  offline: { title: () => 'You are offline', body: 'This place needs an internet connection the first time. Places you have already visited still work.' },
-  failed: { title: (w) => `Couldn't load ${w}`, body: 'The download failed. Check your connection and try again.' },
-  slow: { title: (w) => `${w} is taking a while`, body: 'It is still downloading on a slow connection. Keep waiting, retry, or go somewhere else.' },
+export const PROBLEM_TEXT: Record<Problem['kind'], { title: (what: string) => string; body: () => string }> = {
+  offline: { title: () => t('You are offline'), body: () => t('This place needs an internet connection the first time. Places you have already visited still work.') },
+  failed: { title: (w) => t("Couldn't load {x}", { x: t(w) }), body: () => t('The download failed. Check your connection and try again.') },
+  slow: { title: (w) => t('{x} is taking a while', { x: t(w) }), body: () => t('It is still downloading on a slow connection. Keep waiting, retry, or go somewhere else.') },
 }
 
 /** In a headset: the problem card floats in front of you with Retry and a way home (never an empty scene). */
 export function ProblemPanelVR() {
   const session = useStore(xrStore, (s) => s.session)
   const problem = useLoading((s) => s.problem)
+  useXRApp((s) => s.settings.lang)
   const g = useRef<Group>(null)
   const v = useMemo(() => ({ head: new Vector3(), fwd: new Vector3(), target: new Vector3(), placed: false }), [])
   useEffect(() => {
@@ -205,9 +207,9 @@ export function ProblemPanelVR() {
           <GlassPanel width={2.6} height={1.25} radius={0.16} />
           <Icon name={problem.kind === 'slow' ? 'refresh' : 'warning'} size={0.22} color={UI.warn} position={[-1.08, 0.4, 0.004]} />
           <Label text={text.title(problem.what)} position={[-0.88, 0.4, 0.005]} size={UI.type.title} bold maxWidth={2.1} />
-          <Label text={text.body} position={[-1.15, 0.05, 0.005]} size={UI.type.body} color={UI.muted} maxWidth={2.3} />
-          <Button label="Retry" icon="refresh" tone="accent" onPress={retryScene} position={[-0.62, -0.38, 0]} width={1.1} height={0.3} />
-          <Button label="Solar System" icon="back" onPress={() => useXRApp.getState().selectBody(null)} position={[0.62, -0.38, 0]} width={1.1} height={0.3} />
+          <Label text={text.body()} position={[-1.15, 0.05, 0.005]} size={UI.type.body} color={UI.muted} maxWidth={2.3} />
+          <Button label={t('Retry')} icon="refresh" tone="accent" onPress={retryScene} position={[-0.62, -0.38, 0]} width={1.1} height={0.3} />
+          <Button label={t('Solar System')} icon="back" onPress={() => useXRApp.getState().selectBody(null)} position={[0.62, -0.38, 0]} width={1.1} height={0.3} />
         </group>
       </Appear>
     </group>

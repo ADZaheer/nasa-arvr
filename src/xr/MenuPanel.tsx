@@ -4,32 +4,42 @@ import { BODY_BY_ID } from './bodies'
 import { useSiteContent } from './content'
 import { ALL_GOALS } from './missions'
 import { activeMissions } from './MissionTracker'
+import { LANGS, t, useT } from './i18n'
 import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 
 /** On-screen version of the wrist menu (desktop, phone, phone AR via the DOM overlay). Same options. */
 export function MenuPanel() {
   const open = useXRApp((s) => s.menuOpen)
   const [tab, setTab] = useState<MenuTab>('travel')
+  const lang = useXRApp((s) => s.settings.lang)
+  const t = useT()
   const app = useXRApp.getState
   if (!open) {
     return (
-      <button className="btn menu-fab" aria-label="Open menu" onClick={() => app().setMenuOpen(true)}>
-        ⚙ Menu
+      <button className="btn menu-fab" aria-label={t('Open menu')} onClick={() => app().setMenuOpen(true)}>
+        ⚙ {t('Menu')}
       </button>
     )
   }
   return (
-    <aside className="menu-panel" aria-label="Expedition menu">
+    <aside className="menu-panel" aria-label={t('Expedition Menu')}>
       <header>
-        <strong>Expedition Menu</strong>
-        <button className="icon-btn" aria-label="Close menu" onClick={() => app().setMenuOpen(false)}>
+        <strong>{t('Expedition Menu')}</strong>
+        <div className="seg seg--lang" role="group" aria-label={t('Language')}>
+          {LANGS.map((l) => (
+            <button key={l.value} className={lang === l.value ? 'on' : ''} aria-pressed={lang === l.value} onClick={() => app().setSetting('lang', l.value)}>
+              {l.value.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <button className="icon-btn" aria-label={t('Close menu')} onClick={() => app().setMenuOpen(false)}>
           ×
         </button>
       </header>
       <nav className="menu-tabs" role="tablist">
-        {MENU_TABS.map((t) => (
-          <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>
-            {t.label}
+        {MENU_TABS.map((m) => (
+          <button key={m.id} role="tab" aria-selected={tab === m.id} className={tab === m.id ? 'on' : ''} onClick={() => setTab(m.id)}>
+            {t(m.label)}
           </button>
         ))}
       </nav>
@@ -39,7 +49,7 @@ export function MenuPanel() {
       {tab === 'comfort' && <Controls controls={COMFORT_CONTROLS} />}
       {tab === 'audio' && <Controls controls={AUDIO_CONTROLS} />}
       {tab === 'info' && <Info />}
-      <p className="menu-tip">In VR: turn your left palm toward your face, or press Y on the left controller.</p>
+      <p className="menu-tip">{t('In VR: turn your left palm toward your face, or press Y on the left controller.')}</p>
     </aside>
   )
 }
@@ -52,26 +62,24 @@ function Missions() {
   const count = ALL_GOALS.filter((g) => done[g.id]).length
   return (
     <div className="menu-missions">
-      {list.length === 0 && <p>No missions here: explore freely!</p>}
+      {list.length === 0 && <p>{t('No missions here: explore freely!')}</p>}
       {list.map((m) => (
         <section key={m.id}>
-          <h4>{m.title}</h4>
+          <h4>{t(m.title)}</h4>
           <ul>
             {m.goals.map((g) => (
-              <li key={g.id} className={done[g.id] ? 'done' : ''} title={g.hint}>
-                <span aria-hidden>{done[g.id] ? '✓' : '○'}</span> {g.title}
-                {!done[g.id] && <small>{g.hint}</small>}
+              <li key={g.id} className={done[g.id] ? 'done' : ''} title={t(g.hint)}>
+                <span aria-hidden>{done[g.id] ? '✓' : '○'}</span> {t(g.title)}
+                {!done[g.id] && <small>{t(g.hint)}</small>}
               </li>
             ))}
           </ul>
         </section>
       ))}
       <footer>
-        <span>
-          All missions: {count}/{ALL_GOALS.length}
-        </span>
+        <span>{t('All missions: {n}/{total}', { n: count, total: ALL_GOALS.length })}</span>
         <button className="btn" onClick={() => useXRApp.getState().resetMissions()}>
-          Restart training
+          {t('Restart training')}
         </button>
       </footer>
     </div>
@@ -85,9 +93,12 @@ function Travel() {
     <div className="menu-list">
       {DESTINATIONS.map((d) => (
         <button key={d.id} className={d.active({ bodyId, siteId }) ? 'on' : ''} onClick={d.go}>
-          {d.label}
+          {t(d.label)}
         </button>
       ))}
+      <button className="on" onClick={() => useXRApp.getState().setTourStep(0)}>
+        ▶ {t('Guided tour')}
+      </button>
     </div>
   )
 }
@@ -105,7 +116,7 @@ function Controls({ controls }: { controls: ControlSpec[] }) {
           return (
             <label key={c.key} className={disabled ? 'off' : ''}>
               <span>
-                {c.label} <em>{disabled ? 'on the surface' : c.format(v)}</em>
+                {t(c.label)} <em>{disabled ? t('on the surface') : t(c.format(v))}</em>
               </span>
               <input type="range" min={c.min} max={c.max} step={(c.max - c.min) / 100} value={v} disabled={disabled} onChange={(e) => set(c.key, Number(e.target.value) as never)} />
             </label>
@@ -114,17 +125,17 @@ function Controls({ controls }: { controls: ControlSpec[] }) {
         if (c.kind === 'toggle')
           return (
             <label key={c.key} className="row">
-              <span>{c.label}</span>
+              <span>{t(c.label)}</span>
               <input type="checkbox" checked={settings[c.key] as boolean} onChange={(e) => set(c.key, e.target.checked as never)} />
             </label>
           )
         return (
           <div key={c.key}>
-            <span>{c.label}</span>
+            <span>{t(c.label)}</span>
             <div className="seg">
               {c.options.map((o) => (
                 <button key={o.value} className={settings[c.key] === o.value ? 'on' : ''} onClick={() => set(c.key, o.value as never)}>
-                  {o.label}
+                  {t(o.label)}
                 </button>
               ))}
             </div>
@@ -144,17 +155,17 @@ function Info() {
     const id = setInterval(() => tick((n) => n + 1), 1000)
     return () => clearInterval(id)
   }, [])
-  const where = siteId ? (site ? `${site.name}, Mars` : 'Mars surface') : bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : 'Solar System'
+  const where = siteId ? (site ? `${site.name}, ${BODY_BY_ID[site.body]?.name ?? site.body}` : t('Mars surface')) : bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : t('Solar System')
   return (
     <dl className="menu-info">
       {infoLines(where, !!siteId).map((l) => (
         <div key={l.label}>
-          <dt>{l.label}</dt>
+          <dt>{t(l.label)}</dt>
           <dd>{l.value}</dd>
         </div>
       ))}
       <small>
-        Mars time:{' '}
+        {t('Time source: {x}', { x: '' })}
         <a href={INFO_SOURCE.url} target="_blank" rel="noopener noreferrer">
           {INFO_SOURCE.label}
         </a>

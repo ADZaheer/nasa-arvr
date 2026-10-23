@@ -9,6 +9,8 @@ import { InfoCardPanel, KIND_LABEL } from './InfoCard'
 import { MenuPanel } from './MenuPanel'
 import { retryScene, useLoading } from './loading'
 import { PROBLEM_TEXT } from './smooth'
+import { t, useT } from './i18n'
+import { TourCaption } from './TourUI'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
 
@@ -29,6 +31,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
   const site = useSiteContent(siteId)
   const sites = useSitesForBody(siteId ? null : bodyId)
   const root = useRef<HTMLDivElement>(null)
+  useT() // re-render everything below on language change
 
   // Taps on overlay buttons must not also trigger an XR "select" (which would re-place the model).
   useEffect(() => {
@@ -63,57 +66,58 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
         <div className="hud__title">
           {surface ? (
             <button className="btn btn--ghost" onClick={() => app().selectBody(site?.body ?? bodyId)}>
-              ◂ Back to orbit
+              {t('◂ Back to orbit')}
             </button>
           ) : bodyId ? (
             <button className="btn btn--ghost" onClick={() => app().selectBody(null)}>
-              ◂ Solar System
+              {t('◂ Solar System')}
             </button>
           ) : (
             <span className="brand">AR Cosmic Expedition</span>
           )}
-          {name && <span className="crumb">{name}</span>}
+          {name && <span className="crumb">{t(name)}</span>}
         </div>
         <div className="hud__modes">
+          {!session && !inAR && <TourButton />}
           {!session && caps.vr && (
             <button className="btn btn--primary" onClick={() => enter('vr')}>
-              Enter VR
+              {t('Enter VR')}
             </button>
           )}
           {!session && caps.ar && (
             <button className="btn btn--primary" onClick={() => enter('ar')}>
-              Enter AR
+              {t('Enter AR')}
             </button>
           )}
           {!session && caps.gyro && !gyroEnabled && (
             <button className="btn" onClick={startGyro}>
-              Look around (motion)
+              {t('Look around (motion)')}
             </button>
           )}
           {!session && gyroEnabled && (
             <button className="btn" onClick={() => app().setGyroEnabled(false)}>
-              Touch controls
+              {t('Touch controls')}
             </button>
           )}
           {inAR && placed && (
             <button className="btn" onClick={() => app().setArAnchor(null)}>
-              Move model
+              {t('Move model')}
             </button>
           )}
           {session && (
             <button className="btn" onClick={() => session.end()}>
-              Exit {mode === 'ar' ? 'AR' : 'VR'}
+              {t(mode === 'ar' ? 'Exit AR' : 'Exit VR')}
             </button>
           )}
         </div>
       </header>
 
       {!caps.secure && <p className="notice notice--warn">Open this page over HTTPS: WebXR and motion sensors are disabled on insecure pages.</p>}
-      {inAR && !placed && <p className="notice">Point your phone at a table and tap to place the model.</p>}
+      {inAR && !placed && <p className="notice">{t('Point your phone at a table and tap to place the model.')}</p>}
 
       {!bodyId && !surface && !inAR && (
         <nav className="body-chips" aria-label="Destinations">
-          <span className="badge">Not to scale</span>
+          <span className="badge">{t('Not to scale')}</span>
           {BODIES.map((b) => (
             <button key={b.id} className={`chip${hasContent(b.id) ? ' chip--live' : ''}`} onClick={() => app().selectBody(b.id)}>
               {b.name}
@@ -126,7 +130,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
         <>
           {sites.length > 0 && (
             <nav className="land" aria-label="Stand on the surface">
-              <span>Stand on the surface:</span>
+              <span>{t('Stand on the surface:')}</span>
               {sites.map((s) => (
                 <button key={s.id} className="btn btn--accent" onClick={() => app().selectSite(s.id, s.body)}>
                   {s.name}
@@ -137,7 +141,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
           <div className="legend">
             {(Object.keys(KIND_COLORS) as HotspotKind[]).map((k) => (
               <span key={k}>
-                <i style={{ background: KIND_COLORS[k] }} /> {KIND_LABEL[k]}
+                <i style={{ background: KIND_COLORS[k] }} /> {t(KIND_LABEL[k])}
               </span>
             ))}
             {credit && <small className="credit">{credit}</small>}
@@ -151,18 +155,19 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {mode === 'desktop' && !inAR && (
         <p className="hint">
           {surface
-            ? `W A S D walk · Q/E turn · Shift run · ${jumpHint(site?.environment?.gravity ?? 3.71)} · drag to look · grab rocks · click a beacon`
+            ? t('W A S D walk · Q/E turn · Shift run · {jump} · drag to look · grab rocks · click a beacon', { jump: jumpHint(site?.environment?.gravity ?? 3.71) })
             : bodyId
-              ? 'Drag to rotate · scroll to zoom · click a glowing pin'
-              : 'Drag to rotate · click a body (● = has hotspots)'}
+              ? t('Drag to rotate · scroll to zoom · click a glowing pin')
+              : t('Drag to rotate · click a body (● = has hotspots)')}
         </p>
       )}
-      {mode === 'gyro' && <p className="hint">Move your phone to look around · tap a pin or hold the centre dot on it</p>}
+      {mode === 'gyro' && <p className="hint">{t('Move your phone to look around · tap a pin or hold the centre dot on it')}</p>}
       {surface && inAR && <p className="notice">Tabletop model of {site?.name}. Exit AR and use Enter VR or Look around to stand on it.</p>}
 
       {(!session || inAR) && <MenuPanel />}
       <LoadingCard />
       <ProblemCard />
+      {!inAR && <TourCaption />}
       <OfflinePill />
       <MissionBanner />
       <InfoCardPanel />
@@ -208,23 +213,23 @@ function SuitReadout({ site, credit }: { site: SiteContent; credit?: string }) {
         <b>{state.heading}°</b>
       </div>
       <aside className="suit" aria-label="Suit readout">
-        <h3>{site.region}</h3>
+        <h3>{t(site.region)}</h3>
         <dl>
           {site.conditions.map((c) => (
             <div key={c.label}>
-              <dt>{c.label}</dt>
-              <dd>{c.value}</dd>
+              <dt>{t(c.label)}</dt>
+              <dd>{t(c.value)}</dd>
             </div>
           ))}
           <div>
-            <dt>From landing spot</dt>
+            <dt>{t('From landing spot')}</dt>
             <dd>
-              {state.walked} m{state.air ? ' · airborne!' : ''}
+              {state.walked} m{state.air ? ` · ${t('airborne!')}` : ''}
             </dd>
           </div>
         </dl>
         <small>
-          Source:{' '}
+          {t('Source:')}{' '}
           <a href={site.conditionsSource.url} target="_blank" rel="noopener noreferrer">
             {site.conditionsSource.label}
           </a>
@@ -246,14 +251,14 @@ function TouchMoveButtons() {
   })
   return (
     <div className="move-pad">
-      <button className="btn btn--pad" {...hold('forward')} aria-label="Walk forward">
-        ▲ Walk
+      <button className="btn btn--pad" {...hold('forward')} aria-label={t('Walk forward')}>
+        {t('▲ Walk')}
       </button>
-      <button className="btn btn--pad" {...hold('back')} aria-label="Walk back">
+      <button className="btn btn--pad" {...hold('back')} aria-label={t('Walk back')}>
         ▼
       </button>
-      <button className="btn btn--pad" onPointerDown={() => (input.jump = true)} aria-label="Jump">
-        Jump
+      <button className="btn btn--pad" onPointerDown={() => (input.jump = true)} aria-label={t('Jump')}>
+        {t('Jump')}
       </button>
     </div>
   )
@@ -266,9 +271,9 @@ function MissionBanner() {
   return (
     <div className={`mission-card${card.done ? ' mission-card--done' : ''}`} role="status">
       <small>
-        {card.done ? 'Mission goal complete ✓' : 'Mission'} · {card.mission} · {card.progress}
+        {card.done ? t('Mission goal complete ✓') : t('Mission')} · {t(card.mission)} · {card.progress}
       </small>
-      <strong>{card.goal}</strong>
+      <strong>{t(card.goal)}</strong>
       <span>{card.hint}</span>
     </div>
   )
@@ -276,8 +281,8 @@ function MissionBanner() {
 
 /** Desktop hint for jumping, matched to the site's gravity. */
 function jumpHint(g: number) {
-  if (g < 0.05) return 'no jumping here (you would reach escape speed!)'
-  return `Space jump (${Math.round((g / 9.81) * 100)}% of Earth's gravity)`
+  if (g < 0.05) return t('no jumping here (you would reach escape speed!)')
+  return t("Space jump ({n}% of Earth's gravity)", { n: Math.round((g / 9.81) * 100) })
 }
 
 const LOADING_TIPS = [
@@ -294,15 +299,16 @@ function LoadingCard() {
   const label = useLoading((s) => s.label)
   const progress = useLoading((s) => s.progress)
   const [tip] = useState(() => LOADING_TIPS[Math.floor(Math.random() * LOADING_TIPS.length)])
+  const what = t(label)
   if (!active) return null
   return (
-    <div className="loading-card" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label={`Preparing ${label}`}>
+    <div className="loading-card" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label={t('Preparing {x}…', { x: what })}>
       <div className="loading-spinner" aria-hidden />
-      <strong>Preparing {label}…</strong>
+      <strong>{t('Preparing {x}…', { x: what })}</strong>
       <div className="loading-bar">
         <i style={{ width: `${Math.max(3, progress * 100)}%` }} />
       </div>
-      <small>{tip}</small>
+      <small>{t(tip)}</small>
     </div>
   )
 }
@@ -315,13 +321,13 @@ function ProblemCard() {
   return (
     <div className="problem-card" role="alert">
       <strong>{text.title(problem.what)}</strong>
-      <p>{text.body}</p>
+      <p>{text.body()}</p>
       <div className="problem-card__actions">
         <button className="btn btn--primary" onClick={retryScene}>
-          Retry
+          {t('Retry')}
         </button>
         <button className="btn" onClick={() => useXRApp.getState().selectBody(null)}>
-          Solar System
+          {t('Solar System')}
         </button>
       </div>
     </div>
@@ -334,7 +340,18 @@ function OfflinePill() {
   if (!offline || problem) return null
   return (
     <div className="offline-pill" role="status">
-      Offline · places you have visited still work
+      {t('Offline · places you have visited still work')}
     </div>
+  )
+}
+
+/** "Guided tour" for first-time visitors: starts at the Solar System and visits Mars, Victoria, Gale and Jezero. */
+function TourButton() {
+  const running = useXRApp((s) => s.tourStep !== null)
+  if (running) return null
+  return (
+    <button className="btn btn--accent" onClick={() => useXRApp.getState().setTourStep(0)} title={t('Start the guided tour')}>
+      ▶ {t('Guided tour')}
+    </button>
   )
 }

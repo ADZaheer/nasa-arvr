@@ -22,6 +22,7 @@ import { viewCamera } from './viewCamera'
 import type { Group } from 'three'
 import { ErrorBoundary } from './ErrorBoundary'
 import { reportProblem, useLoading } from './loading'
+import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
 
 /** Rendered instead of a scene that crashed: turns it into the clear "Couldn't load" card. */
 function SceneFailed({ what }: { what: string }) {
@@ -31,6 +32,15 @@ function SceneFailed({ what }: { what: string }) {
 import { useSiteContent } from './content'
 import { BODY_BY_ID } from './bodies'
 import { useQuality } from './quality'
+
+/** Dev builds: window.__scene for inspection. */
+function DebugHandle() {
+  const scene = useThree((s) => s.scene)
+  useEffect(() => {
+    if (import.meta.env.DEV) (window as unknown as { __scene: unknown }).__scene = scene
+  }, [scene])
+  return null
+}
 
 /** Brightness setting → renderer tone-mapping exposure. */
 function ExposureSync() {
@@ -149,6 +159,7 @@ export function XRRoot() {
       >
         <XR store={xrStore}>
           <ModeSync />
+          <DebugHandle />
           {(PERF || showFps) && <PerfProbe />}
           <ExposureSync />
           <QualityGovernor />
@@ -157,6 +168,13 @@ export function XRRoot() {
           <SceneLoadTracker label={sceneLabel} sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
           <LoadingPanelVR />
           <ProblemPanelVR />
+          <TourDirector />
+          <TourPanelVR />
+          {mode === 'vr' && kind === 'hub' && (
+            <group position={[0, 1.02, -0.85]} rotation={[-0.35, 0, 0]}>
+              <TourStartVR />
+            </group>
+          )}
           <ComfortVignette />
           <Prefetcher />
           <SoundDirector kind={kind} />

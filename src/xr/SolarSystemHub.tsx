@@ -9,6 +9,7 @@ import { useDwellTarget } from './dwell'
 import { FONT, FONT_BOLD } from './font'
 import { Sun } from './space'
 import { SceneReady } from './smooth'
+import { useT } from './i18n'
 
 const GOLDEN = 2.39996
 
@@ -24,6 +25,7 @@ function hubPosition(b: BodyInfo, i: number): [number, number, number] {
 
 /** Body picker. Sizes and distances are deliberately NOT to scale. */
 export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
+  const t = useT()
   return (
     <group rotation={[tilt, 0, 0]}>
       <SceneReady />
@@ -38,10 +40,10 @@ export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
       })}
       <Billboard position={[0, 0.95, 0]}>
         <Text font={FONT_BOLD} fontSize={0.2} color="#ffffff" anchorY="bottom">
-          Choose a destination
+          {t('Choose a destination')}
         </Text>
         <Text font={FONT} position={[0, -0.04, 0]} fontSize={0.09} color="#ffcc55" anchorY="top">
-          Not to scale: sizes and distances are exaggerated
+          {t('Not to scale: sizes and distances are exaggerated')}
         </Text>
       </Billboard>
     </group>

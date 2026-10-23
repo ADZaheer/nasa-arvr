@@ -10,6 +10,7 @@ import { FONT, FONT_BOLD } from './font'
 import { GlassPanel, Icon, UI } from './ui3d'
 import { MISSIONS, missionContext, missionsFor, type Mission } from './missions'
 import { playChime } from './feedback'
+import { t } from './i18n'
 import { player } from './surface/player'
 
 const noFog = new MeshBasicMaterial({ fog: false, toneMapped: false, transparent: true })
@@ -44,7 +45,7 @@ export function MissionTracker() {
     const m = list[0]
     const next = m?.goals.find((g) => !s.goalsDone[g.id])
     if (m && next) {
-      s.setMissionCard({ mission: m.title, goal: next.title, hint: next.hint, done: false, progress: progressOf(m, s.goalsDone) })
+      s.setMissionCard({ mission: m.title, goal: next.title, hint: t(next.hint), done: false, progress: progressOf(m, s.goalsDone) })
       st.current.hideAt = performance.now() + 9000
     }
   }, [bodyId, siteId])
@@ -79,7 +80,7 @@ export function MissionTracker() {
         app.setMissionCard({
           mission: m.title,
           goal: g.title,
-          hint: next ? `Next: ${next.title}` : `${m.title} complete!`,
+          hint: next ? t('Next: {x}', { x: t(next.title) }) : t('{x} complete!', { x: t(m.title) }),
           done: true,
           progress: progressOf(m, after),
         })
@@ -126,10 +127,10 @@ function MissionCard3D() {
       <GlassPanel width={0.62} height={0.2} radius={0.035} rim={0.003} overlay tint={shown.done ? '#0f3d2c' : UI.glass} />
       <Icon name={shown.done ? 'check' : 'missions'} size={0.03} color={shown.done ? UI.good : UI.accent} position={[-0.27, 0.068, 0.001]} overlay />
       <Text font={FONT} material={noFog} position={[-0.245, 0.068, 0]} fontSize={0.022} color={shown.done ? '#5ee39a' : '#8fd9d3'} anchorX="left" anchorY="middle" renderOrder={3002}>
-        {`${shown.done ? 'MISSION GOAL COMPLETE ✓' : 'MISSION'} · ${shown.mission} · ${shown.progress}`}
+        {`${(shown.done ? t('Mission goal complete ✓') : t('Mission')).toUpperCase()} · ${t(shown.mission)} · ${shown.progress}`}
       </Text>
       <Text font={FONT_BOLD} material={noFog} position={[-0.285, 0.02, 0]} fontSize={0.036} maxWidth={0.56} color="#ffffff" anchorX="left" anchorY="middle" renderOrder={3002}>
-        {shown.goal}
+        {t(shown.goal)}
       </Text>
       <Text font={FONT} material={noFog} position={[-0.285, -0.045, 0]} fontSize={0.02} maxWidth={0.56} color="#c3d6d4" anchorX="left" anchorY="middle" renderOrder={3002}>
         {shown.hint}

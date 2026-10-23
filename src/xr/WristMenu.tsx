@@ -13,6 +13,7 @@ import { Appear, Button, Choice3D, GlassPanel, Icon, Label, Slider3D, TEAL, Tile
 
 const TAB_ICON: Record<MenuTab, IconName> = { travel: 'travel', missions: 'missions', display: 'visuals', comfort: 'comfort', audio: 'audio', info: 'info' }
 import { ALL_GOALS } from './missions'
+import { t } from './i18n'
 import { activeMissions } from './MissionTracker'
 
 const noFog = new MeshBasicMaterial({ fog: false, toneMapped: false })
@@ -89,11 +90,17 @@ function WristAnchor({ space, isHand, controller }: { space: XRSpace; isHand: bo
       </XRSpaceGroup>
       <group ref={panel}>
         <Appear open={shown} from={0.6}>
-          <MenuPanel3D />
+          <MenuPanel3DLang />
         </Appear>
       </group>
     </>
   )
+}
+
+/** Remounts the panel when the language changes, so every label re-renders in the new language. */
+function MenuPanel3DLang() {
+  const lang = useXRApp((s) => s.settings.lang)
+  return <MenuPanel3D key={lang} />
 }
 
 function MenuPanel3D() {
@@ -104,14 +111,15 @@ function MenuPanel3D() {
     <group scale={0.07}>
       <GlassPanel width={W} height={H} radius={0.18} rim={0.014} />
       <Icon name="pin" size={0.16} color={TEAL} position={[-W / 2 + 0.2, H / 2 - 0.2, 0.004]} />
-      <Text font={FONT_BOLD} material={noFog} position={[-W / 2 + 0.36, H / 2 - 0.2, 0.005]} fontSize={UI.type.title} color={UI.text} anchorX="left" anchorY="middle">
-        Expedition
+      <Text font={FONT_BOLD} material={noFog} position={[-W / 2 + 0.36, H / 2 - 0.2, 0.005]} fontSize={0.13} color={UI.text} anchorX="left" anchorY="middle">
+        {t('Expedition')}
       </Text>
+      <LangButton position={[W / 2 - 1.47, H / 2 - 0.2, 0.005]} />
       <Button icon="recenter" onPress={() => useXRApp.getState().requestRecenter()} position={[W / 2 - 1.12, H / 2 - 0.2, 0.005]} width={0.3} height={0.24} />
       <PinButton position={[W / 2 - 0.5, H / 2 - 0.2, 0.005]} />
       <mesh geometry={roundedRect(W - 0.16, 0.5, 0.16)} material={uiMat('#13232b')} position={[0, H / 2 - 0.66, -0.004]} />
       {MENU_TABS.map((t, i) => (
-        <Button key={t.id} label={t.label} icon={TAB_ICON[t.id]} stack active={tab === t.id} onPress={() => setTab(t.id)} position={[-W / 2 + 0.1 + tabW * (i + 0.5), H / 2 - 0.66, 0]} width={tabW - 0.04} height={0.44} />
+        <Button key={t.id} label={tr(t.label)} icon={TAB_ICON[t.id]} stack active={tab === t.id} onPress={() => setTab(t.id)} position={[-W / 2 + 0.1 + tabW * (i + 0.5), H / 2 - 0.66, 0]} width={tabW - 0.04} height={0.44} />
       ))}
       <group position={[0, H / 2 - 1.12, 0]}>
         {tab === 'travel' && <TravelPage />}
@@ -125,9 +133,16 @@ function MenuPanel3D() {
   )
 }
 
+const tr = (s: string) => t(s)
+
+function LangButton({ position }: { position: [number, number, number] }) {
+  const lang = useXRApp((s) => s.settings.lang)
+  return <Button label={lang === 'id' ? 'ID' : 'EN'} icon="globe" onPress={() => useXRApp.getState().setSetting('lang', lang === 'id' ? 'en' : 'id')} position={position} width={0.42} height={0.24} />
+}
+
 function PinButton({ position }: { position: [number, number, number] }) {
   const open = useXRApp((s) => s.menuOpen)
-  return <Button label={open ? 'Close' : 'Keep open'} icon={open ? 'close' : 'pin'} active={open} onPress={() => useXRApp.getState().setMenuOpen(!open)} position={position} width={0.85} height={0.24} />
+  return <Button label={open ? t('Close') : t('Keep open')} icon={open ? 'close' : 'pin'} active={open} onPress={() => useXRApp.getState().setMenuOpen(!open)} position={position} width={0.85} height={0.24} />
 }
 
 /** Current missions with checkmarks; overall progress; restart the training. */
@@ -141,20 +156,20 @@ function MissionsPage() {
   let y = 0
   const rows: React.ReactNode[] = []
   for (const m of list) {
-    rows.push(<Label key={m.id} text={m.title.toUpperCase()} position={[-1.15, y, 0.005]} size={0.085} color="#8fd9d3" bold />)
+    rows.push(<Label key={m.id} text={t(m.title).toUpperCase()} position={[-1.15, y, 0.005]} size={0.085} color="#8fd9d3" bold />)
     y -= 0.2
     for (const g of m.goals) {
-      rows.push(<Label key={g.id} text={`${done[g.id] ? '✓' : '○'}  ${g.title}`} position={[-1.1, y, 0.005]} size={0.095} color={done[g.id] ? '#5ee39a' : '#dff7f5'} />)
+      rows.push(<Label key={g.id} text={`${done[g.id] ? '✓' : '○'}  ${t(g.title)}`} position={[-1.1, y, 0.005]} size={0.095} color={done[g.id] ? '#5ee39a' : '#dff7f5'} />)
       y -= 0.17
     }
     y -= 0.06
   }
-  if (!list.length) rows.push(<Label key="none" text="No missions here: explore freely!" position={[-1.15, 0, 0.005]} />)
+  if (!list.length) rows.push(<Label key="none" text={t('No missions here: explore freely!')} position={[-1.15, 0, 0.005]} />)
   return (
     <>
       {rows}
-      <Label text={`All missions: ${count}/${total}`} position={[-1.15, -2.45, 0.005]} size={0.09} color="#8fd9d3" />
-      <Tile label="Restart training" onPress={() => useXRApp.getState().resetMissions()} position={[0.62, -2.45, 0]} width={0.95} height={0.22} />
+      <Label text={t('All missions: {n}/{total}', { n: count, total })} position={[-1.15, -2.45, 0.005]} size={0.09} color="#8fd9d3" />
+      <Tile label={t('Restart training')} onPress={() => useXRApp.getState().resetMissions()} position={[0.62, -2.45, 0]} width={0.95} height={0.22} />
     </>
   )
 }
@@ -165,8 +180,9 @@ function TravelPage() {
   return (
     <>
       {DESTINATIONS.map((d, i) => (
-        <Tile key={d.id} label={d.label} active={d.active({ bodyId, siteId })} onPress={d.go} position={[i % 2 ? 0.58 : -0.58, -Math.floor(i / 2) * 0.33, 0]} width={1.12} height={0.28} />
+        <Tile key={d.id} label={t(d.label)} active={d.active({ bodyId, siteId })} onPress={d.go} position={[i % 2 ? 0.58 : -0.58, -Math.floor(i / 2) * 0.33, 0]} width={1.12} height={0.28} />
       ))}
+      <Button label={t('Guided tour')} icon="play" tone="accent" onPress={() => useXRApp.getState().setTourStep(0)} position={[0, -Math.ceil(DESTINATIONS.length / 2) * 0.33 - 0.08, 0]} width={2.28} height={0.3} />
     </>
   )
 }
@@ -185,18 +201,19 @@ function ControlsPage({ controls }: { controls: ControlSpec[] }) {
           return (
             <Slider3D
               key={c.key}
-              label={c.label}
+              label={t(c.label)}
               value={settings[c.key] as number}
               min={c.min}
               max={c.max}
-              format={c.format}
+              format={(v) => t(c.format(v))}
+              disabledText={t('on the surface')}
               disabled={c.surfaceOnly && !onSurface}
               onChange={(val) => set(c.key, val as never)}
               position={pos}
             />
           )
-        if (c.kind === 'toggle') return <Toggle3D key={c.key} label={c.label} value={settings[c.key] as boolean} onChange={(val) => set(c.key, val as never)} position={pos} />
-        return <Choice3D key={c.key} label={c.label} value={settings[c.key] as string} options={c.options} onChange={(val) => set(c.key, val as never)} position={pos} />
+        if (c.kind === 'toggle') return <Toggle3D key={c.key} label={t(c.label)} value={settings[c.key] as boolean} onChange={(val) => set(c.key, val as never)} position={pos} />
+        return <Choice3D key={c.key} label={t(c.label)} value={settings[c.key] as string} options={c.options.map((o) => ({ ...o, label: t(o.label) }))} onChange={(val) => set(c.key, val as never)} position={pos} />
       })}
     </>
   )
@@ -206,8 +223,8 @@ function useWhere(): string {
   const bodyId = useXRApp((s) => s.bodyId)
   const siteId = useXRApp((s) => s.siteId)
   const site = useSiteContent(siteId)
-  if (siteId) return site ? `${site.name}, Mars` : 'Mars surface'
-  return bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : 'Solar System'
+  if (siteId) return site ? `${site.name}, ${BODY_BY_ID[site.body]?.name ?? site.body}` : t('Mars surface')
+  return bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : t('Solar System')
 }
 
 function InfoPage() {
@@ -226,11 +243,11 @@ function InfoPage() {
     <>
       {lines.map((l, i) => (
         <group key={l.label} position={[0, -i * 0.34, 0]}>
-          <Label text={l.label} position={[-1.05, 0.06, 0.005]} size={0.09} color="#8fd9d3" />
+          <Label text={t(l.label)} position={[-1.05, 0.06, 0.005]} size={0.09} color="#8fd9d3" />
           <Label text={l.value} position={[-1.05, -0.08, 0.005]} size={0.11} />
         </group>
       ))}
-      <Label text={`Time source: ${INFO_SOURCE.label}`} position={[-1.05, -lines.length * 0.34 - 0.05, 0.005]} size={0.07} color="#6f8c8b" />
+      <Label text={t('Time source: {x}', { x: INFO_SOURCE.label })} position={[-1.05, -lines.length * 0.34 - 0.05, 0.005]} size={0.07} color="#6f8c8b" />
     </>
   )
 }

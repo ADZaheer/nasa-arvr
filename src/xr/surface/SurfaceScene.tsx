@@ -28,6 +28,7 @@ import { Button3D } from '../Button3D'
 import { GlassPanel, Icon, UI } from '../ui3d'
 import { makeFadeable, useFadeIn } from '../fade'
 import { reportProblem } from '../loading'
+import { localHotspot, t, useT } from '../i18n'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { DEFAULT_ENVIRONMENT, type Hotspot, type SiteContent, type SiteEnvironment, type SiteModel, type ViewMode } from '../types'
 import { EarthInSky, SpaceSun, StarSky } from '../space'
@@ -85,7 +86,7 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
   }, [site])
 
   if (site === null) return <Notice text={`Unknown site "${siteId}"`} />
-  if (!site || !hf) return <Notice text="Landing…" />
+  if (!site || !hf) return <Notice text={t('Landing…')} />
   if (mode === 'ar') return <Diorama site={site} hf={hf} />
 
   return (
@@ -426,6 +427,7 @@ const noFogText = new MeshBasicMaterial({ fog: false, toneMapped: false })
 /** A point of interest on the surface: glowing beacon that stays readable at any distance. */
 function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
   const labels = useXRApp((s) => s.settings.labels)
+  const lang = useXRApp((s) => s.settings.lang)
   const a = h.anchor.type === 'site' ? h.anchor : { x: 0, z: 0, y: 0 }
   const lift = a.y ?? 0
   const base = useMemo(() => new Vector3(a.x, hf.heightAt(a.x, a.z) + lift, a.z), [a.x, a.z, lift, hf])
@@ -504,7 +506,7 @@ function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
         {(labels > 0.02 || hovered || selected) && (
         <Billboard position={[0, orbY + 0.35, 0]}>
           <Text font={FONT_BOLD} material={noFogText} fillOpacity={hovered || selected ? 1 : labels} outlineOpacity={hovered || selected ? 1 : labels} fontSize={hovered || selected ? 0.2 : 0.16} color="#ffffff" outlineWidth={0.012} outlineColor="#000000" anchorY="bottom" maxWidth={2.4} textAlign="center">
-            {h.title}
+            {localHotspot(h, lang).title}
           </Text>
           <Text font={FONT} material={noFogText} fillOpacity={hovered || selected ? 1 : labels} outlineOpacity={hovered || selected ? 1 : labels} position={[0, -0.02, 0]} fontSize={0.11} color="#e6d7c8" outlineWidth={0.008} outlineColor="#000000" anchorY="top">
             {distLabel}
@@ -621,7 +623,9 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
       s.z = target.z
       if (target.face) {
         s.yaw = Math.atan2(-(target.face.x - s.x), -(target.face.z - s.z))
-        s.pitch = -0.08
+        // tilt to look at the target's middle (it may sit below you on a crater slope)
+        const rise = hf.heightAt(target.face.x, target.face.z) + 1.6 - (hf.heightAt(s.x, s.z) + EYE_HEIGHT)
+        s.pitch = Math.max(-0.6, Math.min(0.3, Math.atan2(rise, Math.hypot(target.face.x - s.x, target.face.z - s.z))))
       }
     }
     let fx: number, fz: number
@@ -761,6 +765,7 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
 
 /** VR "suit computer": a panel that lazily follows your gaze, below eye level, plus the 3D info card. */
 function SuitPanelVR({ site }: { site: SiteContent }) {
+  const tr = useT()
   const g = useRef<Group>(null)
   const head = useMemo(() => new Vector3(), [])
   const fwd = useMemo(() => new Vector3(), [])
@@ -785,19 +790,19 @@ function SuitPanelVR({ site }: { site: SiteContent }) {
     }
   })
   const cardinal = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(heading / 45) % 8]
-  const lines = site.conditions.map((c) => `${c.label}: ${c.value}`).join('\n')
+  const lines = site.conditions.map((c) => `${tr(c.label)}: ${tr(c.value)}`).join('\n')
   return (
     <group ref={g}>
       <group position={[0, -0.42, 0]} rotation={[-0.35, 0, 0]} scale={0.5}>
         <GlassPanel width={1.5} height={0.62} radius={0.07} rim={0.006} />
         <Icon name="visuals" size={0.05} color={UI.accent} position={[-0.7, 0.218, 0.002]} />
         <Text font={FONT_BOLD} material={noFogText} position={[-0.66, 0.25, 0]} fontSize={0.06} color="#ffffff" anchorX="left" anchorY="top">
-          {`${site.name} · heading ${heading}° ${cardinal}`}
+          {`${tr(site.name)} · ${tr('heading')} ${heading}° ${cardinal}`}
         </Text>
         <Text font={FONT} material={noFogText} position={[-0.68, 0.15, 0]} fontSize={0.042} color="#d7def0" anchorX="left" anchorY="top" lineHeight={1.35} maxWidth={1.36}>
           {lines}
         </Text>
-        <Button3D label="Back to orbit" icon="back" position={[0.45, -0.22, 0]} width={0.5} height={0.1} onClick={() => useXRApp.getState().selectBody(site.body)} />
+        <Button3D label={tr('Back to orbit')} icon="back" position={[0.45, -0.22, 0]} width={0.5} height={0.1} onClick={() => useXRApp.getState().selectBody(site.body)} />
       </group>
       <group position={[0.55, 0.1, 0.05]} scale={0.42}>
         <InfoCard3D position={[0, 0, 0]} rotation={[0, -0.35, 0]} />

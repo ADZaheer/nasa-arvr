@@ -1,0 +1,212 @@
+{
+  "nightingale": {
+    "title": "Lokasi sampel Nightingale",
+    "short": "Pada 20 Oktober 2020 OSIRIS-REx menyentuh permukaan di sini selama beberapa detik dan mengambil batuan serta debu.",
+    "detail": "Nightingale adalah kawah di belahan utara Bennu. Lengan pengambil sampel wahana menembakkan gas nitrogen untuk mengaduk material lepas lalu menangkapnya. Kapsul sampel mendarat di Utah pada 24 September 2023 dengan sekitar 121,6 gram material asteroid, sampel asteroid terbesar yang pernah dibawa pulang."
+  },
+  "sample-chemistry": {
+    "title": "Bahan-bahan kehidupan",
+    "short": "Sampel Bennu mengandung asam amino, kelima nukleobasa DNA/RNA, dan jejak air asin yang menguap.",
+    "detail": "Para ilmuwan yang meneliti sampel itu menemukan 14 dari 20 asam amino yang dipakai kehidupan di Bumi, kelima nukleobasa, amonia, serta mineral sisa air garam yang menguap. Ini tidak berarti Bennu pernah memiliki kehidupan; ini menunjukkan bahwa bahan penyusun kehidupan tersebar luas di Tata Surya awal."
+  },
+  "benben-saxum": {
+    "title": "Batu besar Benben Saxum",
+    "short": "Salah satu batu terbesar di Bennu, terletak di belahan selatan.",
+    "detail": "Ternyata Bennu jauh lebih kasar dari perkiraan: tertutup batu-batu besar, bukan regolit halus. Benben Saxum termasuk yang terbesar dan salah satu fitur pertama yang terlihat saat OSIRIS-REx mendekat. Permukaan yang terjal memaksa tim memilih lokasi pengambilan sampel yang jauh lebih kecil dari rencana."
+  },
+  "rubble-pile": {
+    "title": "Bagian dalam tumpukan puing",
+    "short": "Gambaran konsep: Bennu adalah puing yang terikat longgar dengan banyak ruang kosong di dalamnya.",
+    "detail": "Bennu diduga merupakan tumpukan puing: pecahan asteroid induk yang lebih besar, yang berkumpul kembali karena gravitasi lemah. Massa jenisnya yang rendah menunjukkan sebagian besar bagian dalamnya adalah ruang kosong. Saat wahana menyentuh permukaan, tanahnya berperilaku seperti kolam bola, bukan tanah padat. Pin ini menandai sebuah konsep, bukan fitur yang dipetakan."
+  },
+  "impact-odds-2182": {
+    "title": "Peluang kecil tabrakan pada 2182",
+    "short": "Pelacakan memberi Bennu peluang sekitar 1 banding 2.700 untuk menabrak Bumi pada 2182, sangat kecil kemungkinannya.",
+    "detail": "Pelacakan presisi OSIRIS-REx membantu ilmuwan memperbaiki orbit Bennu, termasuk dorongan kecil dari sinar Matahari yang dipancarkan kembali sebagai panas (efek Yarkovsky). Peluang total tabrakan hingga tahun 2300 sekitar 1 banding 1.750, dengan 24 September 2182 sebagai tanggal tunggal terpenting. Ini adalah peluang, bukan ramalan."
+  },
+  "olympus-mons": {
+    "title": "Olympus Mons",
+    "short": "Gunung berapi terbesar di Tata Surya, kira-kira tiga kali lebih tinggi dari Gunung Everest.",
+    "detail": "Olympus Mons adalah gunung berapi perisai yang terbentuk dari aliran lava selama waktu yang sangat lama. Tingginya sekitar 25 km dari dataran di sekitarnya dan cukup lebar untuk menutupi negara bagian Arizona di Amerika Serikat. Gravitasi Mars yang lebih rendah dan tidak adanya lempeng tektonik yang bergerak membuat lava menumpuk di satu tempat dalam waktu sangat lama."
+  },
+  "valles-marineris": {
+    "title": "Valles Marineris",
+    "short": "Sistem ngarai sepanjang lebih dari 4.000 km dan sedalam hingga 7 km, jauh lebih besar dari Grand Canyon.",
+    "detail": "Valles Marineris membentang sekitar seperlima keliling Mars. Ngarai ini diduga terbentuk terutama ketika kerak planet retak dan merenggang di dekat wilayah vulkanik Tharsis, lalu melebar karena longsor dan erosi. Di Bumi, panjangnya kira-kira selebar Amerika Serikat."
+  },
+  "gale-crater": {
+    "title": "Kawah Gale – Curiosity",
+    "short": "Rover Curiosity mendarat di sini pada Agustus 2012 dan sedang mendaki Gunung Sharp yang berlapis.",
+    "detail": "Kawah Gale menyimpan Gunung Sharp (Aeolis Mons), gundukan lapisan sedimen setinggi sekitar 5 km. Curiosity menemukan bukti bahwa kawah ini dulu memiliki danau dan sungai, dan bahwa Mars purba memiliki bahan kimia serta kondisi yang dapat mendukung kehidupan mikroba."
+  },
+  "jezero-cheyava-falls": {
+    "title": "Kawah Jezero – kemungkinan biosignatur",
+    "short": "Perseverance menemukan batuan dengan ciri yang bisa menjadi tanda kehidupan purba — belum terkonfirmasi.",
+    "detail": "Jezero dulunya danau yang dialiri delta sungai. Perseverance, yang mendarat pada Februari 2021, mengambil sampel batuan berjuluk Cheyava Falls yang tekstur 'bintik macan tutul' dan mineralnya merupakan kemungkinan biosignatur. NASA menegaskan penjelasan non-biologis masih mungkin; sampel perlu diteliti di Bumi untuk memastikannya."
+  },
+  "north-polar-cap": {
+    "title": "Tudung es kutub utara",
+    "short": "Tudung permanen dari es air yang mendapat lapisan karbon dioksida beku setiap musim dingin.",
+    "detail": "Tudung kutub Mars adalah endapan berlapis dari es air dan debu. Pada musim dingin, karbon dioksida dari atmosfer membeku di atasnya sebagai es kering, lalu kembali ke udara pada musim semi. Lapisan-lapisan itu merekam perubahan iklim masa lalu, mirip inti es di Bumi."
+  },
+  "moon-apollo11": {
+    "title": "Apollo 11 – Pangkalan Tranquility",
+    "short": "Tempat Neil Armstrong dan Buzz Aldrin mendarat pada 20 Juli 1969, pendaratan berawak pertama di Bulan.",
+    "detail": "Modul pendarat Eagle mendarat di Laut Ketenangan (Sea of Tranquility), sebuah dataran lava gelap. Para astronaut menghabiskan 21 jam 36 menit di permukaan, mengumpulkan batuan dan tanah, serta memasang eksperimen sebelum lepas landas. Tekan 'Berdiri di sini' untuk berjalan di sekitar lokasi pendaratan."
+  },
+  "moon-regolith": {
+    "title": "Dunia berdebu tanpa udara",
+    "short": "Bulan tertutup regolit abu-abu arang dan hanya memiliki eksosfer yang sangat tipis.",
+    "detail": "Tanpa atmosfer sungguhan, tidak ada cuaca yang mengikis permukaan, sehingga kawah bahkan jejak kaki bisa bertahan sangat lama. Regolit di atasnya adalah campuran debu halus dan pecahan batu, di atas batuan dasar retak yang disebut megaregolit."
+  },
+  "moon-volcanoes": {
+    "title": "Gunung berapi purba",
+    "short": "Dahulu Bulan memiliki gunung berapi aktif; kini semuanya tidak aktif.",
+    "detail": "Bercak gelap yang terlihat dari Bumi adalah lautan lava yang membeku, disebut maria. Maria terbentuk ketika lava membanjiri cekungan tumbukan raksasa miliaran tahun lalu. Gunung berapi Bulan sudah tidak meletus selama jutaan tahun."
+  },
+  "a11-eagle": {
+    "title": "Eagle telah mendarat",
+    "short": "Modul pendarat Eagle milik Apollo 11 mendarat di sini pada 20 Juli 1969 bersama Neil Armstrong dan Buzz Aldrin.",
+    "detail": "Sekitar 109 jam 42 menit setelah peluncuran, Armstrong menginjakkan kaki di Bulan. Ia dan Aldrin berada di permukaan selama 21 jam 36 menit sebelum tahap naik lepas landas untuk bergabung kembali dengan Michael Collins di Columbia. Model ini adalah modul pendarat resmi NASA; posisinya di medan ini merupakan perkiraan."
+  },
+  "a11-mission": {
+    "title": "Pangkalan Tranquility",
+    "short": "Pendaratan berawak pertama di dunia lain: tujuan utama program Apollo.",
+    "detail": "Tujuan utama Apollo 11 adalah mendaratkan manusia di Bulan dan memulangkan mereka dengan selamat ke Bumi. Seluruh misi berlangsung sekitar 195 jam sebelum pendaratan di Samudra Pasifik. Jejak kaki di sini bisa bertahan sangat lama karena tidak ada angin atau hujan yang menghapusnya."
+  },
+  "a11-crater": {
+    "title": "Kawah besar yang masih baru",
+    "short": "Kawah terbesar di area ini; Eagle mendarat beberapa ratus meter darinya.",
+    "detail": "Kawah dengan bibir setajam ini tergolong muda menurut ukuran Bulan. Batu yang terlempar dari kawah semacam ini bisa berserakan di sekitarnya, sehingga memilih tempat mendarat yang aman menjadi sulit. Identifikasi kawah ini sebagai 'West crater' Apollo 11 yang terkenal adalah perkiraan terbaik kami dari model ketinggian."
+  },
+  "a11-regolith": {
+    "title": "Regolit Bulan",
+    "short": "Hampir seluruh Bulan tertutup debu halus abu-abu arang dan pecahan batu.",
+    "detail": "Regolit terbentuk ketika mikrometeorit dan tumbukan menggerus batuan selama miliaran tahun. Di bawahnya terdapat batuan dasar retak yang disebut megaregolit. Tanpa udara, debu yang kamu tendang di sini melayang dalam lengkungan bersih lalu jatuh kembali, bukan mengepul seperti awan."
+  },
+  "a11-whats-real": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Bentuk tanahnya berasal dari model ketinggian NASA; batu kecil, warna, dan langit bersifat artistik.",
+    "detail": "Lanskap ini berasal dari model ketinggian cetak 3D NASA untuk lokasi Apollo 11, dengan kemiringannya dihilangkan dan skala diperkirakan. Modul pendarat adalah model resmi NASA. Di Bulan beratmu hanya seperenam berat di Bumi, jadi lompatan terasa lambat dan tinggi."
+  },
+  "bn-nightingale": {
+    "title": "Lokasi sampel Nightingale",
+    "short": "Pada 20 Oktober 2020 OSIRIS-REx menyentuh permukaan di sini selama beberapa detik dan mengambil batuan serta debu.",
+    "detail": "Lengan pengambil sampel wahana menembakkan gas nitrogen untuk mengaduk material lepas lalu menangkapnya. Kapsul sampel mendarat di Utah pada 24 September 2023, sampel asteroid terbesar yang pernah dibawa pulang. Nightingale sendiri adalah kawah kecil; model bentuk ini terlalu kasar untuk menampilkannya, jadi pin menandai areanya."
+  },
+  "bn-spacecraft": {
+    "title": "OSIRIS-REx",
+    "short": "Wahana NASA, ditampilkan melayang di atas lokasi sampel seperti saat mendekat.",
+    "detail": "OSIRIS-REx memetakan Bennu secara rinci sebelum memilih tempat pengambilan sampel. Sentuhannya ke permukaan hanya berlangsung beberapa detik, lalu wahana mundur. Modelnya adalah model resmi NASA; posisinya di sini bersifat ilustrasi."
+  },
+  "bn-boulders": {
+    "title": "Dunia penuh batu besar",
+    "short": "Bennu tertutup batu-batu besar; salah satu yang terkenal lebarnya sekitar 7,4 m, setengah lapangan basket.",
+    "detail": "Sebelum tiba, ilmuwan memperkirakan permukaan yang lebih halus berupa kerikil. Ternyata batu besar tersebar di seluruh Bennu, sehingga mencari lokasi sampel yang aman jauh lebih sulit. Batu-batu di sekitarmu dibuat untuk memberi gambaran, bukan dipetakan satu per satu."
+  },
+  "bn-rubble": {
+    "title": "Lahir dari puing",
+    "short": "Bennu terbentuk dari sisa puing benda yang lebih besar sekitar 1 hingga 2 miliar tahun lalu.",
+    "detail": "Bennu adalah 'tumpukan puing': pecahan yang terikat longgar oleh gravitasinya sendiri yang lemah. Materialnya jauh lebih tua dari asteroid itu sendiri, berasal dari masa awal Tata Surya, karena itulah sampelnya sangat berharga untuk memahami bagaimana planet terbentuk."
+  },
+  "bn-gravity": {
+    "title": "Lempar sesuatu ke luar angkasa",
+    "short": "Gravitasi Bennu sangat lemah sehingga lemparan pelan bisa membuat kerikil pergi selamanya.",
+    "detail": "Bennu hanya berdiameter sekitar 500 m, jadi tarikannya sangat kecil: kecepatan lepasnya kira-kira 20 cm per detik (setara langkah santai), dihitung dari ukuran dan massanya. Coba lempar batu di sini dan lihat batu itu melayang pergi. Itu juga sebabnya melompat dinonaktifkan — kamu mungkin tidak akan pernah turun lagi!"
+  },
+  "bn-whats-real": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Bentuk Bennu adalah model OSIRIS-REx NASA dalam ukuran asli; batu besar, warna, dan pencahayaan bersifat artistik.",
+    "detail": "Tanah melengkung menjauh dengan cepat karena Bennu sangat kecil: cakrawalanya hanya beberapa puluh meter jauhnya. Bennu yang asli jauh lebih kasar pada skala kecil daripada yang ditunjukkan model ini. OSIRIS-REx adalah model 3D resmi NASA."
+  },
+  "mount-sharp": {
+    "title": "Gunung Sharp (Aeolis Mons)",
+    "short": "Gunung batuan berlapis setinggi 5 km di tengah Kawah Gale. Curiosity mendakinya sejak 2014.",
+    "detail": "Gunung Sharp tersusun dari lapisan-lapisan sedimen yang bertumpuk. Setiap lapisan merekam kondisi Mars purba, jadi dengan mendaki, Curiosity membaca sejarah secara berurutan, dari masa yang lebih basah di dasar hingga masa yang lebih kering di atas. Dalam model ini gunung tersebut berjarak sekitar 40 km dari tempatmu berdiri."
+  },
+  "gale-curiosity": {
+    "title": "Rover Curiosity",
+    "short": "Rover seukuran mobil yang menjelajahi Kawah Gale sejak 2012 dan mendaki Gunung Sharp.",
+    "detail": "Curiosity membawa laboratorium yang mengebor batuan dan menganalisis bubuknya di dalam rover. Rover ini telah menempuh banyak kilometer dari lokasi pendaratannya hingga ke lereng bawah Gunung Sharp. Ini adalah model 3D NASA yang ditempatkan di sampingmu sebagai pembanding ukuran; rover aslinya berada di tempat lain di kawah."
+  },
+  "landing-area": {
+    "title": "Di dasar kawah",
+    "short": "Curiosity menjelajahi Kawah Gale sejak mendarat pada Agustus 2012, meneliti batuan, tanah, dan udara.",
+    "detail": "Gale dipilih karena wahana pengorbit menunjukkan mineral yang berkaitan dengan air dan lapisan tebal di kaki Gunung Sharp. Curiosity mengebor batuan dan menganalisis sampel di laboratorium di dalam rover. Kamu berdiri di dasar kawah antara dinding kawah dan gunung; ini bukan titik pendaratan yang tepat."
+  },
+  "clay-unit": {
+    "title": "Lapisan yang mengandung lempung",
+    "short": "Wilayah di lereng Gunung Sharp dengan kisah unik tentang sejarah air.",
+    "detail": "Mineral lempung biasanya terbentuk ketika batuan bersentuhan dengan air dalam waktu lama. Curiosity meneliti pita di sisi gunung ini untuk mengetahui berapa lama air bertahan di Gale dan bagaimana lingkungannya berubah. Pin menunjukkan arah umum, bukan lokasi yang tepat."
+  },
+  "organics": {
+    "title": "Molekul organik terbesar di Mars",
+    "short": "Batu lumpur purba di Gale menyimpan senyawa organik terbesar yang pernah ditemukan di Mars, mungkin potongan asam lemak.",
+    "detail": "Laboratorium Curiosity mendeteksi molekul dengan rantai karbon panjang pada sampel batu lumpur yang dibor. Ilmuwan menduga molekul itu mungkin pecahan asam lemak. Molekul seperti ini bisa dibuat oleh kehidupan, tetapi juga oleh kimia non-biologis, jadi ini bukan bukti kehidupan dengan sendirinya. Lokasi pin bersifat ilustrasi."
+  },
+  "whats-real-gale": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Kawah dan Gunung Sharp berasal dari model ketinggian NASA; batu di dekatmu, warna, dan langit bersifat artistik.",
+    "detail": "Model ketinggian mencakup seluruh Kawah Gale, jadi bukit di kejauhan nyata bentuknya tetapi kasar, sekitar setengah kilometer per titik data. Tanah di kakimu, batu, pencahayaan, dan langit dibuat untuk memberi rasa berdiri di sana. Gravitasi Mars 38% gravitasi Bumi, jadi cobalah melompat."
+  },
+  "jezero-landing": {
+    "title": "Lokasi pendaratan Perseverance",
+    "short": "Perseverance mendarat di sini, di dasar barat Kawah Jezero, pada Februari 2021.",
+    "detail": "NASA memilih Jezero setelah lima tahun mempelajari calon lokasi. Rover mendarat di dekat sisa delta sungai purba dan telah mengumpulkan sampel batuan yang dapat dibawa ke Bumi oleh misi mendatang. Kamu berdiri di koordinat pendaratan yang sebenarnya; tanah di sekitarmu adalah detail buatan di atas topografi orbit yang nyata."
+  },
+  "jezero-ingenuity": {
+    "title": "Ingenuity: penerbangan pertama di planet lain",
+    "short": "Pada 19 April 2021 Ingenuity melakukan penerbangan bertenaga dan terkendali pertama di planet lain.",
+    "detail": "Helikopter kecil ini menumpang ke Mars di bawah Perseverance. Penerbangan pertamanya disebut 'momen Wright Bersaudara'. Ingenuity akhirnya menyelesaikan 72 penerbangan untuk mengintai jalur rover, jauh melebihi lima penerbangan uji yang direncanakan. Modelnya ditempatkan di samping rover sebagai pembanding ukuran."
+  },
+  "jezero-delta": {
+    "title": "Delta sungai purba",
+    "short": "Dahulu sebuah sungai mengalir ke danau di sini dan membangun delta dari sedimen berlapis.",
+    "detail": "Perseverance menemukan bukti adanya sistem danau, delta, dan sungai yang stabil dan layak huni di masa lalu Jezero. Delta adalah tempat yang baik untuk mencari tanda kehidupan purba karena air yang mengalir membawa dan mengubur sedimen halus. Delta terletak beberapa kilometer di barat lokasi pendaratan; tepinya tidak terlihat jelas dalam data ketinggian ini."
+  },
+  "jezero-crater": {
+    "title": "Kawah Jezero",
+    "short": "Kawah selebar 45 km di tepi barat dataran Isidis Planitia, sedikit di utara khatulistiwa.",
+    "detail": "Sejarah Jezero berganti-ganti antara masa basah dan kering. Air pernah mengisi kawah ini, masuk melalui lembah sungai di bibir kawah. Kehidupan mikroba mungkin saja pernah hidup di sini pada salah satu masa basah itu, karena itulah sampel batuan dari dasar danau dan garis pantainya sangat berharga."
+  },
+  "jezero-biosignature": {
+    "title": "Cheyava Falls: kemungkinan biosignatur",
+    "short": "Batuan dengan 'bintik macan tutul' yang bisa menjadi tanda kehidupan purba — belum terkonfirmasi.",
+    "detail": "Perseverance mengambil sampel batuan berjuluk Cheyava Falls di saluran sungai tua di tepi barat kawah. Tekstur dan mineralnya merupakan kemungkinan biosignatur, tetapi penjelasan non-biologis masih mungkin; ilmuwan perlu meneliti sampelnya di Bumi. Pin hanya menunjukkan arah umum."
+  },
+  "jezero-whats-real": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Bentuk kawah dan posisimu adalah data NASA asli; batu di dekatmu, warna, dan langit bersifat artistik.",
+    "detail": "Medan berasal dari altimeter laser MOLA milik NASA, sekitar 460 m per titik data, jadi bibir dan dasar kawah nyata tetapi kasar. Tanah di kakimu adalah detail buatan. Perseverance dan Ingenuity adalah model 3D resmi NASA, ditempatkan di sampingmu sebagai pembanding ukuran."
+  },
+  "opportunity-rover": {
+    "title": "Rover Opportunity",
+    "short": "Opportunity tiba di Victoria pada September 2006 setelah perjalanan 21 bulan, dan tinggal sekitar dua tahun.",
+    "detail": "Opportunity mendarat di Meridiani Planum pada 2004. Rover ini bertahan 60 kali lebih lama dari rencana dan telah menempuh lebih dari 45 km saat misinya berakhir di Perseverance Valley. Model ini diparkir di bibir kawah sebagai pembanding ukuran; besarnya kira-kira seukuran mobil golf."
+  },
+  "entry-point": {
+    "title": "Tempat Opportunity masuk",
+    "short": "Pada 11 September 2007 Opportunity turun ke dalam kawah dan tinggal di dalamnya hampir setahun.",
+    "detail": "Tim menunggu setahun penuh sambil meneliti bibir kawah sebelum berani menuruni lereng. Di dalam, Opportunity memeriksa batuan berlapis di dinding kawah dan tanahnya. Pin menandai perkiraan area ceruk yang dipakai rover, bukan jejak rodanya yang tepat."
+  },
+  "cape-verde": {
+    "title": "Tanjung Cape Verde",
+    "short": "Salah satu tanjung berbatu di bibir Victoria yang bergerigi. Opportunity naik ke sana tak lama setelah tiba.",
+    "detail": "Bibir Victoria terbagi menjadi teluk dan tanjung, memberi pemandangan ke tebing berlapis. Opportunity mengambil foto-foto terkenal kawah ini dari Cape Verde. Lokasi pin ini perkiraan; berjalanlah di sepanjang bibir kawah untuk melihat teluk dan tanjung yang bergantian."
+  },
+  "crater-floor": {
+    "title": "Dasar Victoria",
+    "short": "Victoria berdiameter sekitar 800 m, lebih lebar dan lebih dalam dari kawah mana pun yang pernah diteliti kedua rover.",
+    "detail": "Victoria adalah kawah tumbukan yang melebar karena erosi dalam waktu lama. Kedalamannya menyingkap tumpukan lapisan batuan yang memungkinkan ilmuwan membaca sejarah Meridiani, seperti membaca halaman-halaman buku. Dalam model ini, dasar di depanmu sekitar 70 m di bawah bibir kawah."
+  },
+  "dusty-sky": {
+    "title": "Langit merah berkabut",
+    "short": "Bagi mata manusia langit Mars tampak berkabut dan kemerahan karena debu yang melayang di udara tipis.",
+    "detail": "Atmosfer Mars sangat tipis dan sebagian besar karbon dioksida, tetapi debu halus terangkat tinggi oleh angin dan badai debu yang kadang melanda seluruh planet. Setelah badai besar, debu bisa butuh berbulan-bulan untuk mengendap. Warna langit di adegan ini adalah perkiraan artistik."
+  },
+  "whats-real": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Bentuk tanah berasal dari model ketinggian NASA; batu, warna, langit, dan tonjolan halus bersifat artistik.",
+    "detail": "Bentuk kawah berasal dari model ketinggian cetak 3D NASA untuk Victoria, diskalakan sesuai lebar aslinya. Batu kecil, tekstur permukaan, pencahayaan, dan langit dibuat untuk memberi rasa berada di sana. Jarak bersifat perkiraan, dan kamu bisa melompat lebih tinggi di sini karena gravitasi Mars hanya 38% gravitasi Bumi."
+  }
+}

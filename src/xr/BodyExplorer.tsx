@@ -18,6 +18,7 @@ import { Atmosphere } from './space'
 import { BennuEjecta } from './surface/particles'
 import { SceneReady } from './smooth'
 import { useMaterialFadeIn } from './fade'
+import { useT } from './i18n'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
 const block = (e: ThreeEvent<PointerEvent | MouseEvent>) => e.stopPropagation()
@@ -140,6 +141,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   const [illustration, setIllustration] = useState(false)
   useEffect(() => useXRApp.setState({ shapeIsIllustration: illustration }), [illustration])
   const paused = useXRApp((s) => s.hotspotId !== null || s.hoveredId !== null)
+  const t = useT()
 
   useFrame((_, dt) => {
     if (spin.current && !paused) spin.current.rotation.y += dt * 0.06
@@ -150,12 +152,12 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   const color = info?.color ?? '#888888'
   const subtitle =
     content === undefined
-      ? 'Loading…'
+      ? t('Loading…')
       : illustration
-        ? 'Shape is an illustration (no model available)'
+        ? t('Shape is an illustration (no model available)')
         : content === null || content.hotspots.length === 0
-          ? 'No hotspots for this body yet'
-          : `${content.hotspots.length} hotspots, point, tap or look to explore`
+          ? t('No hotspots for this body yet')
+          : t('{n} hotspots, point, tap or look to explore', { n: content.hotspots.length })
 
   return (
     <group>
@@ -189,9 +191,9 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
       {vr && (
         <>
           <InfoCard3D />
-          <Button3D label="Solar System" icon="back" position={[0, -1.35, 0.2]} width={0.6} height={0.13} onClick={() => useXRApp.getState().selectBody(null)} />
+          <Button3D label={t('Solar System')} icon="back" position={[0, -1.35, 0.2]} width={0.6} height={0.13} onClick={() => useXRApp.getState().selectBody(null)} />
           {sites.map((s, i) => (
-            <Button3D key={s.id} icon="walk" label={`Stand at ${s.name}`} position={[-1.55, 0.3 - i * 0.18, 0.3]} width={0.95} height={0.13} color="#b5562b" onClick={() => useXRApp.getState().selectSite(s.id, s.body)} />
+            <Button3D key={s.id} icon="walk" label={t('Stand at {x}', { x: s.name })} position={[-1.55, 0.3 - i * 0.18, 0.3]} width={0.95} height={0.13} color="#b5562b" onClick={() => useXRApp.getState().selectSite(s.id, s.body)} />
           ))}
         </>
       )}
