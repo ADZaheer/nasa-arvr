@@ -37,7 +37,7 @@ import { useGroundMaterial, useRockMaterial } from './materials'
 import { DustDevils, DustField, FootstepDust, emitPuff } from './particles'
 import { useQuality, type TierParams } from '../quality'
 import { Grabbables } from './Grabbables'
-import { SceneReady, comfort } from '../smooth'
+import { SceneReady, comfort, recenterOrigin, teleportBlink } from '../smooth'
 import { useXRInputSourceState } from '@react-three/xr'
 import { EYE_HEIGHT, input, player, world } from './player'
 import { withBVH } from '../bvh'
@@ -285,11 +285,59 @@ function TeleportCollider({ hf, center }: { hf: HeightField; center: [number, nu
   const geometry = useMemo(() => withBVH(buildRadialTerrain(hf, center[0], center[1], 400, 48, 64)), [hf, center])
   useEffect(() => () => geometry.dispose(), [geometry])
   return (
-    <TeleportTarget onTeleport={(p) => useXRApp.getState().requestGoTo({ x: p.x, z: p.z, exact: true })}>
-      <mesh geometry={geometry}>
-        <meshBasicMaterial colorWrite={false} depthWrite={false} />
+    <>
+      <TeleportTarget onTeleport={(p) => useXRApp.getState().requestGoTo({ x: p.x, z: p.z, exact: true })}>
+        <mesh
+          geometry={geometry}
+          onPointerMove={(e) => {
+            aim.on = true
+            aim.p.copy(e.point)
+            aim.at = performance.now()
+          }}
+          onPointerLeave={() => (aim.on = false)}
+        >
+          <meshBasicMaterial colorWrite={false} depthWrite={false} />
+        </mesh>
+      </TeleportTarget>
+      <TeleportMarker />
+    </>
+  )
+}
+
+/** Where the teleport arc lands right now (written by the collider's pointer events). */
+const aim = { on: false, p: new Vector3(), at: 0 }
+
+/** Landing marker for the teleport arc: a glowing ring with a pulsing centre and a soft column. */
+function TeleportMarker() {
+  const g = useRef<Group>(null)
+  const pulse = useRef<Mesh>(null)
+  useFrame(({ clock }) => {
+    const o = g.current
+    if (!o) return
+    o.visible = aim.on && performance.now() - aim.at < 200
+    if (!o.visible) return
+    o.position.set(aim.p.x, aim.p.y + 0.03, aim.p.z)
+    const k = (clock.elapsedTime * 1.6) % 1
+    if (pulse.current) {
+      pulse.current.scale.setScalar(0.3 + k * 0.7)
+      ;(pulse.current.material as MeshBasicMaterial).opacity = 0.6 * (1 - k)
+    }
+  })
+  return (
+    <group ref={g} visible={false}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} renderOrder={5}>
+        <ringGeometry args={[0.36, 0.44, 48]} />
+        <meshBasicMaterial color="#6fe7dc" transparent opacity={0.95} toneMapped={false} fog={false} depthWrite={false} />
       </mesh>
-    </TeleportTarget>
+      <mesh ref={pulse} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5}>
+        <circleGeometry args={[0.36, 40]} />
+        <meshBasicMaterial color="#6fe7dc" transparent opacity={0.5} toneMapped={false} fog={false} depthWrite={false} />
+      </mesh>
+      <mesh position={[0, 0.6, 0]} renderOrder={5}>
+        <cylinderGeometry args={[0.4, 0.4, 1.2, 32, 1, true]} />
+        <meshBasicMaterial color="#6fe7dc" transparent opacity={0.08} toneMapped={false} fog={false} depthWrite={false} side={2} />
+      </mesh>
+    </group>
   )
 }
 
@@ -639,7 +687,11 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
   const head = useMemo(() => new Vector3(), [])
   const moveSpeed = useXRApp((s) => s.settings.moveSpeed)
   const turn = useXRApp((s) => s.settings.turn)
-  useXRControllerLocomotion(origin, { speed: 2 * moveSpeed }, turn === 'smooth' ? { type: 'smooth', speed: 1.6 } : { type: 'snap', degrees: turn === 'snap45' ? 45 : 30 })
+  const locomotion = useXRApp((s) => s.settings.locomotion)
+  const heightOffset = useXRApp((s) => s.settings.heightOffset)
+  const recenterSeen = useRef(useXRApp.getState().recenter)
+  // teleport (default): the left stick doesn't slide you around; the right stick aims the teleport arc
+  useXRControllerLocomotion(origin, locomotion === 'smooth' ? { speed: 2 * moveSpeed } : false, turn === 'smooth' ? { type: 'smooth', speed: 1.6 } : { type: 'snap', degrees: turn === 'snap45' ? 45 : 30 })
 
   const right = useXRInputSourceState('controller', 'right')
   const left = useXRInputSourceState('controller', 'left')
@@ -650,7 +702,22 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
     const o = origin.current
     if (!o) return
     const target = consumeGoTo({ x: o.position.x, z: o.position.z })
-    if (target) o.position.set(target.x, o.position.y, target.z)
+    if (target) {
+      // move the origin so your head (not the play-space centre) lands on the target
+      const cam = viewCamera(gl, defaultCamera)
+      cam.getWorldPosition(head)
+      o.position.x += target.x - head.x
+      o.position.z += target.z - head.z
+      teleportBlink()
+      if (target.face) recenterOrigin(o, cam, Math.atan2(-(target.face.x - target.x), -(target.face.z - target.z)))
+    }
+    const rc = useXRApp.getState().recenter
+    if (rc !== recenterSeen.current) {
+      recenterSeen.current = rc
+      const cam = viewCamera(gl, defaultCamera)
+      cam.getWorldPosition(head)
+      recenterOrigin(o, cam, Math.atan2(-(site.spawn.lookAt.x - head.x), -(site.spawn.lookAt.z - head.z)))
+    }
     clampToTerrain(hf, o.position)
     const ground = hf.heightAt(o.position.x, o.position.z)
     // low-gravity hop on A (right) or X (left): same push as on Earth, Mars pulls only 38% as hard
@@ -665,7 +732,7 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
       hop.current.h = Math.max(0, hop.current.h + hop.current.v * Math.min(dt, 0.05))
       if (hop.current.h === 0) hop.current.v = 0
     }
-    o.position.y = ground + hop.current.h + (seated ? 0.5 : 0)
+    o.position.y = ground + hop.current.h + (seated ? 0.5 : 0) + heightOffset
     // comfort vignette: how fast the stick is moving/turning you (not your own head motion)
     const L = last.current
     if (L.init) {

@@ -10,6 +10,7 @@ import { viewCamera } from './viewCamera'
 import { applyMix, setAirlessSteps, setAmbience, updateListener, type Mood } from './feedback'
 import { useSiteContent } from './content'
 import { useLoading } from './loading'
+import { blink } from './smooth'
 import type { TierParams } from './quality'
 
 /**
@@ -29,8 +30,10 @@ export function TransitionVeil({ sceneKey }: { sceneKey: string }) {
     if (!m) return
     // stay black while the new scene loads, then fade in
     t.current = useLoading.getState().active ? 1 : Math.max(0, t.current - Math.min(dt, 0.05) / 0.9)
-    material.opacity = t.current * t.current
-    m.visible = t.current > 0.001
+    blink.t = Math.max(0, blink.t - Math.min(dt, 0.05) / 0.22)
+    const a = Math.max(t.current * t.current, blink.t)
+    material.opacity = a
+    m.visible = a > 0.001
     viewCamera(gl, camera).getWorldPosition(m.position)
   })
   return (

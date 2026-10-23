@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { XR, XRDomOverlay, XROrigin, useXR } from '@react-three/xr'
@@ -17,7 +17,9 @@ import { QualityGovernor } from './QualityGovernor'
 import { StarSky } from './space'
 import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
 import { MissionTracker } from './MissionTracker'
-import { ComfortVignette, LoadingPanelVR, Prefetcher, ProblemPanelVR, SceneLoadTracker } from './smooth'
+import { ComfortVignette, LoadingPanelVR, Prefetcher, ProblemPanelVR, SceneLoadTracker, recenterOrigin } from './smooth'
+import { viewCamera } from './viewCamera'
+import type { Group } from 'three'
 import { ErrorBoundary } from './ErrorBoundary'
 import { reportProblem, useLoading } from './loading'
 
@@ -53,6 +55,23 @@ function ModeSync() {
 }
 
 type SceneKind = 'hub' | 'body' | 'surface'
+
+/** VR/AR origin for the Solar System and orbit views: seated/height offset and "Re-centre view". */
+function PlayerOrigin({ seated }: { seated: boolean }) {
+  const ref = useRef<Group>(null)
+  const recenter = useXRApp((s) => s.recenter)
+  const height = useXRApp((s) => s.settings.heightOffset)
+  const gl = useThree((s) => s.gl)
+  const camera = useThree((s) => s.camera)
+  useEffect(() => {
+    if (recenter && ref.current) recenterOrigin(ref.current, viewCamera(gl, camera), 0, [0, 0])
+  }, [recenter]) // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <XROrigin ref={ref} position={[0, (seated ? 0.5 : 0) + height, 0]}>
+      <WristMenu />
+    </XROrigin>
+  )
+}
 
 /** Camera for non-immersive modes: OrbitControls on desktop, fixed origin for gyro look-around. Surface mode drives its own camera. */
 function CameraRig({ kind }: { kind: SceneKind }) {
@@ -145,9 +164,7 @@ export function XRRoot() {
           <TransitionVeil sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
           {/* the surface VR walker has its own moving origin (with the wrist menu inside it) */}
           {(mode === 'vr' || mode === 'ar') && !(kind === 'surface' && mode === 'vr') && (
-            <XROrigin position={[0, seated ? 0.5 : 0, 0]}>
-              <WristMenu />
-            </XROrigin>
+            <PlayerOrigin seated={seated} />
           )}
           {space && (
             <>

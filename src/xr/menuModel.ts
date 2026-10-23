@@ -55,6 +55,8 @@ export const DISPLAY_CONTROLS: ControlSpec[] = [
   { kind: 'slider', key: 'timeOfDay', label: 'Time of day', min: 0, max: 1, format: timeLabel, surfaceOnly: true },
   { kind: 'slider', key: 'exposure', label: 'Brightness', min: 0.5, max: 1.6, format: pct },
   { kind: 'slider', key: 'haze', label: 'Mars haze', min: 0, max: 2, format: pct, surfaceOnly: true },
+  { kind: 'slider', key: 'labels', label: 'Labels', min: 0, max: 1, format: pct },
+  { kind: 'toggle', key: 'pins', label: 'Pins & beacons' },
   { kind: 'toggle', key: 'showFps', label: 'FPS meter' },
 ]
 export const COMFORT_CONTROLS: ControlSpec[] = [
@@ -68,11 +70,19 @@ export const COMFORT_CONTROLS: ControlSpec[] = [
       { value: 'smooth', label: 'Smooth' },
     ],
   },
-  { kind: 'slider', key: 'moveSpeed', label: 'Move speed', min: 0.5, max: 2, format: (v) => `${v.toFixed(1)}×` },
+  {
+    kind: 'choice',
+    key: 'locomotion',
+    label: 'Movement (VR)',
+    options: [
+      { value: 'teleport', label: 'Teleport' },
+      { value: 'smooth', label: 'Smooth walk' },
+    ],
+  },
+  { kind: 'slider', key: 'moveSpeed', label: 'Walk speed', min: 0.5, max: 2, format: (v) => `${v.toFixed(1)}×` },
   { kind: 'toggle', key: 'vignette', label: 'Comfort vignette (VR)' },
   { kind: 'toggle', key: 'seated', label: 'Seated mode (VR)' },
-  { kind: 'slider', key: 'labels', label: 'Labels', min: 0, max: 1, format: pct },
-  { kind: 'toggle', key: 'pins', label: 'Pins & beacons' },
+  { kind: 'slider', key: 'heightOffset', label: 'Height (VR)', min: -0.3, max: 0.5, format: (v) => (Math.abs(v) < 0.01 ? 'Normal' : `${v > 0 ? '+' : '−'}${Math.round(Math.abs(v) * 100)} cm`) },
 ]
 export const AUDIO_CONTROLS: ControlSpec[] = [
   { kind: 'toggle', key: 'sound', label: 'Sound & music' },

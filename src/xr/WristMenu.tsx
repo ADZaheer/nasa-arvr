@@ -98,7 +98,7 @@ function WristAnchor({ space, isHand, controller }: { space: XRSpace; isHand: bo
 
 function MenuPanel3D() {
   const [tab, setTab] = useState<MenuTab>('travel')
-  const W = 2.6, H = 3.75
+  const W = 2.6, H = 4.0
   const tabW = (W - 0.2) / MENU_TABS.length
   return (
     <group scale={0.07}>
@@ -107,6 +107,7 @@ function MenuPanel3D() {
       <Text font={FONT_BOLD} material={noFog} position={[-W / 2 + 0.36, H / 2 - 0.2, 0.005]} fontSize={UI.type.title} color={UI.text} anchorX="left" anchorY="middle">
         Expedition
       </Text>
+      <Button icon="recenter" onPress={() => useXRApp.getState().requestRecenter()} position={[W / 2 - 1.12, H / 2 - 0.2, 0.005]} width={0.3} height={0.24} />
       <PinButton position={[W / 2 - 0.5, H / 2 - 0.2, 0.005]} />
       <mesh geometry={roundedRect(W - 0.16, 0.5, 0.16)} material={uiMat('#13232b')} position={[0, H / 2 - 0.66, -0.004]} />
       {MENU_TABS.map((t, i) => (
@@ -152,8 +153,8 @@ function MissionsPage() {
   return (
     <>
       {rows}
-      <Label text={`All missions: ${count}/${total}`} position={[-1.15, -1.95, 0.005]} size={0.09} color="#8fd9d3" />
-      <Tile label="Restart training" onPress={() => useXRApp.getState().resetMissions()} position={[0.62, -1.95, 0]} width={0.95} height={0.22} />
+      <Label text={`All missions: ${count}/${total}`} position={[-1.15, -2.45, 0.005]} size={0.09} color="#8fd9d3" />
+      <Tile label="Restart training" onPress={() => useXRApp.getState().resetMissions()} position={[0.62, -2.45, 0]} width={0.95} height={0.22} />
     </>
   )
 }
@@ -179,7 +180,7 @@ function ControlsPage({ controls }: { controls: ControlSpec[] }) {
     <>
       {controls.map((c) => {
         const pos: [number, number, number] = [0, y, 0]
-        y -= c.kind === 'toggle' ? 0.32 : 0.46
+        y -= c.kind === 'toggle' ? 0.28 : 0.4
         if (c.kind === 'slider')
           return (
             <Slider3D

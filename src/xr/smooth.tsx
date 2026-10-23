@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Text, useGLTF } from '@react-three/drei'
 import { useStore } from 'zustand'
-import { BackSide, Group, MeshBasicMaterial, ShaderMaterial, Vector3 } from 'three'
+import { BackSide, Group, MeshBasicMaterial, ShaderMaterial, Vector3, type Object3D } from 'three'
 import { useXRApp } from './store'
 import { xrStore } from './xrStore'
 import { viewCamera } from './viewCamera'
@@ -212,4 +212,29 @@ export function ProblemPanelVR() {
       </Appear>
     </group>
   )
+}
+
+/**
+ * "Re-centre view": turns the XR origin around your head so you face `yaw` (rotation.y convention),
+ * and optionally slides it so your head is above `toXZ`. Your real-world position doesn't change.
+ */
+export function recenterOrigin(origin: Object3D, cam: Object3D, yaw: number, toXZ?: [number, number]) {
+  const head = cam.getWorldPosition(new Vector3())
+  const f = cam.getWorldDirection(new Vector3())
+  const d = yaw - Math.atan2(-f.x, -f.z)
+  const c = Math.cos(d), s = Math.sin(d)
+  const ox = origin.position.x - head.x, oz = origin.position.z - head.z
+  origin.position.x = head.x + ox * c + oz * s
+  origin.position.z = head.z - ox * s + oz * c
+  origin.rotation.y += d
+  if (toXZ) {
+    origin.position.x += toXZ[0] - head.x
+    origin.position.z += toXZ[1] - head.z
+  }
+}
+
+/** A short dip to black on teleport, so the jump doesn't feel like a lurch (read by the transition veil). */
+export const blink = { t: 0 }
+export function teleportBlink() {
+  blink.t = 0.75
 }

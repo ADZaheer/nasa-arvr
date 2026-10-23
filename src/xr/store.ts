@@ -32,9 +32,13 @@ export interface XRSettings {
   vignette: boolean
   /** seated play: raises your viewpoint by 0.5 m in VR */
   seated: boolean
+  /** VR movement on the surface: teleport (most comfortable, default) or smooth stick walking */
+  locomotion: 'teleport' | 'smooth'
+  /** extra height in metres (VR), e.g. for short users or children */
+  heightOffset: number
 }
 
-export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8, vignette: true, seated: false }
+export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8, vignette: true, seated: false, locomotion: 'teleport', heightOffset: 0 }
 
 /**
  * Shared app state for the XR module. The web viewer can read/write the same store
@@ -65,6 +69,9 @@ export interface XRAppState {
   headingOffset: number
   settings: XRSettings
   menuOpen: boolean
+  /** bumped by "Re-centre view": the VR origin turns you to face the scene again */
+  recenter: number
+  requestRecenter: () => void
   /** tier chosen by auto quality (device detection, then lowered by the frame-rate governor) */
   autoTier: Tier
   /** completed mission goals (saved on this device) */
@@ -124,6 +131,8 @@ export const useXRApp = create<XRAppState>((set) => ({
   headingOffset: 0,
   settings: loadSettings(),
   menuOpen: false,
+  recenter: 0,
+  requestRecenter: () => set((s) => ({ recenter: s.recenter + 1 })),
   autoTier: detectTier(),
   goalsDone: loadJSON(GOALS_KEY, {}),
   missionCard: null,
