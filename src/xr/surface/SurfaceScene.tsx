@@ -32,11 +32,14 @@ import { MarsSky, marsSky } from './MarsSky'
 import { useGroundMaterial, useRockMaterial } from './materials'
 import { DustDevils, DustField, FootstepDust, emitPuff } from './particles'
 import { useQuality, type TierParams } from '../quality'
+import { Grabbables } from './Grabbables'
+import { useXRInputSourceState } from '@react-three/xr'
 import { EYE_HEIGHT, MARS_G, input, player } from './player'
 import { withBVH } from '../bvh'
 import type { TerrainBuildRequest, TerrainBuildResult } from './terrain.worker'
 import { viewCamera } from '../viewCamera'
 import { WristMenu } from '../WristMenu'
+import { hoverFeedback, pressFeedback } from '../feedback'
 
 const DEG = Math.PI / 180
 
@@ -81,6 +84,7 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
       <DustField count={q.dust} />
       <DustDevils count={q.devils} hf={hf} particles={mode === 'vr' ? 500 : 1100} />
       {q.bursts && <FootstepDust hf={hf} />}
+      <Grabbables site={site} hf={hf} q={q} />
       {site.rover && (
         <ErrorBoundary fallback={null}>
           <Suspense fallback={null}>
@@ -347,6 +351,7 @@ function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
 
   const select = useCallback(() => {
     const s = useXRApp.getState()
+    pressFeedback()
     s.selectHotspot(s.hotspotId === h.id ? null : h.id)
   }, [h.id])
   useDwellTarget(hit, select)
@@ -389,6 +394,7 @@ function Beacon({ h, hf }: { h: Hotspot; hf: HeightField }) {
           position={[0, orbY - (pole ? 0.4 : 0), 0]}
           onPointerOver={(e: ThreeEvent<PointerEvent>) => {
             e.stopPropagation()
+            if (useXRApp.getState().hoveredId !== h.id) hoverFeedback()
             useXRApp.getState().setHovered(h.id)
             document.body.style.cursor = 'pointer'
           }}
@@ -589,18 +595,30 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
   const turn = useXRApp((s) => s.settings.turn)
   useXRControllerLocomotion(origin, { speed: 2 * moveSpeed }, turn === 'smooth' ? { type: 'smooth', speed: 1.6 } : { type: 'snap', degrees: turn === 'snap45' ? 45 : 30 })
 
-  useFrame(() => {
+  const right = useXRInputSourceState('controller', 'right')
+  const left = useXRInputSourceState('controller', 'left')
+  const hop = useRef({ h: 0, v: 0, was: false })
+  useFrame((_, dt) => {
     const o = origin.current
     if (!o) return
     const target = consumeGoTo({ x: o.position.x, z: o.position.z })
     if (target) o.position.set(target.x, o.position.y, target.z)
     clampToTerrain(hf, o.position)
     const ground = hf.heightAt(o.position.x, o.position.z)
-    o.position.y = ground
+    // low-gravity hop on A (right) or X (left): same push as on Earth, Mars pulls only 38% as hard
+    const pressed = right?.gamepad?.['a-button']?.state === 'pressed' || left?.gamepad?.['x-button']?.state === 'pressed'
+    if (pressed && !hop.current.was && hop.current.h === 0) hop.current.v = 2.6
+    hop.current.was = pressed
+    if (hop.current.v !== 0 || hop.current.h > 0) {
+      hop.current.v -= MARS_G * Math.min(dt, 0.05)
+      hop.current.h = Math.max(0, hop.current.h + hop.current.v * Math.min(dt, 0.05))
+      if (hop.current.h === 0) hop.current.v = 0
+    }
+    o.position.y = ground + hop.current.h
     const camera = viewCamera(gl, defaultCamera)
     camera.getWorldPosition(head)
     camera.getWorldDirection(dir)
-    updatePlayerReadout(head.x, head.z, ground, dir, false)
+    updatePlayerReadout(head.x, head.z, ground, dir, hop.current.h > 0)
   })
 
   return (

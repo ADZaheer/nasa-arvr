@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
+import { useFrame } from '@react-three/fiber'
+import type { Group } from 'three'
 import { Text } from '@react-three/drei'
 import type { ThreeEvent } from '@react-three/fiber'
 import { MeshBasicMaterial, Vector3, type Mesh } from 'three'
 import { FONT, FONT_BOLD } from './font'
-import { pressFeedback } from './feedback'
+import { hoverFeedback, pressFeedback } from './feedback'
 
 /**
  * Small 3D UI kit for in-world panels (wrist menu). Works with controller rays, hand rays (pinch),
@@ -14,6 +16,42 @@ const PANEL = '#0c2a2e'
 const PANEL_HI = '#12484d'
 const noFog = new MeshBasicMaterial({ fog: false, toneMapped: false })
 
+/** Springy scale for buttons: grows a little on hover, dips on press, eases back (like Quest UI). */
+export function useSpringScale(hover: boolean) {
+  const ref = useRef<Group>(null)
+  const st = useRef({ s: 1, v: 0, pressAt: 0 })
+  useFrame((_, dt) => {
+    const g = ref.current
+    if (!g) return
+    const pressed = performance.now() - st.current.pressAt < 120
+    const target = pressed ? 0.93 : hover ? 1.05 : 1
+    const k = 220, d = 18, step = Math.min(dt, 0.033)
+    st.current.v += ((target - st.current.s) * k - st.current.v * d) * step
+    st.current.s += st.current.v * step
+    g.scale.setScalar(st.current.s)
+  })
+  return { ref, press: () => (st.current.pressAt = performance.now()) }
+}
+
+/** Children pop in (scale 0.8 → 1 with a little overshoot) whenever this mounts — re-key it to replay. */
+export function PopIn({ children }: { children: React.ReactNode }) {
+  const ref = useRef<Group>(null)
+  const t = useRef(0)
+  useFrame((_, dt) => {
+    const g = ref.current
+    if (!g || t.current >= 1) return
+    t.current = Math.min(1, t.current + Math.min(dt, 0.033) / 0.28)
+    const x = t.current
+    const back = 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2) // easeOutBack
+    g.scale.setScalar(0.8 + 0.2 * back)
+  })
+  return (
+    <group ref={ref} scale={0.8}>
+      {children}
+    </group>
+  )
+}
+
 function useHover() {
   const [hover, setHover] = useState(false)
   return {
@@ -21,6 +59,7 @@ function useHover() {
     bind: {
       onPointerOver: (e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation()
+        hoverFeedback()
         setHover(true)
       },
       onPointerOut: () => setHover(false),
@@ -52,12 +91,14 @@ export function Tile({ label, active, onPress, position, width = 0.9, height = 0
   height?: number
 }) {
   const { hover, bind } = useHover()
+  const spring = useSpringScale(hover)
   return (
-    <group position={position}>
+    <group position={position} ref={spring.ref}>
       <mesh
         {...bind}
         onClick={(e) => {
           e.stopPropagation()
+          spring.press()
           pressFeedback()
           onPress()
         }}

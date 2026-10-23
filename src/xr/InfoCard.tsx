@@ -6,6 +6,7 @@ import { askGuide, backToSource } from './events'
 import { KIND_COLORS } from './bodies'
 import { FONT, FONT_BOLD } from './font'
 import { Button3D } from './Button3D'
+import { PopIn } from './ui3d'
 import type { Hotspot, HotspotKind } from './types'
 
 export const KIND_LABEL: Record<HotspotKind, string> = {
@@ -120,6 +121,7 @@ export function InfoCard3D({
 
   return (
     <group position={position} rotation={rotation}>
+      <PopIn key={h.id}>
       <mesh position={[0, action ? -0.08 : 0, -0.005]}>
         <planeGeometry args={[W, H + (action ? 0.16 : 0)]} />
         <meshBasicMaterial color="#0b1020" transparent opacity={0.92} />
@@ -153,6 +155,7 @@ export function InfoCard3D({
       <Button3D label="Ask the guide" position={[-W / 4 + 0.02, yButtons, 0]} width={0.56} height={0.11} color="#2f6fed" onClick={() => ask(h)} />
       <Button3D label="Back to source image" position={[W / 4 - 0.02, yButtons, 0]} width={0.56} height={0.11} onClick={() => backToSource(h.body, h.id)} />
       {action && <Button3D label={action.label} position={[0, yAction, 0]} width={W - 0.16} height={0.11} color="#b5562b" onClick={action.run} />}
+      </PopIn>
     </group>
   )
 }

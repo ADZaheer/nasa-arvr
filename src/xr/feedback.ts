@@ -132,6 +132,11 @@ export function haptic(strength = 0.35, ms = 25) {
   }
 }
 
+/** Hover feedback: the faintest tick on the controllers (no sound), like Quest system UI. */
+export function hoverFeedback() {
+  haptic(0.08, 8)
+}
+
 /** Menu / button press feedback: click sound + a tiny controller buzz. */
 export function pressFeedback() {
   playClick()

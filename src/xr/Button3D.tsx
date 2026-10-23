@@ -3,7 +3,8 @@ import { Text } from '@react-three/drei'
 import type { Mesh } from 'three'
 import { useDwellTarget } from './dwell'
 import { FONT_BOLD } from './font'
-import { pressFeedback } from './feedback'
+import { hoverFeedback, pressFeedback } from './feedback'
+import { useSpringScale } from './ui3d'
 
 /** A flat 3D button usable with XR rays/hands, mouse, touch and gaze dwell. */
 export function Button3D({
@@ -26,12 +27,14 @@ export function Button3D({
   const [hover, setHover] = useState(false)
   const ref = useRef<Mesh>(null)
   useDwellTarget(ref, onClick)
+  const spring = useSpringScale(hover)
   return (
-    <group position={position}>
+    <group position={position} ref={spring.ref}>
       <mesh
         ref={ref}
         onPointerOver={(e) => {
           e.stopPropagation()
+          hoverFeedback()
           setHover(true)
           document.body.style.cursor = 'pointer'
         }}
@@ -41,6 +44,7 @@ export function Button3D({
         }}
         onClick={(e) => {
           e.stopPropagation()
+          spring.press()
           pressFeedback()
           onClick()
         }}

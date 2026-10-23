@@ -9,6 +9,7 @@ import { useDwellTarget } from './dwell'
 import { KIND_COLORS } from './bodies'
 import { FONT_BOLD } from './font'
 import { viewCamera } from './viewCamera'
+import { hoverFeedback, pressFeedback } from './feedback'
 
 const MAX_LABELS = 6
 const UP = new Vector3(0, 1, 0)
@@ -93,6 +94,7 @@ function Pin({ p, showLabel, groupRef }: { p: Placed; showLabel: boolean; groupR
 
   const select = useCallback(() => {
     const s = useXRApp.getState()
+    pressFeedback()
     s.selectHotspot(s.hotspotId === h.id ? null : h.id)
   }, [h.id])
   useDwellTarget(hit, select)
@@ -106,6 +108,7 @@ function Pin({ p, showLabel, groupRef }: { p: Placed; showLabel: boolean; groupR
 
   const over = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
+    if (useXRApp.getState().hoveredId !== h.id) hoverFeedback()
     useXRApp.getState().setHovered(h.id)
     document.body.style.cursor = 'pointer'
   }

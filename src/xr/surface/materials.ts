@@ -131,7 +131,7 @@ export function useRockMaterial(size: Size | null): MeshStandardMaterial {
   const material = useMemo(() => {
     if (!sets) return new MeshStandardMaterial({ color: '#5e3b2b', roughness: 1, flatShading: true })
     return new MeshStandardMaterial({
-      color: '#8f6048',
+      color: '#b4805f',
       map: sets.rock.albedo,
       normalMap: sets.rock.normal,
       normalScale: new Vector2(1.4, 1.4),
