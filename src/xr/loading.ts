@@ -24,14 +24,17 @@ function recompute() {
   useLoading.setState({ progress, active: progress < 1 })
 }
 
-DefaultLoadingManager.onStart = (_url, loaded, total) => {
+// loaders start during React render (suspense), so store updates are deferred out of it
+const later = (f: () => void) => queueMicrotask(f)
+
+DefaultLoadingManager.onStart = (_url, loaded, total) => later(() => {
   useLoading.setState({ managerLoaded: loaded, managerTotal: total })
   recompute()
-}
-DefaultLoadingManager.onProgress = (_url, loaded, total) => {
+})
+DefaultLoadingManager.onProgress = (_url, loaded, total) => later(() => {
   useLoading.setState({ managerLoaded: loaded, managerTotal: total })
   recompute()
-}
+})
 DefaultLoadingManager.onLoad = () => {
   const s = useLoading.getState()
   useLoading.setState({ managerLoaded: s.managerTotal })
