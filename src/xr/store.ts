@@ -59,6 +59,13 @@ export interface XRAppState {
   menuOpen: boolean
   /** tier chosen by auto quality (device detection, then lowered by the frame-rate governor) */
   autoTier: Tier
+  /** completed mission goals (saved on this device) */
+  goalsDone: Record<string, true>
+  /** mission card currently shown (scene intro or a just-completed goal) */
+  missionCard: { mission: string; goal: string; hint: string; done: boolean; progress: string } | null
+  completeGoal: (id: string) => void
+  resetMissions: () => void
+  setMissionCard: (c: XRAppState['missionCard']) => void
 
   selectBody: (id: string | null) => void
   setBand: (band: string | null) => void
@@ -77,6 +84,21 @@ export interface XRAppState {
 }
 
 const SETTINGS_KEY = 'cosmic-xr-settings'
+const GOALS_KEY = 'cosmic-xr-goals'
+function loadJSON<T>(key: string, fallback: T): T {
+  try {
+    return { ...fallback, ...JSON.parse(localStorage.getItem(key) ?? '{}') }
+  } catch {
+    return fallback
+  }
+}
+function saveJSON(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    /* private mode etc. */
+  }
+}
 function loadSettings(): XRSettings {
   try {
     return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }
@@ -95,6 +117,20 @@ export const useXRApp = create<XRAppState>((set) => ({
   settings: loadSettings(),
   menuOpen: false,
   autoTier: detectTier(),
+  goalsDone: loadJSON(GOALS_KEY, {}),
+  missionCard: null,
+  completeGoal: (id) =>
+    set((s) => {
+      if (s.goalsDone[id]) return s
+      const goalsDone = { ...s.goalsDone, [id]: true as const }
+      saveJSON(GOALS_KEY, goalsDone)
+      return { goalsDone }
+    }),
+  resetMissions: () => {
+    saveJSON(GOALS_KEY, {})
+    set({ goalsDone: {} })
+  },
+  setMissionCard: (missionCard) => set({ missionCard }),
   band: null,
   observation: null,
   hotspotId: null,

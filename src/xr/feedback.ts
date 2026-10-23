@@ -137,3 +137,25 @@ export function pressFeedback() {
   playClick()
   haptic()
 }
+
+/** Mission-complete chime: a bright two-note arpeggio, plus a stronger buzz. */
+export function playChime() {
+  haptic(0.6, 60)
+  if (!on()) return
+  const c = ensure()
+  if (!c || !master) return
+  const t0 = c.currentTime
+  ;[659.25, 987.77, 1318.5].forEach((f, i) => {
+    const o = c.createOscillator()
+    const g = c.createGain()
+    const t = t0 + i * 0.09
+    o.type = 'triangle'
+    o.frequency.value = f
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.exponentialRampToValueAtTime(0.16, t + 0.02)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6)
+    o.connect(g).connect(master!)
+    o.start(t)
+    o.stop(t + 0.65)
+  })
+}

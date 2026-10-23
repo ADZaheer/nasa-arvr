@@ -16,6 +16,7 @@ import { WristMenu } from './WristMenu'
 import { QualityGovernor } from './QualityGovernor'
 import { StarSky } from './space'
 import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
+import { MissionTracker } from './MissionTracker'
 import { useQuality } from './quality'
 
 /** Brightness setting → renderer tone-mapping exposure. */
@@ -118,6 +119,7 @@ export function XRRoot() {
           <ExposureSync />
           <QualityGovernor />
           <HandStyler />
+          <MissionTracker />
           <SoundDirector kind={kind} />
           <ScreenEffects q={q} tier={q.tier} />
           <TransitionVeil sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />

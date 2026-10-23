@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useXRApp } from './store'
 import { BODY_BY_ID } from './bodies'
 import { useSiteContent } from './content'
+import { ALL_GOALS } from './missions'
+import { activeMissions } from './MissionTracker'
 import { COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 
 /** On-screen version of the wrist menu (desktop, phone, phone AR via the DOM overlay). Same options. */
@@ -32,11 +34,46 @@ export function MenuPanel() {
         ))}
       </nav>
       {tab === 'travel' && <Travel />}
+      {tab === 'missions' && <Missions />}
       {tab === 'display' && <Controls controls={DISPLAY_CONTROLS} />}
       {tab === 'comfort' && <Controls controls={COMFORT_CONTROLS} />}
       {tab === 'info' && <Info />}
       <p className="menu-tip">In VR: turn your left palm toward your face, or press Y on the left controller.</p>
     </aside>
+  )
+}
+
+function Missions() {
+  const done = useXRApp((s) => s.goalsDone)
+  const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
+  const list = activeMissions(done, bodyId, siteId)
+  const count = ALL_GOALS.filter((g) => done[g.id]).length
+  return (
+    <div className="menu-missions">
+      {list.length === 0 && <p>No missions here: explore freely!</p>}
+      {list.map((m) => (
+        <section key={m.id}>
+          <h4>{m.title}</h4>
+          <ul>
+            {m.goals.map((g) => (
+              <li key={g.id} className={done[g.id] ? 'done' : ''} title={g.hint}>
+                <span aria-hidden>{done[g.id] ? '✓' : '○'}</span> {g.title}
+                {!done[g.id] && <small>{g.hint}</small>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <footer>
+        <span>
+          All missions: {count}/{ALL_GOALS.length}
+        </span>
+        <button className="btn" onClick={() => useXRApp.getState().resetMissions()}>
+          Restart training
+        </button>
+      </footer>
+    </div>
   )
 }
 

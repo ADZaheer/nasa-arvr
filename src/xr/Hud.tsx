@@ -159,6 +159,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {surface && inAR && <p className="notice">Tabletop model of {site?.name}. Exit AR and use Enter VR or Look around to stand on it.</p>}
 
       {(!session || inAR) && <MenuPanel />}
+      <MissionBanner />
       <InfoCardPanel />
       {toast && (
         <div className="toast" role="status">
@@ -249,6 +250,21 @@ function TouchMoveButtons() {
       <button className="btn btn--pad" onPointerDown={() => (input.jump = true)} aria-label="Jump">
         Jump
       </button>
+    </div>
+  )
+}
+
+/** On-screen mission card (desktop / phone / phone AR). */
+function MissionBanner() {
+  const card = useXRApp((s) => s.missionCard)
+  if (!card) return null
+  return (
+    <div className={`mission-card${card.done ? ' mission-card--done' : ''}`} role="status">
+      <small>
+        {card.done ? 'Mission goal complete ✓' : 'Mission'} · {card.mission} · {card.progress}
+      </small>
+      <strong>{card.goal}</strong>
+      <span>{card.hint}</span>
     </div>
   )
 }

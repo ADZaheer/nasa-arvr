@@ -3,9 +3,10 @@ import { MARS24_URL, earthUTC, marsTime } from './marsTime'
 import { player } from './surface/player'
 
 /** One definition of the expedition menu, rendered as the VR/AR wrist panel and the on-screen ⚙ panel. */
-export type MenuTab = 'travel' | 'display' | 'comfort' | 'info'
+export type MenuTab = 'travel' | 'missions' | 'display' | 'comfort' | 'info'
 export const MENU_TABS: { id: MenuTab; label: string }[] = [
   { id: 'travel', label: 'Travel' },
+  { id: 'missions', label: 'Missions' },
   { id: 'display', label: 'Visuals' },
   { id: 'comfort', label: 'Comfort' },
   { id: 'info', label: 'Info' },

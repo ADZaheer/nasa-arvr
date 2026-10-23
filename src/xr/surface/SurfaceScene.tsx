@@ -63,6 +63,8 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
     if (!site) return
     player.x = site.spawn.x
     player.z = site.spawn.z
+    player.spawnX = site.spawn.x
+    player.spawnZ = site.spawn.z
     useXRApp.setState({ headingOffset: spawnYaw(site) })
     return () => useXRApp.setState({ headingOffset: 0 })
   }, [site])

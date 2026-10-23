@@ -5,6 +5,7 @@ import type { HeightField } from './terrain'
 import { MARS_G, player } from './player'
 import { viewCamera } from '../viewCamera'
 import { playLand, playStep } from '../feedback'
+import { missionEvent } from '../missions'
 
 /** World-size point sprites: gl_PointSize = size[m] * uScale / depth. uScale ≈ half the viewport height × projection[1][1]. */
 function pointScale(gl: { xr: { isPresenting: boolean }; domElement: HTMLCanvasElement }, proj: number) {
@@ -324,6 +325,10 @@ export function FootstepDust({ hf }: { hf: HeightField }) {
  */
 export function BennuEjecta({ surface }: { surface: Float32Array | null }) {
   const N = 160
+  const pointsRef = useRef<Points>(null)
+  const tmpV = useMemo(() => new Vector3(), [])
+  const tmpN = useMemo(() => new Vector3(), [])
+  const tmpC = useMemo(() => new Vector3(), [])
   const sim = useMemo(() => ({ pos: new Float32Array(N * 3), vel: new Float32Array(N * 3), age: new Float32Array(N).fill(99), next: 0, timer: 1.5 }), [])
   const geometry = useMemo(() => {
     const g = new BufferGeometry()
@@ -366,6 +371,14 @@ export function BennuEjecta({ surface }: { surface: Float32Array | null }) {
       const v = Math.floor(Math.random() * (surface.length / 3)) * 3
       const px = surface[v], py = surface[v + 1], pz = surface[v + 2]
       const L = Math.hypot(px, py, pz) || 1
+      // mission: a burst counts as "seen" when it leaves the side of Bennu that faces you
+      const pts = pointsRef.current
+      if (pts) {
+        tmpV.set(px, py, pz).applyMatrix4(pts.matrixWorld)
+        tmpN.set(px / L, py / L, pz / L).transformDirection(pts.matrixWorld)
+        viewCamera(gl, camera).getWorldPosition(tmpC)
+        if (tmpN.dot(tmpC.sub(tmpV).normalize()) > 0.2) missionEvent('bennu-burst-seen')
+      }
       const n = 6 + Math.floor(Math.random() * 10)
       for (let k = 0; k < n; k++) {
         const i = sim.next
@@ -399,6 +412,6 @@ export function BennuEjecta({ surface }: { surface: Float32Array | null }) {
     ageAttr.needsUpdate = true
     material.uniforms.uScale.value = pointScale(gl, camera.projectionMatrix.elements[5])
   })
-  return <points geometry={geometry} material={material} frustumCulled={false} />
+  return <points ref={pointsRef} geometry={geometry} material={material} frustumCulled={false} />
 }
 

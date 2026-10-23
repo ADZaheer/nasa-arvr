@@ -2,6 +2,9 @@
 export const player = {
   x: 0,
   z: 0,
+  /** landing spot of the current site */
+  spawnX: 0,
+  spawnZ: 0,
   /** metres above the elevation model's lowest point */
   ground: 0,
   /** heading in degrees clockwise from north */

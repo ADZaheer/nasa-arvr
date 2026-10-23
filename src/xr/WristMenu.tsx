@@ -10,6 +10,8 @@ import { useSiteContent } from './content'
 import { FONT, FONT_BOLD } from './font'
 import { COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 import { Choice3D, Label, Slider3D, TEAL, Tile, Toggle3D } from './ui3d'
+import { ALL_GOALS } from './missions'
+import { activeMissions } from './MissionTracker'
 
 const noFog = new MeshBasicMaterial({ fog: false, toneMapped: false })
 
@@ -108,10 +110,11 @@ function MenuPanel3D() {
       </Text>
       <PinButton position={[W / 2 - 0.42, H / 2 - 0.14, 0.005]} />
       {MENU_TABS.map((t, i) => (
-        <Tile key={t.id} label={t.label} active={tab === t.id} onPress={() => setTab(t.id)} position={[-W / 2 + 0.1 + 0.6 * i + 0.3, H / 2 - 0.5, 0]} width={0.58} height={0.26} />
+        <Tile key={t.id} label={t.label} active={tab === t.id} onPress={() => setTab(t.id)} position={[-W / 2 + 0.1 + ((W - 0.2) / MENU_TABS.length) * (i + 0.5), H / 2 - 0.5, 0]} width={(W - 0.2) / MENU_TABS.length - 0.03} height={0.26} />
       ))}
       <group position={[0, H / 2 - 0.85, 0]}>
         {tab === 'travel' && <TravelPage />}
+        {tab === 'missions' && <MissionsPage />}
         {tab === 'display' && <ControlsPage controls={DISPLAY_CONTROLS} />}
         {tab === 'comfort' && <ControlsPage controls={COMFORT_CONTROLS} />}
         {tab === 'info' && <InfoPage />}
@@ -123,6 +126,35 @@ function MenuPanel3D() {
 function PinButton({ position }: { position: [number, number, number] }) {
   const open = useXRApp((s) => s.menuOpen)
   return <Tile label={open ? 'Close' : 'Keep open'} active={open} onPress={() => useXRApp.getState().setMenuOpen(!open)} position={position} width={0.75} height={0.22} />
+}
+
+/** Current missions with checkmarks; overall progress; restart the training. */
+function MissionsPage() {
+  const done = useXRApp((s) => s.goalsDone)
+  const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
+  const list = activeMissions(done, bodyId, siteId)
+  const total = ALL_GOALS.length
+  const count = ALL_GOALS.filter((g) => done[g.id]).length
+  let y = 0
+  const rows: React.ReactNode[] = []
+  for (const m of list) {
+    rows.push(<Label key={m.id} text={m.title.toUpperCase()} position={[-1.15, y, 0.005]} size={0.085} color="#8fd9d3" bold />)
+    y -= 0.2
+    for (const g of m.goals) {
+      rows.push(<Label key={g.id} text={`${done[g.id] ? '✓' : '○'}  ${g.title}`} position={[-1.1, y, 0.005]} size={0.095} color={done[g.id] ? '#5ee39a' : '#dff7f5'} />)
+      y -= 0.17
+    }
+    y -= 0.06
+  }
+  if (!list.length) rows.push(<Label key="none" text="No missions here: explore freely!" position={[-1.15, 0, 0.005]} />)
+  return (
+    <>
+      {rows}
+      <Label text={`All missions: ${count}/${total}`} position={[-1.15, -1.95, 0.005]} size={0.09} color="#8fd9d3" />
+      <Tile label="Restart training" onPress={() => useXRApp.getState().resetMissions()} position={[0.62, -1.95, 0]} width={0.95} height={0.22} />
+    </>
+  )
 }
 
 function TravelPage() {
