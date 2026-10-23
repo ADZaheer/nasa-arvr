@@ -19,6 +19,7 @@ import { BennuEjecta } from './surface/particles'
 import { SceneReady } from './smooth'
 import { useMaterialFadeIn } from './fade'
 import { useT } from './i18n'
+import { manipulation, useBodyManipulation } from './BodyManipulator'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
 const block = (e: ThreeEvent<PointerEvent | MouseEvent>) => e.stopPropagation()
@@ -137,6 +138,8 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   const sites = useSitesForBody(vr ? id : null)
   const info = BODY_BY_ID[id]
   const spin = useRef<Group>(null)
+  const manip = useRef<Group>(null)
+  useBodyManipulation(manip)
   const [geometry, setGeometry] = useState<BufferGeometry | null>(null)
   const [illustration, setIllustration] = useState(false)
   useEffect(() => useXRApp.setState({ shapeIsIllustration: illustration }), [illustration])
@@ -144,7 +147,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   const t = useT()
 
   useFrame((_, dt) => {
-    if (spin.current && !paused) spin.current.rotation.y += dt * 0.06
+    if (spin.current && !paused && !manipulation.active) spin.current.rotation.y += dt * 0.06
   })
 
   const name = content?.name ?? info?.name ?? id
@@ -161,6 +164,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
 
   return (
     <group>
+      <group ref={manip}>
       <group ref={spin}>
         {isAsteroid ? (
           <Asteroid model={content?.model} onGeometry={setGeometry} onIllustration={setIllustration} />
@@ -175,6 +179,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
         )}
         {content && <Hotspots content={content} geometry={geometry} />}
         {id === 'bennu' && q.bursts && <BennuEjecta surface={geometry ? (geometry.attributes.position.array as Float32Array) : null} />}
+      </group>
       </group>
 
       {content !== undefined && <SceneReady />}

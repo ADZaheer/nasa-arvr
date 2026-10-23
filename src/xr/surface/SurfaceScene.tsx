@@ -29,6 +29,7 @@ import { GlassPanel, Icon, UI } from '../ui3d'
 import { makeFadeable, useFadeIn } from '../fade'
 import { reportProblem } from '../loading'
 import { localHotspot, t, useT } from '../i18n'
+import { ControllerHints } from '../ControllerHints'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { DEFAULT_ENVIRONMENT, type Hotspot, type SiteContent, type SiteEnvironment, type SiteModel, type ViewMode } from '../types'
 import { EarthInSky, SpaceSun, StarSky } from '../space'
@@ -759,6 +760,7 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
   return (
     <XROrigin ref={origin} position={[site.spawn.x, hf.heightAt(site.spawn.x, site.spawn.z), site.spawn.z]} rotation={[0, spawnYaw(site), 0]}>
       <WristMenu />
+      <ControllerHints scene="surface" />
     </XROrigin>
   )
 }

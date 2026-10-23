@@ -23,6 +23,7 @@ import type { Group } from 'three'
 import { ErrorBoundary } from './ErrorBoundary'
 import { reportProblem, useLoading } from './loading'
 import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
+import { ControllerHints } from './ControllerHints'
 
 /** Rendered instead of a scene that crashed: turns it into the clear "Couldn't load" card. */
 function SceneFailed({ what }: { what: string }) {
@@ -67,7 +68,7 @@ function ModeSync() {
 type SceneKind = 'hub' | 'body' | 'surface'
 
 /** VR/AR origin for the Solar System and orbit views: seated/height offset and "Re-centre view". */
-function PlayerOrigin({ seated }: { seated: boolean }) {
+function PlayerOrigin({ seated, kind }: { seated: boolean; kind: SceneKind }) {
   const ref = useRef<Group>(null)
   const recenter = useXRApp((s) => s.recenter)
   const height = useXRApp((s) => s.settings.heightOffset)
@@ -79,6 +80,7 @@ function PlayerOrigin({ seated }: { seated: boolean }) {
   return (
     <XROrigin ref={ref} position={[0, (seated ? 0.5 : 0) + height, 0]}>
       <WristMenu />
+      <ControllerHints scene={kind} />
     </XROrigin>
   )
 }
@@ -116,7 +118,7 @@ function Stage({ kind, children }: { kind: SceneKind; children: ReactNode }) {
     }
   } else if (mode === 'gyro') position = [0, 0, hub ? -6.5 : -3.6]
   else if (mode === 'vr') {
-    position = [0, 1.3, hub ? -1.3 : -1.25]
+    position = [0, 1.3, hub ? -1.3 : -1.05]
     scale = hub ? 0.3 : 0.36
   } else if (mode === 'ar') {
     scale = hub ? 0.06 : 0.11
@@ -182,7 +184,7 @@ export function XRRoot() {
           <TransitionVeil sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
           {/* the surface VR walker has its own moving origin (with the wrist menu inside it) */}
           {(mode === 'vr' || mode === 'ar') && !(kind === 'surface' && mode === 'vr') && (
-            <PlayerOrigin seated={seated} />
+            <PlayerOrigin seated={seated} kind={kind} />
           )}
           {space && (
             <>

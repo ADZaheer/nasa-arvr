@@ -35,3 +35,6 @@ export const xrStore = createXRStore({
   anchors: false,
   layers: false,
 })
+
+// Debug handle in dev builds: window.__xrStore
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __xrStore: typeof xrStore }).__xrStore = xrStore

@@ -14,6 +14,7 @@ import { Appear, Button, Choice3D, GlassPanel, Icon, Label, Slider3D, TEAL, Tile
 const TAB_ICON: Record<MenuTab, IconName> = { travel: 'travel', missions: 'missions', display: 'visuals', comfort: 'comfort', audio: 'audio', info: 'info' }
 import { ALL_GOALS } from './missions'
 import { t } from './i18n'
+import { resetControllerHints } from './ControllerHints'
 import { activeMissions } from './MissionTracker'
 
 const noFog = new MeshBasicMaterial({ fog: false, toneMapped: false })
@@ -169,7 +170,10 @@ function MissionsPage() {
     <>
       {rows}
       <Label text={t('All missions: {n}/{total}', { n: count, total })} position={[-1.15, -2.45, 0.005]} size={0.09} color="#8fd9d3" />
-      <Tile label={t('Restart training')} onPress={() => useXRApp.getState().resetMissions()} position={[0.62, -2.45, 0]} width={0.95} height={0.22} />
+      <Tile label={t('Restart training')} onPress={() => {
+        useXRApp.getState().resetMissions()
+        resetControllerHints()
+      }} position={[0.62, -2.45, 0]} width={0.95} height={0.22} />
     </>
   )
 }

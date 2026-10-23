@@ -5,6 +5,7 @@ import { useSiteContent } from './content'
 import { ALL_GOALS } from './missions'
 import { activeMissions } from './MissionTracker'
 import { LANGS, t, useT } from './i18n'
+import { resetControllerHints } from './ControllerHints'
 import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 
 /** On-screen version of the wrist menu (desktop, phone, phone AR via the DOM overlay). Same options. */
@@ -78,7 +79,10 @@ function Missions() {
       ))}
       <footer>
         <span>{t('All missions: {n}/{total}', { n: count, total: ALL_GOALS.length })}</span>
-        <button className="btn" onClick={() => useXRApp.getState().resetMissions()}>
+        <button className="btn" onClick={() => {
+            useXRApp.getState().resetMissions()
+            resetControllerHints()
+          }}>
           {t('Restart training')}
         </button>
       </footer>
