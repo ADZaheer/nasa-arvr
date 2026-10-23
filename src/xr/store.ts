@@ -24,9 +24,13 @@ export interface XRSettings {
   timeOfDay: number
   /** ambience + UI sounds (off by default: judging rooms vary) */
   sound: boolean
+  /** soundtrack volume 0..1 */
+  musicVolume: number
+  /** effects + ambience volume 0..1 */
+  sfxVolume: number
 }
 
-export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false }
+export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8 }
 
 /**
  * Shared app state for the XR module. The web viewer can read/write the same store

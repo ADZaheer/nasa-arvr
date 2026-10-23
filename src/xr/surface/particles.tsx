@@ -4,7 +4,7 @@ import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, NormalBlendin
 import type { HeightField } from './terrain'
 import { player, world } from './player'
 import { viewCamera } from '../viewCamera'
-import { playLand, playStep } from '../feedback'
+import { playLand, playStep, updateEmitter } from '../feedback'
 import { missionEvent } from '../missions'
 
 /** World-size point sprites: gl_PointSize = size[m] * uScale / depth. uScale ≈ half the viewport height × projection[1][1]. */
@@ -191,6 +191,7 @@ function DustDevil({ index, hf, particles }: { index: number; hf: HeightField; p
     const u = material.uniforms
     u.uTime.value = clock.elapsedTime + index * 13
     u.uCenter.value.set(s.x, hf.baseAt(s.x, s.z), s.z)
+    updateEmitter(`devil-${index}`, 'devil', s.x, hf.baseAt(s.x, s.z) + 10, s.z)
     u.uHeight.value = s.height
     u.uRadius.value = s.radius
     u.uScale.value = pointScale(gl, camera.projectionMatrix.elements[5])

@@ -40,7 +40,7 @@ import { withBVH } from '../bvh'
 import type { TerrainBuildRequest, TerrainBuildResult } from './terrain.worker'
 import { viewCamera } from '../viewCamera'
 import { WristMenu } from '../WristMenu'
-import { hoverFeedback, pressFeedback } from '../feedback'
+import { hoverFeedback, pressFeedback, updateEmitter } from '../feedback'
 
 const DEG = Math.PI / 180
 
@@ -352,6 +352,11 @@ function Rover({ rover, hf, shadows }: { rover: SiteModel; hf: HeightField; shad
     })
     return c
   }, [scene, rover, shadows])
+  // rovers hum softly in 3D (spacecraft and landers are silent)
+  const hums = /rover|perseverance|curiosity|opportunity/i.test(rover.name)
+  useFrame(() => {
+    if (hums) updateEmitter(rover.name, 'machine', rover.x, hf.heightAt(rover.x, rover.z) + 0.8, rover.z)
+  })
   return (
     <group position={[rover.x, hf.heightAt(rover.x, rover.z) + (rover.y ?? 0), rover.z]} rotation={[0, rover.yawDeg * DEG, 0]}>
       <primitive object={obj} />

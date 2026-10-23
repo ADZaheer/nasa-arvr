@@ -4,7 +4,7 @@ import { BODY_BY_ID } from './bodies'
 import { useSiteContent } from './content'
 import { ALL_GOALS } from './missions'
 import { activeMissions } from './MissionTracker'
-import { COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
+import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 
 /** On-screen version of the wrist menu (desktop, phone, phone AR via the DOM overlay). Same options. */
 export function MenuPanel() {
@@ -37,6 +37,7 @@ export function MenuPanel() {
       {tab === 'missions' && <Missions />}
       {tab === 'display' && <Controls controls={DISPLAY_CONTROLS} />}
       {tab === 'comfort' && <Controls controls={COMFORT_CONTROLS} />}
+      {tab === 'audio' && <Controls controls={AUDIO_CONTROLS} />}
       {tab === 'info' && <Info />}
       <p className="menu-tip">In VR: turn your left palm toward your face, or press Y on the left controller.</p>
     </aside>

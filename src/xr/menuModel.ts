@@ -3,12 +3,13 @@ import { MARS24_URL, earthUTC, marsTime } from './marsTime'
 import { player } from './surface/player'
 
 /** One definition of the expedition menu, rendered as the VR/AR wrist panel and the on-screen ⚙ panel. */
-export type MenuTab = 'travel' | 'missions' | 'display' | 'comfort' | 'info'
+export type MenuTab = 'travel' | 'missions' | 'display' | 'comfort' | 'audio' | 'info'
 export const MENU_TABS: { id: MenuTab; label: string }[] = [
   { id: 'travel', label: 'Travel' },
   { id: 'missions', label: 'Missions' },
   { id: 'display', label: 'Visuals' },
   { id: 'comfort', label: 'Comfort' },
+  { id: 'audio', label: 'Audio' },
   { id: 'info', label: 'Info' },
 ]
 
@@ -70,7 +71,11 @@ export const COMFORT_CONTROLS: ControlSpec[] = [
   { kind: 'slider', key: 'moveSpeed', label: 'Move speed', min: 0.5, max: 2, format: (v) => `${v.toFixed(1)}×` },
   { kind: 'slider', key: 'labels', label: 'Labels', min: 0, max: 1, format: pct },
   { kind: 'toggle', key: 'pins', label: 'Pins & beacons' },
-  { kind: 'toggle', key: 'sound', label: 'Sound' },
+]
+export const AUDIO_CONTROLS: ControlSpec[] = [
+  { kind: 'toggle', key: 'sound', label: 'Sound & music' },
+  { kind: 'slider', key: 'musicVolume', label: 'Music', min: 0, max: 1, format: pct },
+  { kind: 'slider', key: 'sfxVolume', label: 'Effects & ambience', min: 0, max: 1, format: pct },
 ]
 
 const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']

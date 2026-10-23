@@ -8,7 +8,7 @@ import { viewCamera } from './viewCamera'
 import { BODY_BY_ID } from './bodies'
 import { useSiteContent } from './content'
 import { FONT, FONT_BOLD } from './font'
-import { COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
+import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 import { Choice3D, Label, Slider3D, TEAL, Tile, Toggle3D } from './ui3d'
 import { ALL_GOALS } from './missions'
 import { activeMissions } from './MissionTracker'
@@ -117,6 +117,7 @@ function MenuPanel3D() {
         {tab === 'missions' && <MissionsPage />}
         {tab === 'display' && <ControlsPage controls={DISPLAY_CONTROLS} />}
         {tab === 'comfort' && <ControlsPage controls={COMFORT_CONTROLS} />}
+        {tab === 'audio' && <ControlsPage controls={AUDIO_CONTROLS} />}
         {tab === 'info' && <InfoPage />}
       </group>
     </group>

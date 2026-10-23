@@ -3,11 +3,12 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Bloom, EffectComposer, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { useStore } from 'zustand'
-import { BackSide, MeshBasicMaterial, MeshStandardMaterial, type Mesh, type SkinnedMesh } from 'three'
+import { BackSide, MeshBasicMaterial, MeshStandardMaterial, Quaternion, Vector3, type Mesh, type SkinnedMesh } from 'three'
 import { xrStore } from './xrStore'
 import { useXRApp } from './store'
 import { viewCamera } from './viewCamera'
-import { setAmbience } from './feedback'
+import { applyMix, setAirlessSteps, setAmbience, updateListener, type Mood } from './feedback'
+import { useSiteContent } from './content'
 import type { TierParams } from './quality'
 
 /**
@@ -81,12 +82,29 @@ export function HandStyler() {
   return null
 }
 
-/** Keeps the synthesised ambience in step with the scene and the Sound setting. */
+/** Keeps soundtrack mood, ambience, mix and the 3D listener in step with the scene and settings. */
 export function SoundDirector({ kind }: { kind: 'hub' | 'body' | 'surface' }) {
   const sound = useXRApp((s) => s.settings.sound)
+  const music = useXRApp((s) => s.settings.musicVolume)
+  const sfx = useXRApp((s) => s.settings.sfxVolume)
+  const siteId = useXRApp((s) => s.siteId)
+  const site = useSiteContent(siteId)
+  const world: Mood = kind === 'surface' ? ((site?.environment?.kind ?? 'mars') as Mood) : 'space'
+  const airless = kind === 'surface' && (world === 'moon' || world === 'asteroid')
   useEffect(() => {
-    setAmbience(sound ? kind : 'none')
-  }, [sound, kind])
+    setAirlessSteps(airless)
+    setAmbience(sound ? kind : 'none', world)
+  }, [sound, kind, world, airless])
+  useEffect(() => applyMix(), [music, sfx])
   useEffect(() => () => setAmbience('none'), [])
+  const v = useMemo(() => ({ p: new Vector3(), f: new Vector3(), u: new Vector3(), q: new Quaternion() }), [])
+  useFrame(({ camera, gl }) => {
+    if (!sound) return
+    const cam = viewCamera(gl, camera)
+    cam.getWorldPosition(v.p)
+    cam.getWorldDirection(v.f)
+    v.u.set(0, 1, 0).applyQuaternion(cam.getWorldQuaternion(v.q))
+    updateListener(v.p, v.f, v.u, airless)
+  })
   return null
 }
