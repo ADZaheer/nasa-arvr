@@ -1,0 +1,104 @@
+{
+  "id": "jezero",
+  "body": "mars",
+  "name": "Jezero Crater",
+  "region": "Jezero Crater, Mars – Perseverance's landing site",
+  "environment": { "kind": "mars", "gravity": 3.71, "sky": "mars", "rockScale": 1 },
+  "terrain": {
+    "url": "/terrain/jezero.bin",
+    "gridW": 384,
+    "gridH": 384,
+    "widthUnits": 72982.1,
+    "depthUnits": 76905.3,
+    "zMinUnits": -3050.485,
+    "zMaxUnits": -518.88,
+    "metersPerUnit": 1,
+    "verticalMetersPerUnit": 1,
+    "detailAmplitude": 0.5,
+    "viewRadius": 120000
+  },
+  "terrainCredit": "Terrain: NASA MGS MOLA topography (MEGDR, 128 px/deg ≈ 460 m per sample) around Jezero Crater, from the NASA Planetary Data System. Near-ground detail, rocks, colours and sky are artistic.",
+  "spawn": { "x": -6260, "z": -2846, "lookAt": { "x": -8500, "z": -2700 } },
+  "sun": { "azimuthDeg": 120, "elevationDeg": 30 },
+  "fogDensity": 0.000026,
+  "dioramaExaggeration": 4,
+  "models": [
+    { "name": "Perseverance", "model": "/models/perseverance.glb", "x": -6254, "z": -2852, "yawDeg": 60, "sizeM": 3.0, "credit": "Perseverance rover model: NASA 3D Resources" },
+    { "name": "Ingenuity", "model": "/models/ingenuity.glb", "x": -6236, "z": -2838, "yawDeg": 0, "sizeM": 1.2, "credit": "Ingenuity helicopter model: NASA 3D Resources" }
+  ],
+  "conditions": [
+    { "label": "Gravity", "value": "0.38 g (3.71 m/s²)" },
+    { "label": "Air", "value": "Very thin, mostly carbon dioxide" },
+    { "label": "Equator at noon", "value": "~24 °C at your feet, ~0 °C at your head" },
+    { "label": "Day length", "value": "24.6 hours" }
+  ],
+  "conditionsSource": { "label": "NASA Science – Mars Facts", "url": "https://science.nasa.gov/mars/facts/" },
+  "hotspots": [
+    {
+      "id": "jezero-landing",
+      "body": "mars",
+      "anchor": { "type": "site", "x": -6266, "z": -2838 },
+      "title": "Perseverance's landing site",
+      "short": "Perseverance touched down here on the western floor of Jezero Crater in February 2021.",
+      "detail": "NASA picked Jezero after a five-year study of possible sites. The rover landed near the remains of an ancient river delta and has been collecting rock samples that a future mission could bring to Earth. You are standing at the real landing coordinates; the ground around you is generated detail on top of real orbital topography.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Perseverance", "url": "https://science.nasa.gov/mission/mars-2020-perseverance/" },
+      "guidePrompt": "Why did NASA choose Jezero Crater for Perseverance, and what has the rover found there?"
+    },
+    {
+      "id": "jezero-ingenuity",
+      "body": "mars",
+      "anchor": { "type": "site", "x": -6236, "z": -2838, "y": 0.6 },
+      "title": "Ingenuity: first flight on another planet",
+      "short": "On 19 April 2021 Ingenuity made the first powered, controlled flight on another planet.",
+      "detail": "The small helicopter rode to Mars under Perseverance. Its first flight was called a 'Wright Brothers moment'. Ingenuity went on to complete 72 flights, scouting ahead for the rover, far more than its planned five test flights. The model here is placed next to the rover for scale.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Ingenuity Mars Helicopter", "url": "https://science.nasa.gov/mission/mars-2020-perseverance/ingenuity-mars-helicopter/" },
+      "guidePrompt": "How can a helicopter fly in Mars' very thin air, and what did Ingenuity achieve?"
+    },
+    {
+      "id": "jezero-delta",
+      "body": "mars",
+      "anchor": { "type": "site", "x": -8460, "z": -2700, "y": 40 },
+      "title": "An ancient river delta",
+      "short": "Long ago a river flowed into a lake here, building a delta of layered sediments.",
+      "detail": "Perseverance found evidence of a habitable, stable lake, delta and river system in Jezero's past. Deltas are good places to look for signs of ancient life because flowing water carries and buries fine sediment. The delta lies a couple of kilometres west of the landing site; its exact edge is not resolved in this elevation data.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Perseverance", "url": "https://science.nasa.gov/mission/mars-2020-perseverance/" },
+      "guidePrompt": "How do we know Jezero Crater once held a lake, and why are deltas good places to look for ancient life?"
+    },
+    {
+      "id": "jezero-crater",
+      "body": "mars",
+      "anchor": { "type": "site", "x": 6409, "z": -1308, "y": 150 },
+      "title": "Jezero Crater",
+      "short": "A 45-km-wide crater on the western edge of the Isidis Planitia plain, just north of the equator.",
+      "detail": "Jezero's history alternates between wet and dry periods. Water once filled the crater, entering through river valleys in the rim. Microbial life could conceivably have lived here during one or more of those wet times, which is why rock samples from the lakebed and shoreline are so valuable.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Perseverance", "url": "https://science.nasa.gov/mission/mars-2020-perseverance/" },
+      "guidePrompt": "What does Jezero Crater tell us about the on-again, off-again wet past of Mars?"
+    },
+    {
+      "id": "jezero-biosignature",
+      "body": "mars",
+      "anchor": { "type": "site", "x": -8000, "z": -4500, "y": 30 },
+      "title": "Cheyava Falls: a potential biosignature",
+      "short": "A rock with 'leopard spots' that could be a sign of ancient life — not confirmed.",
+      "detail": "Perseverance sampled a rock nicknamed Cheyava Falls in an old river channel at the crater's western edge. Its textures and minerals are a potential biosignature, but non-biological explanations are still possible; scientists would need to study the sample on Earth. The pin shows the general direction only.",
+      "kind": "candidate",
+      "source": { "label": "NASA – Potential biosignature announcement", "url": "https://www.nasa.gov/news-release/nasa-says-mars-rover-discovered-potential-biosignature-last-year/" },
+      "guidePrompt": "What is a potential biosignature, and why is the Cheyava Falls rock not yet proof of life on Mars?"
+    },
+    {
+      "id": "jezero-whats-real",
+      "body": "mars",
+      "anchor": { "type": "site", "x": -6270, "z": -2852 },
+      "title": "What's real in this scene?",
+      "short": "Crater shape and your position are real NASA data; nearby rocks, colours and sky are artistic.",
+      "detail": "The terrain comes from NASA's MOLA laser altimeter, about 460 m per sample, so the crater rim and floor are real but coarse. The ground at your feet is generated detail. Perseverance and Ingenuity are NASA's official 3D models, placed beside you for scale.",
+      "kind": "illustration",
+      "source": { "label": "NASA PDS – MGS MOLA MEGDR", "url": "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html" },
+      "guidePrompt": "How did the MOLA laser altimeter map the shape of the whole surface of Mars?"
+    }
+  ]
+}

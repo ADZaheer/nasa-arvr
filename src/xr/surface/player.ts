@@ -25,4 +25,6 @@ export const input = {
 
 /** Mars surface gravity, m/s² */
 export const MARS_G = 3.71
+/** current site gravity (m/s²) and whether it has air (dust drifts, drag) */
+export const world = { g: MARS_G, air: true }
 export const EYE_HEIGHT = 1.7

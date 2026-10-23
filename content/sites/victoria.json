@@ -173,5 +173,11 @@
       },
       "guidePrompt": "How do scientists build 3D elevation models of places on Mars from orbiter images?"
     }
-  ]
+  ],
+  "environment": {
+    "kind": "mars",
+    "gravity": 3.71,
+    "sky": "mars",
+    "rockScale": 1
+  }
 }

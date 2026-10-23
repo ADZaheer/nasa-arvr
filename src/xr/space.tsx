@@ -161,3 +161,90 @@ export function Atmosphere({ radius = 1, color = '#e8a27a', intensity = 1, sunDi
     </mesh>
   )
 }
+
+// --------------------------------------------------------------------------------------------
+/**
+ * The Sun seen from an airless world: a small, white, very bright disc with a tight glare (no
+ * atmospheric scattering, so the sky stays black around it). Placed far away along the sun direction.
+ */
+export function SpaceSun({ dir, distance }: { dir: [number, number, number]; distance: number }) {
+  const ref = useRef<Mesh>(null)
+  const material = useMemo(
+    () =>
+      new ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        fog: false,
+        blending: AdditiveBlending,
+        toneMapped: false,
+        vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: /* glsl */ `
+          varying vec2 vUv;
+          void main() {
+            float r = length(vUv - 0.5) * 2.0;
+            float disc = smoothstep(0.09, 0.075, r);
+            float glare = pow(max(0.0, 1.0 - r), 6.0) * 0.6;
+            gl_FragColor = vec4(vec3(1.0, 0.98, 0.94) * (disc * 3.0 + glare), 1.0);
+          }`,
+      }),
+    [],
+  )
+  useEffect(() => () => material.dispose(), [material])
+  useFrame(({ camera, gl }) => {
+    const m = ref.current
+    if (!m) return
+    viewCamera(gl, camera).getWorldPosition(m.position)
+    m.position.addScaledVector(new Vector3(...dir).normalize(), distance)
+    m.lookAt(viewCamera(gl, camera).getWorldPosition(new Vector3()))
+  })
+  const size = distance * 0.12
+  return (
+    <mesh ref={ref} material={material} renderOrder={-900} frustumCulled={false}>
+      <planeGeometry args={[size, size]} />
+    </mesh>
+  )
+}
+
+/**
+ * Earth hanging in the black lunar sky (about 2° across, as seen from the Moon), lit from the sun's
+ * direction so it shows the right phase. Procedural oceans/clouds: an artistic stand-in, not a photo.
+ */
+export function EarthInSky({ dir, sunDir, distance }: { dir: [number, number, number]; sunDir: [number, number, number]; distance: number }) {
+  const ref = useRef<Mesh>(null)
+  const material = useMemo(
+    () =>
+      new ShaderMaterial({
+        fog: false,
+        toneMapped: false,
+        uniforms: { uSun: { value: new Vector3(...sunDir).normalize() }, uTime: { value: 0 } },
+        vertexShader: /* glsl */ `varying vec3 vN; varying vec3 vP; void main() { vN = normalize(mat3(modelMatrix) * normal); vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: /* glsl */ `
+          uniform vec3 uSun; uniform float uTime; varying vec3 vN; varying vec3 vP;
+          ${noiseGLSL}
+          void main() {
+            vec3 p = normalize(vP);
+            float land = smoothstep(0.52, 0.56, fbm(p * 2.2 + 3.1));
+            float cloud = smoothstep(0.5, 0.75, fbm(p * 4.0 + vec3(uTime * 0.01, 0.0, 0.0)));
+            vec3 col = mix(vec3(0.05, 0.16, 0.42), vec3(0.28, 0.36, 0.2), land);
+            col = mix(col, vec3(0.95), cloud * 0.85);
+            float lit = smoothstep(-0.05, 0.25, dot(normalize(vN), uSun));
+            gl_FragColor = vec4(col * (0.03 + 1.2 * lit), 1.0);
+            #include <colorspace_fragment>
+          }`,
+      }),
+    [sunDir],
+  )
+  useEffect(() => () => material.dispose(), [material])
+  useFrame(({ camera, gl, clock }) => {
+    const m = ref.current
+    if (!m) return
+    material.uniforms.uTime.value = clock.elapsedTime
+    viewCamera(gl, camera).getWorldPosition(m.position)
+    m.position.addScaledVector(new Vector3(...dir).normalize(), distance)
+  })
+  return (
+    <mesh ref={ref} material={material} renderOrder={-899} frustumCulled={false} scale={distance * Math.tan((0.95 * Math.PI) / 180)}>
+      <sphereGeometry args={[1, 48, 32]} />
+    </mesh>
+  )
+}

@@ -149,7 +149,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {mode === 'desktop' && !inAR && (
         <p className="hint">
           {surface
-            ? 'W A S D walk · Q/E turn · Shift run · Space jump (38% gravity!) · drag to look · click a beacon'
+            ? `W A S D walk · Q/E turn · Shift run · ${jumpHint(site?.environment?.gravity ?? 3.71)} · drag to look · grab rocks · click a beacon`
             : bodyId
               ? 'Drag to rotate · scroll to zoom · click a glowing pin'
               : 'Drag to rotate · click a body (● = has hotspots)'}
@@ -267,4 +267,10 @@ function MissionBanner() {
       <span>{card.hint}</span>
     </div>
   )
+}
+
+/** Desktop hint for jumping, matched to the site's gravity. */
+function jumpHint(g: number) {
+  if (g < 0.05) return 'no jumping here (you would reach escape speed!)'
+  return `Space jump (${Math.round((g / 9.81) * 100)}% of Earth's gravity)`
 }

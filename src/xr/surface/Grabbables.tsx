@@ -9,7 +9,7 @@ import { missionEvent } from '../missions'
 import type { SiteContent } from '../types'
 import type { HeightField } from './terrain'
 import { vnoise } from './terrain'
-import { MARS_G } from './player'
+import { world } from './player'
 import { emitPuff } from './particles'
 import { useRockMaterial } from './materials'
 import type { TierParams } from '../quality'
@@ -35,6 +35,9 @@ interface Rock {
   pull: number
   history: { p: Vector3; t: number }[]
   thrownFrom: Vector3 | null
+  /** where it started, to put it back after it is lost (e.g. thrown off Bennu) */
+  home: Vector3
+  lostAt: number
   sleeping: boolean
   hot: number
 }
@@ -95,6 +98,8 @@ export function Grabbables({ site, hf, q }: { site: SiteContent; hf: HeightField
         pull: 0,
         history: [],
         thrownFrom: null,
+        home: new Vector3(x, hf.heightAt(x, z) + radius * 0.8, z),
+        lostAt: 0,
         sleeping: true,
         hot: 0,
       })
@@ -230,9 +235,22 @@ export function Grabbables({ site, hf, q }: { site: SiteContent; hf: HeightField
           while (r.history.length > 6) r.history.shift()
         }
       } else if (!r.sleeping) {
-        // free flight in Mars gravity
-        r.vel.y -= MARS_G * dt
+        // free flight in the site's gravity
+        r.vel.y -= world.g * dt
         r.pos.addScaledVector(r.vel, dt)
+        // on a tiny asteroid a gentle throw escapes: count it, then bring the rock back after a while
+        if (r.thrownFrom && r.pos.distanceTo(r.thrownFrom) > 30) {
+          missionEvent('rock-thrown')
+          missionEvent('rock-escaped')
+          r.thrownFrom = null
+          r.lostAt = now
+        }
+        if (r.lostAt && now - r.lostAt > 20000) {
+          r.pos.copy(r.home)
+          r.vel.set(0, 0, 0)
+          r.sleeping = true
+          r.lostAt = 0
+        }
         r.quat.multiply(tmpQ.setFromEuler(tmpE.set(r.spin.x * dt, r.spin.y * dt, r.spin.z * dt)))
         const ground = hf.heightAt(r.pos.x, r.pos.z) + r.radius * 0.75
         if (r.pos.y < ground) {

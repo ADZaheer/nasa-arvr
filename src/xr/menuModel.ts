@@ -22,9 +22,13 @@ const app = () => useXRApp.getState()
 export const DESTINATIONS: Destination[] = [
   { id: 'hub', label: 'Solar System', go: () => app().selectBody(null), active: (s) => !s.bodyId && !s.siteId },
   { id: 'mars', label: 'Mars (orbit)', go: () => app().selectBody('mars'), active: (s) => s.bodyId === 'mars' && !s.siteId },
-  { id: 'bennu', label: 'Asteroid Bennu', go: () => app().selectBody('bennu'), active: (s) => s.bodyId === 'bennu' },
+  { id: 'bennu', label: 'Bennu (orbit)', go: () => app().selectBody('bennu'), active: (s) => s.bodyId === 'bennu' && !s.siteId },
   { id: 'victoria', label: 'Victoria Crater', go: () => app().selectSite('victoria', 'mars'), active: (s) => s.siteId === 'victoria' },
   { id: 'gale', label: 'Gale Crater', go: () => app().selectSite('gale', 'mars'), active: (s) => s.siteId === 'gale' },
+  { id: 'jezero', label: 'Jezero Crater', go: () => app().selectSite('jezero', 'mars'), active: (s) => s.siteId === 'jezero' },
+  { id: 'moon', label: 'Moon (orbit)', go: () => app().selectBody('moon'), active: (s) => s.bodyId === 'moon' && !s.siteId },
+  { id: 'apollo11', label: 'Apollo 11 site', go: () => app().selectSite('apollo11', 'moon'), active: (s) => s.siteId === 'apollo11' },
+  { id: 'bennu-surface', label: 'Bennu surface', go: () => app().selectSite('bennu-nightingale', 'bennu'), active: (s) => s.siteId === 'bennu-nightingale' },
 ]
 
 export type SliderSpec = { kind: 'slider'; key: keyof XRSettings; label: string; min: number; max: number; format: (v: number) => string; surfaceOnly?: boolean }

@@ -11,19 +11,28 @@ import { Sun } from './space'
 
 const GOLDEN = 2.39996
 
+function hubPosition(b: BodyInfo, i: number): [number, number, number] {
+  if (b.parent) {
+    const pi = BODIES.findIndex((x) => x.id === b.parent)
+    const [px, py, pz] = hubPosition(BODIES[pi], pi)
+    return [px + 0.17, py + 0.04, pz + 0.05]
+  }
+  const a = i * GOLDEN
+  return [Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit]
+}
+
 /** Body picker. Sizes and distances are deliberately NOT to scale. */
 export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
   return (
     <group rotation={[tilt, 0, 0]}>
-      {BODIES.filter((b) => b.orbit > 0).map((b) => (
+      {BODIES.filter((b) => b.orbit > 0 && !b.parent).map((b) => (
         <mesh key={`orbit-${b.id}`} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[b.orbit - 0.004, b.orbit + 0.004, 128]} />
           <meshBasicMaterial color={b.kind === 'asteroid' ? '#5a5146' : '#33415e'} side={DoubleSide} transparent opacity={0.6} />
         </mesh>
       ))}
       {BODIES.map((b, i) => {
-        const a = i * GOLDEN
-        return <HubBody key={b.id} b={b} position={[Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit]} />
+        return <HubBody key={b.id} b={b} position={hubPosition(b, i)} />
       })}
       <Billboard position={[0, 0.95, 0]}>
         <Text font={FONT_BOLD} fontSize={0.2} color="#ffffff" anchorY="bottom">

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, NormalBlending, ShaderMaterial, Vector3, type Points } from 'three'
 import type { HeightField } from './terrain'
-import { MARS_G, player } from './player'
+import { player, world } from './player'
 import { viewCamera } from '../viewCamera'
 import { playLand, playStep } from '../feedback'
 import { missionEvent } from '../missions'
@@ -302,10 +302,11 @@ export function FootstepDust({ hf }: { hf: HeightField }) {
         continue
       }
       sim.age[i] += dt
-      const drag = Math.exp(-dt * 1.4)
+      // with air, fine dust drags and settles slowly; without air it flies in clean ballistic arcs
+      const drag = world.air ? Math.exp(-dt * 1.4) : 1
       sim.vel[i * 3] *= drag
       sim.vel[i * 3 + 2] *= drag
-      sim.vel[i * 3 + 1] = sim.vel[i * 3 + 1] * drag - MARS_G * 0.08 * dt // fine dust settles slowly
+      sim.vel[i * 3 + 1] = sim.vel[i * 3 + 1] * drag - world.g * (world.air ? 0.08 : 1) * dt
       sim.pos[i * 3] += sim.vel[i * 3] * dt
       sim.pos[i * 3 + 1] += sim.vel[i * 3 + 1] * dt
       sim.pos[i * 3 + 2] += sim.vel[i * 3 + 2] * dt

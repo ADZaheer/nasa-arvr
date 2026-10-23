@@ -1,0 +1,103 @@
+{
+  "id": "bennu-nightingale",
+  "body": "bennu",
+  "name": "Bennu – Nightingale",
+  "region": "Asteroid Bennu, near the Nightingale sample site",
+  "environment": { "kind": "asteroid", "gravity": 0.00008, "sky": "space", "rockScale": 6 },
+  "terrain": {
+    "url": "/terrain/bennu-nightingale.bin",
+    "gridW": 256,
+    "gridH": 256,
+    "widthUnits": 360,
+    "depthUnits": 360,
+    "zMinUnits": -387.361,
+    "zMaxUnits": 5.908,
+    "metersPerUnit": 1,
+    "verticalMetersPerUnit": 1,
+    "detailAmplitude": 0.6,
+    "viewRadius": 2000
+  },
+  "terrainCredit": "Terrain: NASA OSIRIS-REx shape model of Bennu (NASA 3D Resources), at real size around the Nightingale area. Boulders, colours and lighting are artistic; Bennu's real surface is rougher than this model.",
+  "spawn": { "x": 0, "z": 6, "lookAt": { "x": 0, "z": -60 } },
+  "sun": { "azimuthDeg": 120, "elevationDeg": 35 },
+  "fogDensity": 0,
+  "dioramaExaggeration": 1,
+  "models": [
+    { "name": "OSIRIS-REx", "model": "/models/osiris-rex.glb", "x": 4, "z": -14, "yawDeg": 20, "sizeM": 6.2, "y": 22, "credit": "OSIRIS-REx spacecraft model: NASA 3D Resources" }
+  ],
+  "conditions": [
+    { "label": "Gravity", "value": "~0.00001 g: a gentle toss can escape" },
+    { "label": "Air", "value": "None" },
+    { "label": "Size", "value": "About 500 m across" },
+    { "label": "Surface", "value": "Very dark, boulder-strewn rubble" }
+  ],
+  "conditionsSource": { "label": "NASA Science – Asteroid Bennu", "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/" },
+  "hotspots": [
+    {
+      "id": "bn-nightingale",
+      "body": "bennu",
+      "anchor": { "type": "site", "x": 0, "z": 0 },
+      "title": "Nightingale sample site",
+      "short": "On 20 Oct 2020 OSIRIS-REx touched down here for seconds and collected rock and dust.",
+      "detail": "The spacecraft's sampling arm fired nitrogen gas to stir up loose material and captured it. The sample capsule landed in Utah on 24 September 2023, the largest asteroid sample ever returned. Nightingale itself is a small crater; this shape model is too coarse to show it, so the pin marks the area.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – OSIRIS-REx", "url": "https://science.nasa.gov/mission/osiris-rex/" },
+      "guidePrompt": "How did OSIRIS-REx collect a sample from Bennu's Nightingale crater?"
+    },
+    {
+      "id": "bn-spacecraft",
+      "body": "bennu",
+      "anchor": { "type": "site", "x": 4, "z": -14, "y": 26 },
+      "title": "OSIRIS-REx",
+      "short": "NASA's spacecraft, shown hovering above the sample site as it did during its approach.",
+      "detail": "OSIRIS-REx mapped Bennu in detail before choosing where to sample. Its touchdown lasted only seconds, then it backed away. The model is NASA's official one; its position here is illustrative.",
+      "kind": "illustration",
+      "source": { "label": "NASA Science – OSIRIS-REx", "url": "https://science.nasa.gov/mission/osiris-rex/" },
+      "guidePrompt": "How did OSIRIS-REx navigate so close to a tiny asteroid without crashing?"
+    },
+    {
+      "id": "bn-boulders",
+      "body": "bennu",
+      "anchor": { "type": "site", "x": -40, "z": -30, "y": 6 },
+      "title": "A world of boulders",
+      "short": "Bennu is covered in boulders; one well-known one is about 7.4 m wide, half a basketball court.",
+      "detail": "Before arrival, scientists expected a smoother surface of fine gravel. Instead, boulders are scattered all over Bennu, which made finding a safe sampling site much harder. The boulders around you are generated to give a sense of this, not mapped individually.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Asteroid Bennu", "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/" },
+      "guidePrompt": "Why was Bennu's boulder-covered surface such a surprise to the OSIRIS-REx team?"
+    },
+    {
+      "id": "bn-rubble",
+      "body": "bennu",
+      "anchor": { "type": "site", "x": 60, "z": 10, "y": 4 },
+      "title": "Born from rubble",
+      "short": "Bennu gathered from leftover rubble of a larger body about 1 to 2 billion years ago.",
+      "detail": "Bennu is a 'rubble pile': fragments held together loosely by their own weak gravity. Its material is far older than the asteroid itself, dating back to the early solar system, which is why its sample is so valuable for understanding how planets formed.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Asteroid Bennu", "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/" },
+      "guidePrompt": "What is a rubble-pile asteroid, and how did Bennu form?"
+    },
+    {
+      "id": "bn-gravity",
+      "body": "bennu",
+      "anchor": { "type": "site", "x": 5, "z": 10 },
+      "title": "Throw something into space",
+      "short": "Bennu's gravity is so weak that a gentle toss can send a pebble away for good.",
+      "detail": "Bennu is only about 500 m across, so its pull is tiny: escape speed is roughly 20 cm per second (a slow walking pace), calculated from its size and mass. Try throwing a rock here and watch it drift off. That is also why a jump is disabled — you might never come back down!",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Asteroid Bennu", "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/" },
+      "guidePrompt": "Why is gravity so weak on a small asteroid like Bennu, and what would it feel like to stand there?"
+    },
+    {
+      "id": "bn-whats-real",
+      "body": "bennu",
+      "anchor": { "type": "site", "x": -4, "z": 9 },
+      "title": "What's real in this scene?",
+      "short": "Bennu's shape is NASA's OSIRIS-REx model at real size; boulders, colours and lighting are artistic.",
+      "detail": "The ground curves away quickly because Bennu is tiny: the horizon is only a few dozen metres off. Real Bennu is much rougher at small scales than this model shows. OSIRIS-REx is NASA's official 3D model.",
+      "kind": "illustration",
+      "source": { "label": "NASA 3D Resources", "url": "https://science.nasa.gov/3d-resources/" },
+      "guidePrompt": "How did OSIRIS-REx measure the shape of Bennu so precisely?"
+    }
+  ]
+}

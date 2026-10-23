@@ -8,56 +8,107 @@
     {
       "id": "nightingale",
       "body": "bennu",
-      "anchor": { "type": "mesh", "point": [0.405, 0.829, -0.385] },
+      "anchor": {
+        "type": "mesh",
+        "point": [
+          0.405,
+          0.829,
+          -0.385
+        ]
+      },
       "title": "Nightingale sample site",
       "short": "On 20 Oct 2020 OSIRIS-REx touched down here for seconds and collected rock and dust.",
       "detail": "Nightingale is a crater in Bennu's northern hemisphere. The spacecraft's sampling arm fired nitrogen gas to stir up loose material and captured it. The sample capsule landed in Utah on 24 September 2023 with about 121.6 grams of asteroid material, the largest asteroid sample ever returned.",
       "kind": "fact",
-      "source": { "label": "NASA Science – OSIRIS-REx", "url": "https://science.nasa.gov/mission/osiris-rex/" },
-      "guidePrompt": "How did OSIRIS-REx collect a sample from Bennu's Nightingale crater?"
+      "source": {
+        "label": "NASA Science – OSIRIS-REx",
+        "url": "https://science.nasa.gov/mission/osiris-rex/"
+      },
+      "guidePrompt": "How did OSIRIS-REx collect a sample from Bennu's Nightingale crater?",
+      "site": "bennu-nightingale"
     },
     {
       "id": "sample-chemistry",
       "body": "bennu",
-      "anchor": { "type": "mesh", "point": [-0.6, 0.3, 0.74] },
+      "anchor": {
+        "type": "mesh",
+        "point": [
+          -0.6,
+          0.3,
+          0.74
+        ]
+      },
       "title": "Ingredients for life",
       "short": "Bennu's sample contains amino acids, all five DNA/RNA nucleobases, and traces of evaporated salty water.",
       "detail": "Scientists analysing the returned sample found 14 of the 20 amino acids used by life on Earth, all five nucleobases, ammonia and minerals left by evaporating brine. This does not mean Bennu had life; it shows that building blocks of life were widespread in the early solar system.",
       "kind": "fact",
-      "source": { "label": "NASA – Bennu sample reveals mix of life's ingredients", "url": "https://www.nasa.gov/news-release/nasas-asteroid-bennu-sample-reveals-mix-of-lifes-ingredients/" },
+      "source": {
+        "label": "NASA – Bennu sample reveals mix of life's ingredients",
+        "url": "https://www.nasa.gov/news-release/nasas-asteroid-bennu-sample-reveals-mix-of-lifes-ingredients/"
+      },
       "guidePrompt": "What did scientists find in the Bennu sample, and what does it tell us about the origin of life's ingredients?"
     },
     {
       "id": "benben-saxum",
       "body": "bennu",
-      "anchor": { "type": "mesh", "point": [-0.42, -0.71, -0.56] },
+      "anchor": {
+        "type": "mesh",
+        "point": [
+          -0.42,
+          -0.71,
+          -0.56
+        ]
+      },
       "title": "Benben Saxum boulder",
       "short": "One of Bennu's biggest boulders, sitting in the southern hemisphere.",
       "detail": "Bennu turned out to be far rougher than expected, covered in boulders rather than smooth fine-grained regolith. Benben Saxum is among the largest and was one of the first features visible as OSIRIS-REx approached. The rugged surface forced the team to pick a much smaller sampling site than planned.",
       "kind": "fact",
-      "source": { "label": "NASA Science – Asteroid Bennu", "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/" },
+      "source": {
+        "label": "NASA Science – Asteroid Bennu",
+        "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/"
+      },
       "guidePrompt": "Why was Bennu's boulder-covered surface a surprise, and how did it change the OSIRIS-REx sampling plan?"
     },
     {
       "id": "rubble-pile",
       "body": "bennu",
-      "anchor": { "type": "mesh", "point": [0.98, 0.0, 0.2] },
+      "anchor": {
+        "type": "mesh",
+        "point": [
+          0.98,
+          0,
+          0.2
+        ]
+      },
       "title": "Rubble-pile interior",
       "short": "Conceptual view: Bennu is loosely held-together rubble with a lot of empty space inside.",
       "detail": "Bennu is thought to be a rubble pile: fragments of a larger parent asteroid that re-gathered under weak gravity. Its low density suggests much of its interior is empty space. When the spacecraft touched down, the surface behaved more like a ball pit than solid ground. This pin marks a conceptual idea, not a mapped feature.",
       "kind": "illustration",
-      "source": { "label": "NASA Science – OSIRIS-REx", "url": "https://science.nasa.gov/mission/osiris-rex/" },
+      "source": {
+        "label": "NASA Science – OSIRIS-REx",
+        "url": "https://science.nasa.gov/mission/osiris-rex/"
+      },
       "guidePrompt": "What is a rubble-pile asteroid, and how do we know Bennu is one?"
     },
     {
       "id": "impact-odds-2182",
       "body": "bennu",
-      "anchor": { "type": "mesh", "point": [0.1, -0.2, -0.97] },
+      "anchor": {
+        "type": "mesh",
+        "point": [
+          0.1,
+          -0.2,
+          -0.97
+        ]
+      },
       "title": "A small chance of impact in 2182",
       "short": "Tracking gives Bennu about a 1-in-2,700 chance of hitting Earth in 2182, which is very unlikely.",
       "detail": "Precise tracking of OSIRIS-REx let scientists refine Bennu's orbit, including the tiny push from sunlight re-radiated as heat (the Yarkovsky effect). The overall chance of impact through 2300 is about 1 in 1,750, with 24 September 2182 the most significant single date. These are probabilities, not predictions.",
       "kind": "candidate",
-      "source": { "label": "NASA Science – Asteroid Bennu", "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/" },
+      "source": {
+        "label": "NASA Science – Asteroid Bennu",
+        "url": "https://science.nasa.gov/solar-system/asteroids/101955-bennu/"
+      },
       "guidePrompt": "How do scientists calculate Bennu's impact probability, and why is it so small?"
     }
   ]

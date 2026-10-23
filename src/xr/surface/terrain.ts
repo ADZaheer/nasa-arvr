@@ -89,9 +89,13 @@ export function useHeightField(site: SiteContent | null | undefined): HeightFiel
 }
 
 // ---- meshes -------------------------------------------------------------------------------
-const DUST = new Color('#b8714a')
-const ROCK = new Color('#7a432c')
-const DARK = new Color('#5b3324')
+/** Ground colour palettes: [dust, dark patches, rock]. Mars rust, Moon charcoal-grey regolith, Bennu very dark rubble. */
+export type Palette = 'mars' | 'moon' | 'asteroid'
+const PALETTES: Record<Palette, [Color, Color, Color]> = {
+  mars: [new Color('#b8714a'), new Color('#5b3324'), new Color('#7a432c')],
+  moon: [new Color('#8f8c88'), new Color('#5f5d5a'), new Color('#76736f')],
+  asteroid: [new Color('#4a4642'), new Color('#2b2826'), new Color('#5a5550')],
+}
 
 const detailFade = (r: number) => 1 - Math.min(1, Math.max(0, (r - 120) / 280))
 
@@ -99,7 +103,7 @@ const detailFade = (r: number) => 1 - Math.min(1, Math.max(0, (r - 120) / 280))
  * Radial "clipmap": rings get exponentially wider away from the viewer, so ground near your feet is
  * finely detailed while the same mesh reaches the horizon (tens of km at Gale). Rebuilt when you walk away.
  */
-export function buildRadialTerrain(hf: HeightField, cx: number, cz: number, rMax: number, rings = 170, segs = 256): BufferGeometry {
+export function buildRadialTerrain(hf: HeightField, cx: number, cz: number, rMax: number, rings = 170, segs = 256, palette: Palette = 'mars'): BufferGeometry {
   const r0 = 0.35
   const k = Math.pow(rMax / r0, 1 / (rings - 1))
   const count = 1 + rings * segs
@@ -134,13 +138,13 @@ export function buildRadialTerrain(hf: HeightField, cx: number, cz: number, rMax
   g.setAttribute('uv', new BufferAttribute(uv, 2))
   g.setIndex(index)
   g.computeVertexNormals()
-  colorize(g, hf)
+  colorize(g, hf, palette)
   g.computeBoundingSphere()
   return g
 }
 
 /** Small uniform-grid copy of the whole terrain for the AR tabletop diorama (fits in `size` metres). */
-export function buildDiorama(hf: HeightField, size: number, exaggeration: number): BufferGeometry {
+export function buildDiorama(hf: HeightField, size: number, exaggeration: number, palette: Palette = 'mars'): BufferGeometry {
   const s = size / Math.max(hf.width, hf.depth)
   const g = new PlaneGeometry(hf.width * s, hf.depth * s, 200, Math.round((200 * hf.depth) / hf.width))
   g.rotateX(-Math.PI / 2)
@@ -149,7 +153,7 @@ export function buildDiorama(hf: HeightField, size: number, exaggeration: number
   for (let i = 0; i < p.count; i++) lo = Math.min(lo, hf.baseAt(p.getX(i) / s, p.getZ(i) / s))
   for (let i = 0; i < p.count; i++) p.setY(i, (hf.baseAt(p.getX(i) / s, p.getZ(i) / s) - lo) * s * exaggeration)
   g.computeVertexNormals()
-  colorize(g)
+  colorize(g, undefined, palette)
   return g
 }
 
@@ -164,7 +168,8 @@ const smooth = (a: number, b: number, x: number) => {
  *   crater floors and walls) is darkened, ridges slightly brightened. Free at runtime on every tier.
  * - a 'mask' attribute (x = fine dust cover, y = bare rock on slopes) used by the PBR ground material.
  */
-function colorize(g: BufferGeometry, hf?: HeightField) {
+function colorize(g: BufferGeometry, hf?: HeightField, palette: Palette = 'mars') {
+  const [DUST, DARK, ROCK] = PALETTES[palette]
   const p = g.attributes.position, n = g.attributes.normal
   const col = new Float32Array(p.count * 3)
   const mask = new Float32Array(p.count * 2)

@@ -76,7 +76,8 @@
         "label": "NASA – Potential biosignature announcement",
         "url": "https://www.nasa.gov/news-release/nasa-says-mars-rover-discovered-potential-biosignature-last-year/"
       },
-      "guidePrompt": "What is a potential biosignature, and why is the Cheyava Falls rock not yet proof of life on Mars?"
+      "guidePrompt": "What is a potential biosignature, and why is the Cheyava Falls rock not yet proof of life on Mars?",
+      "site": "jezero"
     },
     {
       "id": "north-polar-cap",

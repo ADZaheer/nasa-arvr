@@ -1,0 +1,43 @@
+{
+  "id": "moon",
+  "name": "Moon",
+  "type": "moon",
+  "texture": "/textures/moon.jpg",
+  "textureCredit": "NASA 3D Resources (Moon global colour map), public domain",
+  "hotspots": [
+    {
+      "id": "moon-apollo11",
+      "body": "moon",
+      "anchor": { "type": "latlon", "lat": 0.674, "lon": 23.473 },
+      "title": "Apollo 11 – Tranquility Base",
+      "short": "Where Neil Armstrong and Buzz Aldrin landed on 20 July 1969, the first crewed Moon landing.",
+      "detail": "The lunar module Eagle touched down in the Sea of Tranquility, a dark lava plain. The astronauts spent 21 hours and 36 minutes on the surface, collected rocks and soil, and set up experiments before lifting off. Press 'Stand here' to walk around the landing site.",
+      "kind": "fact",
+      "source": { "label": "NASA – Apollo 11 mission overview", "url": "https://www.nasa.gov/missions/apollo/apollo-11-mission-overview/" },
+      "guidePrompt": "Why did Apollo 11 land in the Sea of Tranquility?",
+      "site": "apollo11"
+    },
+    {
+      "id": "moon-regolith",
+      "body": "moon",
+      "anchor": { "type": "latlon", "lat": -20, "lon": -10 },
+      "title": "A dusty, airless world",
+      "short": "The Moon is covered in charcoal-grey regolith and has only a very thin exosphere.",
+      "detail": "Without a real atmosphere there is no weather to wear the surface down, so craters and even footprints can last a very long time. The regolith on top is a rubble of powdery dust and rocky debris, above fractured bedrock called the megaregolith.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Moon Facts", "url": "https://science.nasa.gov/moon/facts/" },
+      "guidePrompt": "Why is the Moon's surface covered in craters while Earth's mostly isn't?"
+    },
+    {
+      "id": "moon-volcanoes",
+      "body": "moon",
+      "anchor": { "type": "latlon", "lat": 30, "lon": -30 },
+      "title": "Ancient volcanoes",
+      "short": "Long ago the Moon had active volcanoes; today they are all dormant.",
+      "detail": "The dark patches you can see from Earth are seas of solidified lava, called maria. They formed when lava flooded huge impact basins billions of years ago. The Moon's volcanoes have not erupted for millions of years.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Moon Facts", "url": "https://science.nasa.gov/moon/facts/" },
+      "guidePrompt": "What are the dark 'seas' on the Moon, and how did they form?"
+    }
+  ]
+}

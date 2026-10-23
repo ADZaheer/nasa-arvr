@@ -74,6 +74,25 @@
       "guidePrompt": "Why is Mount Sharp made of layers, and what does climbing it tell Curiosity about Mars' past?"
     },
     {
+      "id": "gale-curiosity",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 14765,
+        "z": -13911,
+        "y": 2.4
+      },
+      "title": "Curiosity rover",
+      "short": "The car-sized rover that has explored Gale Crater since 2012 and climbs Mount Sharp.",
+      "detail": "Curiosity carries a laboratory that drills rock and analyses the powder inside the rover. It has driven many kilometres from its landing site up the lower slopes of Mount Sharp. This is NASA's 3D model placed beside you for scale; the real rover is elsewhere in the crater.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Curiosity",
+        "url": "https://science.nasa.gov/mission/msl-curiosity/"
+      },
+      "guidePrompt": "What instruments does Curiosity carry, and what has it discovered in Gale Crater?"
+    },
+    {
       "id": "landing-area",
       "body": "mars",
       "anchor": {
@@ -145,6 +164,23 @@
         "url": "https://science.nasa.gov/3d-resources/"
       },
       "guidePrompt": "How big is Gale Crater and how far could an astronaut see standing on its floor?"
+    }
+  ],
+  "environment": {
+    "kind": "mars",
+    "gravity": 3.71,
+    "sky": "mars",
+    "rockScale": 1
+  },
+  "models": [
+    {
+      "name": "Curiosity",
+      "model": "/models/curiosity.glb",
+      "x": 14765,
+      "z": -13911,
+      "yawDeg": 200,
+      "sizeM": 2.9,
+      "credit": "Curiosity rover model: NASA 3D Resources (3D-print model, simplified)"
     }
   ]
 }

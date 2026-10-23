@@ -9,6 +9,8 @@ export interface BodyInfo {
   /** display radius in hub units */
   size: number
   rings?: boolean
+  /** a moon: drawn next to its planet instead of on its own orbit */
+  parent?: string
 }
 
 export const BODIES: BodyInfo[] = [
@@ -16,6 +18,7 @@ export const BODIES: BodyInfo[] = [
   { id: 'mercury', name: 'Mercury', kind: 'planet', color: '#a9a39b', orbit: 0.6, size: 0.05 },
   { id: 'venus', name: 'Venus', kind: 'planet', color: '#e8c48a', orbit: 0.85, size: 0.08 },
   { id: 'earth', name: 'Earth', kind: 'planet', color: '#3d7bd9', orbit: 1.1, size: 0.085 },
+  { id: 'moon', name: 'Moon', kind: 'planet', color: '#bdb8b0', orbit: 0, size: 0.03, parent: 'earth' },
   { id: 'bennu', name: 'Bennu', kind: 'asteroid', color: '#8a847c', orbit: 1.25, size: 0.035 },
   { id: 'mars', name: 'Mars', kind: 'planet', color: '#c1440e', orbit: 1.42, size: 0.065 },
   { id: 'jupiter', name: 'Jupiter', kind: 'planet', color: '#d6a26b', orbit: 1.9, size: 0.2 },

@@ -163,7 +163,7 @@ function TravelPage() {
   return (
     <>
       {DESTINATIONS.map((d, i) => (
-        <Tile key={d.id} label={d.label} active={d.active({ bodyId, siteId })} onPress={d.go} position={[0, -i * 0.31, 0]} width={2.3} height={0.27} />
+        <Tile key={d.id} label={d.label} active={d.active({ bodyId, siteId })} onPress={d.go} position={[i % 2 ? 0.58 : -0.58, -Math.floor(i / 2) * 0.33, 0]} width={1.12} height={0.28} />
       ))}
     </>
   )

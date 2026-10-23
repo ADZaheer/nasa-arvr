@@ -26,7 +26,8 @@ import { FONT, FONT_BOLD } from '../font'
 import { InfoCard3D } from '../InfoCard'
 import { Button3D } from '../Button3D'
 import { ErrorBoundary } from '../ErrorBoundary'
-import type { Hotspot, SiteContent, ViewMode } from '../types'
+import { DEFAULT_ENVIRONMENT, type Hotspot, type SiteContent, type SiteEnvironment, type SiteModel, type ViewMode } from '../types'
+import { EarthInSky, SpaceSun, StarSky } from '../space'
 import { buildDiorama, buildRadialTerrain, useHeightField, vnoise, type HeightField } from './terrain'
 import { MarsSky, marsSky } from './MarsSky'
 import { useGroundMaterial, useRockMaterial } from './materials'
@@ -34,7 +35,7 @@ import { DustDevils, DustField, FootstepDust, emitPuff } from './particles'
 import { useQuality, type TierParams } from '../quality'
 import { Grabbables } from './Grabbables'
 import { useXRInputSourceState } from '@react-three/xr'
-import { EYE_HEIGHT, MARS_G, input, player } from './player'
+import { EYE_HEIGHT, input, player, world } from './player'
 import { withBVH } from '../bvh'
 import type { TerrainBuildRequest, TerrainBuildResult } from './terrain.worker'
 import { viewCamera } from '../viewCamera'
@@ -46,6 +47,10 @@ const DEG = Math.PI / 180
 /** Desktop / phone arrival: a short descent from orbit-ish height (VR fades in instead, to avoid motion sickness). */
 const LANDING_SECONDS = 3.2
 const LANDING_HEIGHT = 250
+
+export function envOf(site: SiteContent): SiteEnvironment {
+  return site.environment ?? DEFAULT_ENVIRONMENT
+}
 
 function spawnYaw(site: SiteContent) {
   const { x, z, lookAt } = site.spawn
@@ -68,6 +73,9 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
     player.z = site.spawn.z
     player.spawnX = site.spawn.x
     player.spawnZ = site.spawn.z
+    const env = envOf(site)
+    world.g = env.gravity
+    world.air = env.kind === 'mars'
     useXRApp.setState({ headingOffset: spawnYaw(site) })
     return () => useXRApp.setState({ headingOffset: 0 })
   }, [site])
@@ -81,17 +89,21 @@ export function SurfaceScene({ siteId, mode }: { siteId: string; mode: ViewMode 
       <SurfaceEnvironment site={site} q={q} />
       <Terrain site={site} hf={hf} teleport={mode === 'vr'} q={q} />
       <Rocks site={site} hf={hf} q={q} />
-      <DustField count={q.dust} />
-      <DustDevils count={q.devils} hf={hf} particles={mode === 'vr' ? 500 : 1100} />
+      {envOf(site).kind === 'mars' && (
+        <>
+          <DustField count={q.dust} />
+          <DustDevils count={q.devils} hf={hf} particles={mode === 'vr' ? 500 : 1100} />
+        </>
+      )}
       {q.bursts && <FootstepDust hf={hf} />}
       <Grabbables site={site} hf={hf} q={q} />
-      {site.rover && (
-        <ErrorBoundary fallback={null}>
+      {[...(site.rover ? [site.rover] : []), ...(site.models ?? [])].map((m) => (
+        <ErrorBoundary key={m.model} fallback={null}>
           <Suspense fallback={null}>
-            <Rover rover={site.rover} hf={hf} shadows={q.shadow > 0} />
+            <Rover rover={m} hf={hf} shadows={q.shadow > 0} />
           </Suspense>
         </ErrorBoundary>
-      )}
+      ))}
       {pins && site.hotspots.map((h) => (
         <Beacon key={h.id} h={h} hf={hf} />
       ))}
@@ -117,11 +129,16 @@ function Notice({ text }: { text: string }) {
  * Sky, fog, sunlight and shadows for the chosen time of day. The shadow camera is a ~70 m box that
  * follows you (snapped to its texel grid so shadows don't shimmer); size per quality tier, off on Low/Medium VR.
  */
+/** Earth seen from Tranquility Base: high in the western sky (about 66° up), roughly where it hangs for Apollo 11's site. */
+const EARTH_FROM_TRANQUILITY: [number, number, number] = [-Math.cos((66 * Math.PI) / 180), Math.sin((66 * Math.PI) / 180), 0]
+
 function SurfaceEnvironment({ site, q }: { site: SiteContent; q: TierParams }) {
   const haze = useXRApp((s) => s.settings.haze)
   const timeOfDay = useXRApp((s) => s.settings.timeOfDay)
   const camera = useThree((s) => s.camera) as PerspectiveCamera
   const sky = useMemo(() => marsSky(timeOfDay), [timeOfDay])
+  const env = envOf(site)
+  const space = env.sky === 'space'
   const far = site.terrain.viewRadius * 1.2
   const sun = useRef<DirectionalLight>(null)
   const span = 36
@@ -150,14 +167,25 @@ function SurfaceEnvironment({ site, q }: { site: SiteContent; q: TierParams }) {
 
   return (
     <>
-      <fogExp2 attach="fog" args={[sky.horizon, site.fogDensity * haze]} />
-      <MarsSky sky={sky} radius={far * 0.8} />
-      <hemisphereLight args={['#d9b08c', '#5e3522', sky.ambient]} />
+      {space ? (
+        <>
+          <StarSky size={q.stars} radius={far * 0.8} />
+          <SpaceSun dir={sky.sunDir} distance={far * 0.7} />
+          {env.kind === 'moon' && <EarthInSky dir={EARTH_FROM_TRANQUILITY} sunDir={sky.sunDir} distance={far * 0.6} />}
+          <hemisphereLight args={['#9aa7c0', '#3a3936', env.kind === 'moon' ? 0.12 : 0.06]} />
+        </>
+      ) : (
+        <>
+          <fogExp2 attach="fog" args={[sky.horizon, site.fogDensity * haze]} />
+          <MarsSky sky={sky} radius={far * 0.8} />
+          <hemisphereLight args={['#d9b08c', '#5e3522', sky.ambient]} />
+        </>
+      )}
       <directionalLight
         key={q.shadow}
         ref={sun}
-        intensity={sky.light}
-        color={sky.lightColor}
+        intensity={space ? 3.2 : sky.light}
+        color={space ? '#ffffff' : sky.lightColor}
         castShadow={q.shadow > 0}
         shadow-mapSize={[q.shadow || 1, q.shadow || 1]}
         shadow-bias={-0.0004}
@@ -222,6 +250,7 @@ function Terrain({ site, hf, teleport, q }: { site: SiteContent; hf: HeightField
       cz: center[1],
       rMax: site.terrain.viewRadius,
       rings: q.terrainRings,
+      palette: envOf(site).kind,
       segs: q.terrainSegs,
     }
     worker.postMessage(req)
@@ -294,7 +323,7 @@ function Rocks({ site, hf, q }: { site: SiteContent; hf: HeightField; q: TierPar
         z = site.spawn.z + r * Math.sin(a)
         if (!site.rover || Math.hypot(x - site.rover.x, z - site.rover.z) > 3) break
       }
-      const size = 0.03 + 0.75 * Math.pow(rnd(), 5)
+      const size = (0.03 + 0.75 * Math.pow(rnd(), 5)) * envOf(site).rockScale
       axis.set(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).normalize()
       q.setFromAxisAngle(axis, rnd() * Math.PI * 2)
       pos.set(x, hf.heightAt(x, z) + size * 0.15, z)
@@ -309,7 +338,7 @@ function Rocks({ site, hf, q }: { site: SiteContent; hf: HeightField; q: TierPar
   )
 }
 
-function Rover({ rover, hf, shadows }: { rover: NonNullable<SiteContent['rover']>; hf: HeightField; shadows: boolean }) {
+function Rover({ rover, hf, shadows }: { rover: SiteModel; hf: HeightField; shadows: boolean }) {
   const { scene } = useGLTF(rover.model)
   const obj = useMemo(() => {
     const c = scene.clone(true)
@@ -324,7 +353,7 @@ function Rover({ rover, hf, shadows }: { rover: NonNullable<SiteContent['rover']
     return c
   }, [scene, rover, shadows])
   return (
-    <group position={[rover.x, hf.heightAt(rover.x, rover.z), rover.z]} rotation={[0, rover.yawDeg * DEG, 0]}>
+    <group position={[rover.x, hf.heightAt(rover.x, rover.z) + (rover.y ?? 0), rover.z]} rotation={[0, rover.yawDeg * DEG, 0]}>
       <primitive object={obj} />
     </group>
   )
@@ -560,10 +589,13 @@ function Walker({ site, hf, gyro }: { site: SiteContent; hf: HeightField; gyro: 
       clampToTerrain(hf, s)
     }
     // low-gravity jump: same push as on Earth, but Mars pulls only 38% as hard
-    if (input.jump && s.jy === 0 && !landing) s.vy = 2.6
+    if (input.jump && s.jy === 0 && !landing) {
+      if (world.g < 0.05) useXRApp.getState().showToast('On Bennu a jump would reach escape speed: you would float away into space!')
+      else s.vy = 2.6
+    }
     input.jump = false
     if (s.vy !== 0 || s.jy > 0) {
-      s.vy -= MARS_G * dt
+      s.vy -= world.g * dt
       s.jy += s.vy * dt
       if (s.jy <= 0) {
         s.jy = 0
@@ -607,10 +639,13 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
     const ground = hf.heightAt(o.position.x, o.position.z)
     // low-gravity hop on A (right) or X (left): same push as on Earth, Mars pulls only 38% as hard
     const pressed = right?.gamepad?.['a-button']?.state === 'pressed' || left?.gamepad?.['x-button']?.state === 'pressed'
-    if (pressed && !hop.current.was && hop.current.h === 0) hop.current.v = 2.6
+    if (pressed && !hop.current.was && hop.current.h === 0) {
+      if (world.g < 0.05) useXRApp.getState().showToast('On Bennu a jump would reach escape speed: you would float away into space!')
+      else hop.current.v = 2.6
+    }
     hop.current.was = pressed
     if (hop.current.v !== 0 || hop.current.h > 0) {
-      hop.current.v -= MARS_G * Math.min(dt, 0.05)
+      hop.current.v -= world.g * Math.min(dt, 0.05)
       hop.current.h = Math.max(0, hop.current.h + hop.current.v * Math.min(dt, 0.05))
       if (hop.current.h === 0) hop.current.v = 0
     }
@@ -680,7 +715,7 @@ function SuitPanelVR({ site }: { site: SiteContent }) {
 /** Handheld AR: the whole site as a tabletop model (vertical exaggeration labelled). */
 function Diorama({ site, hf }: { site: SiteContent; hf: HeightField }) {
   const SIZE = 0.6
-  const geometry = useMemo(() => buildDiorama(hf, SIZE, site.dioramaExaggeration), [hf, site])
+  const geometry = useMemo(() => buildDiorama(hf, SIZE, site.dioramaExaggeration, envOf(site).kind), [hf, site])
   useEffect(() => () => geometry.dispose(), [geometry])
   const s = SIZE / Math.max(hf.width, hf.depth)
   const spawnY = useMemo(() => {

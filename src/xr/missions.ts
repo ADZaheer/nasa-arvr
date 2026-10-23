@@ -59,6 +59,7 @@ export const MISSIONS: Mission[] = [
     goals: [
       { id: 'h-mars', title: 'Visit Mars', hint: 'Select the red planet.', check: (c) => c.bodyId === 'mars' },
       { id: 'h-bennu', title: 'Visit asteroid Bennu', hint: 'Select Bennu, between Earth and Mars.', check: (c) => c.bodyId === 'bennu' },
+      { id: 'h-moon', title: 'Visit the Moon', hint: 'Select the Moon, next to Earth.', check: (c) => c.bodyId === 'moon' },
     ],
   },
   {
@@ -69,6 +70,7 @@ export const MISSIONS: Mission[] = [
       { id: 'm-olympus', title: 'Find the tallest volcano', hint: 'Look for Olympus Mons.', check: hot('olympus-mons') },
       { id: 'm-life', title: 'Find the possible sign of ancient life', hint: 'A rock in Jezero Crater.', check: hot('jezero-cheyava-falls') },
       { id: 'm-land', title: 'Land on the surface', hint: 'Use “Stand on the surface” or a pin’s “Stand here”.', check: (c) => !!c.siteId },
+      { id: 'm-jezero', title: 'Visit Perseverance in Jezero Crater', hint: 'Menu → Travel → Jezero Crater.', check: (c) => c.siteId === 'jezero' },
     ],
   },
   {
@@ -79,6 +81,46 @@ export const MISSIONS: Mission[] = [
       { id: 'b-sample', title: 'Find where the sample was taken', hint: 'The Nightingale site.', check: hot('nightingale') },
       { id: 'b-pebbles', title: 'Spot Bennu throwing pebbles', hint: 'Watch the asteroid: bright specks sometimes fly off it.', check: (c) => (c.events['bennu-burst-seen'] ?? 0) > 0 },
       { id: 'b-chem', title: 'Learn what the sample contained', hint: 'Find the “Ingredients for life” pin.', check: hot('sample-chemistry') },
+      { id: 'b-land', title: 'Stand on Bennu', hint: 'Press “Stand here” on the Nightingale pin.', check: (c) => c.siteId === 'bennu-nightingale' },
+    ],
+  },
+  {
+    id: 'moon-orbit',
+    title: 'Moon from orbit',
+    scene: 'body:moon',
+    goals: [
+      { id: 'mo-a11', title: 'Find Tranquility Base', hint: 'The Apollo 11 landing site.', check: hot('moon-apollo11') },
+      { id: 'mo-land', title: 'Land at the Apollo 11 site', hint: 'Press “Stand here” on its pin.', check: (c) => c.siteId === 'apollo11' },
+    ],
+  },
+  {
+    id: 'apollo11',
+    title: 'Apollo 11 moonwalk',
+    scene: 'site:apollo11',
+    goals: [
+      { id: 'a-eagle', title: 'Walk to the lunar module Eagle', hint: 'It stands a few metres in front of you.', check: (c) => c.distTo(-963, 1543) < 9 },
+      { id: 'a-jump', title: 'Jump in Moon gravity', hint: 'Space bar, Jump button or A/X: one sixth of Earth’s pull.', check: (c) => c.airborne },
+      { id: 'a-crater', title: 'Reach the large crater’s rim', hint: 'Head east toward the beacon, about 400 m away.', check: (c) => c.distTo(-563, 1543) < 120 },
+    ],
+  },
+  {
+    id: 'bennu-surface',
+    title: 'Life on a tiny asteroid',
+    scene: 'site:bennu-nightingale',
+    goals: [
+      { id: 'bs-craft', title: 'Look up at OSIRIS-REx', hint: 'Select the spacecraft hovering above the sample site.', check: hot('bn-spacecraft') },
+      { id: 'bs-escape', title: 'Throw a rock into space', hint: 'Grab a rock and toss it gently: Bennu can’t hold on to it.', check: (c) => (c.events['rock-escaped'] ?? 0) > 0 },
+      { id: 'bs-boulders', title: 'Learn about Bennu’s boulders', hint: 'Find the boulder beacon.', check: hot('bn-boulders') },
+    ],
+  },
+  {
+    id: 'jezero',
+    title: 'Jezero Crater expedition',
+    scene: 'site:jezero',
+    goals: [
+      { id: 'j-ingenuity', title: 'Find the Ingenuity helicopter', hint: 'It sits beside Perseverance.', check: (c) => c.distTo(-6236, -2838) < 4 },
+      { id: 'j-delta', title: 'Face the ancient river delta', hint: 'Turn west toward the delta beacon.', check: (c) => c.facing(-8460, -2700) < 12 },
+      { id: 'j-life', title: 'Learn about the potential biosignature', hint: 'Find the Cheyava Falls beacon.', check: hot('jezero-biosignature') },
     ],
   },
   {

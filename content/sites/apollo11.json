@@ -1,0 +1,92 @@
+{
+  "id": "apollo11",
+  "body": "moon",
+  "name": "Tranquility Base",
+  "region": "Apollo 11 landing site, Sea of Tranquility, Moon",
+  "environment": { "kind": "moon", "gravity": 1.62, "sky": "space", "rockScale": 0.8 },
+  "terrain": {
+    "url": "/terrain/apollo11.bin",
+    "gridW": 512,
+    "gridH": 512,
+    "widthUnits": 255.5,
+    "depthUnits": 255.5,
+    "zMinUnits": -16.42,
+    "zMaxUnits": 4.303,
+    "metersPerUnit": 19.6,
+    "verticalMetersPerUnit": 5,
+    "detailAmplitude": 0.18,
+    "viewRadius": 30000
+  },
+  "terrainCredit": "Terrain: NASA 3D Resources \"Apollo 11 – Landing Site\" elevation model (tilt removed), scaled so the largest crater is ~180 m wide. Rocks, colours and lighting are artistic; positions are approximate.",
+  "spawn": { "x": -945, "z": 1550, "lookAt": { "x": -963, "z": 1543 } },
+  "sun": { "azimuthDeg": 90, "elevationDeg": 12 },
+  "fogDensity": 0,
+  "dioramaExaggeration": 6,
+  "models": [
+    { "name": "Eagle (Lunar Module)", "model": "/models/lunar-module.glb", "x": -963, "z": 1543, "yawDeg": 30, "sizeM": 9.4, "credit": "Apollo Lunar Module model: NASA 3D Resources" }
+  ],
+  "conditions": [
+    { "label": "Gravity", "value": "0.17 g (1.62 m/s²)" },
+    { "label": "Air", "value": "Essentially none: a very thin exosphere" },
+    { "label": "Ground", "value": "Charcoal-grey powdery regolith" },
+    { "label": "Sky", "value": "Black, even in daytime" }
+  ],
+  "conditionsSource": { "label": "NASA Science – Moon Facts", "url": "https://science.nasa.gov/moon/facts/" },
+  "hotspots": [
+    {
+      "id": "a11-eagle",
+      "body": "moon",
+      "anchor": { "type": "site", "x": -963, "z": 1543, "y": 7 },
+      "title": "The Eagle has landed",
+      "short": "Apollo 11's lunar module Eagle landed here on 20 July 1969 with Neil Armstrong and Buzz Aldrin.",
+      "detail": "About 109 hours and 42 minutes after launch, Armstrong stepped onto the Moon. He and Aldrin spent 21 hours and 36 minutes on the surface before the ascent stage lifted off to rejoin Michael Collins in Columbia. The model is NASA's official lunar module; its position in this terrain is approximate.",
+      "kind": "fact",
+      "source": { "label": "NASA – Apollo 11 mission overview", "url": "https://www.nasa.gov/missions/apollo/apollo-11-mission-overview/" },
+      "guidePrompt": "What happened during Apollo 11's time on the Moon, minute by minute?"
+    },
+    {
+      "id": "a11-mission",
+      "body": "moon",
+      "anchor": { "type": "site", "x": -935, "z": 1528 },
+      "title": "Tranquility Base",
+      "short": "The first crewed landing on another world: the goal of the Apollo programme.",
+      "detail": "Apollo 11's primary objective was to land humans on the Moon and return them safely to Earth. The whole mission lasted about 195 hours before splashdown in the Pacific Ocean. Footprints left here can last a very long time because there is no wind or rain to erase them.",
+      "kind": "fact",
+      "source": { "label": "NASA – Apollo 11", "url": "https://www.nasa.gov/mission/apollo-11/" },
+      "guidePrompt": "Why did it matter so much that Apollo 11 landed on the Moon in 1969?"
+    },
+    {
+      "id": "a11-crater",
+      "body": "moon",
+      "anchor": { "type": "site", "x": -563, "z": 1543, "y": 20 },
+      "title": "A large fresh crater",
+      "short": "The biggest crater in this area; Eagle came down a few hundred metres from it.",
+      "detail": "Craters this sharp-rimmed are young by lunar standards. Rocks blasted out of them can litter the ground nearby, which made choosing a safe landing spot tricky. The identification of this crater with Apollo 11's famous 'West crater' is our best guess from the elevation model.",
+      "kind": "candidate",
+      "source": { "label": "NASA – Apollo 11 mission overview", "url": "https://www.nasa.gov/missions/apollo/apollo-11-mission-overview/" },
+      "guidePrompt": "Why do young craters on the Moon have sharp rims and boulders around them?"
+    },
+    {
+      "id": "a11-regolith",
+      "body": "moon",
+      "anchor": { "type": "site", "x": -952, "z": 1557 },
+      "title": "Lunar regolith",
+      "short": "Almost the whole Moon is covered by charcoal-grey powdery dust and rocky debris.",
+      "detail": "Regolith forms as micrometeorites and impacts grind rock down over billions of years. Below it lies fractured bedrock called the megaregolith. Without air, the dust you kick up here flies in clean arcs and falls straight back down instead of drifting in clouds.",
+      "kind": "fact",
+      "source": { "label": "NASA Science – Moon Facts", "url": "https://science.nasa.gov/moon/facts/" },
+      "guidePrompt": "What is lunar regolith made of, and why is it such a challenge for astronauts and machines?"
+    },
+    {
+      "id": "a11-whats-real",
+      "body": "moon",
+      "anchor": { "type": "site", "x": -940, "z": 1545 },
+      "title": "What's real in this scene?",
+      "short": "The ground shape is a NASA elevation model; small rocks, colours and the sky are artistic.",
+      "detail": "The landscape comes from NASA's 3D-print elevation model of the Apollo 11 site, with its tilt removed and an estimated scale. The lunar module is NASA's official model. On the Moon you weigh one sixth of your Earth weight, so jumps are slow and high.",
+      "kind": "illustration",
+      "source": { "label": "NASA 3D Resources", "url": "https://science.nasa.gov/3d-resources/" },
+      "guidePrompt": "How would walking and jumping feel in the Moon's one-sixth gravity?"
+    }
+  ]
+}
