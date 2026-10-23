@@ -99,4 +99,4 @@ export function retryScene() {
 }
 
 // Debug handle in dev builds: window.__loading
-if (import.meta.env.DEV) (window as unknown as { __loading: unknown }).__loading = { useLoading, reportProblem, retryScene }
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __loading: unknown }).__loading = { useLoading, reportProblem, retryScene }

@@ -27,6 +27,7 @@ import { InfoCard3D } from '../InfoCard'
 import { Button3D } from '../Button3D'
 import { GlassPanel, Icon, UI } from '../ui3d'
 import { makeFadeable, useFadeIn } from '../fade'
+import { reportProblem } from '../loading'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { DEFAULT_ENVIRONMENT, type Hotspot, type SiteContent, type SiteEnvironment, type SiteModel, type ViewMode } from '../types'
 import { EarthInSky, SpaceSun, StarSky } from '../space'
@@ -231,6 +232,7 @@ function Terrain({ site, hf, teleport, q }: { site: SiteContent; hf: HeightField
   // created in an effect (not useMemo) so React StrictMode's mount/unmount/mount gets a live worker
   useEffect(() => {
     const w = new Worker(new URL('./terrain.worker.ts', import.meta.url), { type: 'module' })
+    w.onerror = () => reportProblem('failed', site.name)
     setWorker(w)
     return () => w.terminate()
   }, [])
