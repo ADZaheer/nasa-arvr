@@ -17,7 +17,15 @@ import { QualityGovernor } from './QualityGovernor'
 import { StarSky } from './space'
 import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
 import { MissionTracker } from './MissionTracker'
-import { ComfortVignette, LoadingPanelVR, Prefetcher, SceneLoadTracker } from './smooth'
+import { ComfortVignette, LoadingPanelVR, Prefetcher, ProblemPanelVR, SceneLoadTracker } from './smooth'
+import { ErrorBoundary } from './ErrorBoundary'
+import { reportProblem, useLoading } from './loading'
+
+/** Rendered instead of a scene that crashed: turns it into the clear "Couldn't load" card. */
+function SceneFailed({ what }: { what: string }) {
+  useEffect(() => reportProblem('failed', what), [what])
+  return null
+}
 import { useSiteContent } from './content'
 import { BODY_BY_ID } from './bodies'
 import { useQuality } from './quality'
@@ -109,6 +117,7 @@ export function XRRoot() {
   const seated = useXRApp((s) => s.settings.seated)
   const sceneLabel = siteId ? (site?.name ?? 'the surface') : bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : 'the Solar System'
   const space = kind !== 'surface' && mode !== 'ar'
+  const retry = useLoading((s) => s.retry)
 
   return (
     <div className="xr-root">
@@ -128,6 +137,7 @@ export function XRRoot() {
           <MissionTracker />
           <SceneLoadTracker label={sceneLabel} sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
           <LoadingPanelVR />
+          <ProblemPanelVR />
           <ComfortVignette />
           <Prefetcher />
           <SoundDirector kind={kind} />
@@ -155,6 +165,7 @@ export function XRRoot() {
           {mode === 'gyro' && <GyroControls />}
           {mode === 'ar' && <ARPlacement />}
           <Stage kind={kind}>
+            <ErrorBoundary key={`${kind}:${bodyId}:${siteId}:${retry}`} fallback={<SceneFailed what={sceneLabel} />}>
             {kind === 'surface' ? (
               <SurfaceScene key={siteId} siteId={siteId!} mode={mode} />
             ) : bodyId ? (
@@ -162,6 +173,7 @@ export function XRRoot() {
             ) : (
               <SolarSystemHub tilt={mode === 'vr' || mode === 'gyro' ? 0.35 : 0} />
             )}
+            </ErrorBoundary>
           </Stage>
           <GazeDwell enabled={mode !== 'desktop'} distance={mode === 'gyro' ? 1.5 : 0.8} />
           {mode === 'ar' && (

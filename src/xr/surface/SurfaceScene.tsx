@@ -26,6 +26,7 @@ import { FONT, FONT_BOLD } from '../font'
 import { InfoCard3D } from '../InfoCard'
 import { Button3D } from '../Button3D'
 import { GlassPanel, Icon, UI } from '../ui3d'
+import { makeFadeable, useFadeIn } from '../fade'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { DEFAULT_ENVIRONMENT, type Hotspot, type SiteContent, type SiteEnvironment, type SiteModel, type ViewMode } from '../types'
 import { EarthInSky, SpaceSun, StarSky } from '../space'
@@ -355,8 +356,9 @@ function Rover({ rover, hf, shadows }: { rover: SiteModel; hf: HeightField; shad
       o.castShadow = shadows
       o.receiveShadow = shadows
     })
-    return c
+    return { c, fading: makeFadeable(c) }
   }, [scene, rover, shadows])
+  useFadeIn(obj.fading, 0.9)
   // rovers hum softly in 3D (spacecraft and landers are silent)
   const hums = /rover|perseverance|curiosity|opportunity/i.test(rover.name)
   useFrame(() => {
@@ -364,7 +366,7 @@ function Rover({ rover, hf, shadows }: { rover: SiteModel; hf: HeightField; shad
   })
   return (
     <group position={[rover.x, hf.heightAt(rover.x, rover.z) + (rover.y ?? 0), rover.z]} rotation={[0, rover.yawDeg * DEG, 0]}>
-      <primitive object={obj} />
+      <primitive object={obj.c} />
     </group>
   )
 }

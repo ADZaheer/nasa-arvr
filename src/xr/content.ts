@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { BodyContent, SiteContent } from './types'
+import { reportProblem, useLoading } from './loading'
 
 // content/bodies/<id>.json and content/sites/<id>.json, bundled lazily (one chunk each)
 const bodyLoaders = import.meta.glob<BodyContent>('/content/bodies/*.json', { import: 'default' })
@@ -10,7 +11,14 @@ function load<T>(loaders: Record<string, () => Promise<T>>, key: string): Promis
   let p = cache.get(key) as Promise<T | null> | undefined
   if (!p) {
     const loader = loaders[key]
-    p = loader ? loader().catch(() => null) : Promise.resolve(null)
+    p = loader
+      ? loader().catch(() => {
+          // a failed download is not "no content": forget it so Retry fetches again, and say so
+          cache.delete(key)
+          reportProblem('failed', key.split('/').pop()!.replace('.json', ''))
+          return null
+        })
+      : Promise.resolve(null)
     cache.set(key, p)
   }
   return p
@@ -32,6 +40,7 @@ export const SITE_IDS = Object.keys(siteLoaders).map((k) => k.replace(/^.*\/(.+)
 
 function useLoaded<T>(id: string | null, loader: (id: string) => Promise<T | null>): T | null | undefined {
   const [state, setState] = useState<{ id: string | null; value: T | null | undefined }>({ id, value: undefined })
+  const retry = useLoading((s) => s.retry)
   useEffect(() => {
     if (!id) return
     let alive = true
@@ -39,7 +48,7 @@ function useLoaded<T>(id: string | null, loader: (id: string) => Promise<T | nul
     return () => {
       alive = false
     }
-  }, [id, loader])
+  }, [id, loader, retry])
   if (!id) return null
   return state.id === id ? state.value : undefined
 }

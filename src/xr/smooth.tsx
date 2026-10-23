@@ -2,11 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Text, useGLTF } from '@react-three/drei'
 import { useStore } from 'zustand'
-import { BackSide, Group, MeshBasicMaterial, ShaderMaterial } from 'three'
+import { BackSide, Group, MeshBasicMaterial, ShaderMaterial, Vector3 } from 'three'
 import { useXRApp } from './store'
 import { xrStore } from './xrStore'
 import { viewCamera } from './viewCamera'
-import { beginScene, beginTask, endTask, useLoading } from './loading'
+import { beginScene, beginTask, endTask, reportProblem, retryScene, useLoading, type Problem } from './loading'
+import { Appear, Button, GlassPanel, Icon, Label, UI } from './ui3d'
 import { useSitesForBody } from './content'
 import { FONT, FONT_BOLD } from './font'
 
@@ -21,7 +22,8 @@ export function SceneLoadTracker({ label, sceneKey }: { label: string; sceneKey:
   useEffect(() => {
     beginScene(label)
     beginTask('scene')
-    const t = setTimeout(() => endTask('scene'), 15000)
+    // still not ready after 15 s: say so (offline / slow) with Retry, rather than a black or empty view
+    const t = setTimeout(() => useLoading.getState().active && reportProblem('slow', label), 15000)
     return () => clearTimeout(t)
   }, [sceneKey]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
@@ -163,4 +165,51 @@ export function Prefetcher() {
     }
   }, [idle, sites])
   return null
+}
+
+export const PROBLEM_TEXT: Record<Problem['kind'], { title: (what: string) => string; body: string }> = {
+  offline: { title: () => 'You are offline', body: 'This place needs an internet connection the first time. Places you have already visited still work.' },
+  failed: { title: (w) => `Couldn't load ${w}`, body: 'The download failed. Check your connection and try again.' },
+  slow: { title: (w) => `${w} is taking a while`, body: 'It is still downloading on a slow connection. Keep waiting, retry, or go somewhere else.' },
+}
+
+/** In a headset: the problem card floats in front of you with Retry and a way home (never an empty scene). */
+export function ProblemPanelVR() {
+  const session = useStore(xrStore, (s) => s.session)
+  const problem = useLoading((s) => s.problem)
+  const g = useRef<Group>(null)
+  const v = useMemo(() => ({ head: new Vector3(), fwd: new Vector3(), target: new Vector3(), placed: false }), [])
+  useEffect(() => {
+    v.placed = false
+  }, [problem, v])
+  useFrame(({ camera, gl }, dt) => {
+    const o = g.current
+    if (!o) return
+    const cam = viewCamera(gl, camera)
+    cam.getWorldPosition(v.head)
+    cam.getWorldDirection(v.fwd)
+    v.fwd.y = 0
+    v.fwd.normalize()
+    v.target.copy(v.head).addScaledVector(v.fwd, 1.1)
+    if (!v.placed) o.position.copy(v.target)
+    else o.position.lerp(v.target, 1 - Math.exp(-dt * 1.5))
+    v.placed = true
+    o.lookAt(v.head.x, o.position.y, v.head.z)
+  })
+  if (!session || !problem) return null
+  const text = PROBLEM_TEXT[problem.kind]
+  return (
+    <group ref={g}>
+      <Appear>
+        <group scale={0.18}>
+          <GlassPanel width={2.6} height={1.25} radius={0.16} />
+          <Icon name={problem.kind === 'slow' ? 'refresh' : 'warning'} size={0.22} color={UI.warn} position={[-1.08, 0.4, 0.004]} />
+          <Label text={text.title(problem.what)} position={[-0.88, 0.4, 0.005]} size={UI.type.title} bold maxWidth={2.1} />
+          <Label text={text.body} position={[-1.15, 0.05, 0.005]} size={UI.type.body} color={UI.muted} maxWidth={2.3} />
+          <Button label="Retry" icon="refresh" tone="accent" onPress={retryScene} position={[-0.62, -0.38, 0]} width={1.1} height={0.3} />
+          <Button label="Solar System" icon="back" onPress={() => useXRApp.getState().selectBody(null)} position={[0.62, -0.38, 0]} width={1.1} height={0.3} />
+        </group>
+      </Appear>
+    </group>
+  )
 }

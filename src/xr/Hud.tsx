@@ -7,7 +7,8 @@ import { BODIES, BODY_BY_ID, KIND_COLORS } from './bodies'
 import { hasContent, useBodyContent, useSiteContent, useSitesForBody } from './content'
 import { InfoCardPanel, KIND_LABEL } from './InfoCard'
 import { MenuPanel } from './MenuPanel'
-import { useLoading } from './loading'
+import { retryScene, useLoading } from './loading'
+import { PROBLEM_TEXT } from './smooth'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
 
@@ -161,6 +162,8 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
 
       {(!session || inAR) && <MenuPanel />}
       <LoadingCard />
+      <ProblemCard />
+      <OfflinePill />
       <MissionBanner />
       <InfoCardPanel />
       {toast && (
@@ -300,6 +303,38 @@ function LoadingCard() {
         <i style={{ width: `${Math.max(3, progress * 100)}%` }} />
       </div>
       <small>{tip}</small>
+    </div>
+  )
+}
+
+/** Something went wrong or is very slow: say what, and offer Retry and a way home (never an empty scene). */
+function ProblemCard() {
+  const problem = useLoading((s) => s.problem)
+  if (!problem) return null
+  const text = PROBLEM_TEXT[problem.kind]
+  return (
+    <div className="problem-card" role="alert">
+      <strong>{text.title(problem.what)}</strong>
+      <p>{text.body}</p>
+      <div className="problem-card__actions">
+        <button className="btn btn--primary" onClick={retryScene}>
+          Retry
+        </button>
+        <button className="btn" onClick={() => useXRApp.getState().selectBody(null)}>
+          Solar System
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function OfflinePill() {
+  const offline = useLoading((s) => s.offline)
+  const problem = useLoading((s) => s.problem)
+  if (!offline || problem) return null
+  return (
+    <div className="offline-pill" role="status">
+      Offline · places you have visited still work
     </div>
   )
 }

@@ -192,3 +192,17 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .loading-spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #1b2c2e; border-top-color: #2bb8b0; animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; } }
+
+/* ---- problems / offline ---- */
+.problem-card {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(400px, calc(100vw - 32px)); z-index: 21;
+  display: grid; gap: 8px; padding: 20px; text-align: left;
+  background: rgba(8, 16, 22, 0.92); border: 1px solid rgba(255, 204, 85, 0.45); border-radius: 18px;
+}
+.problem-card strong { font-weight: 500; font-size: 17px; color: #ffcc55; }
+.problem-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.problem-card__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.offline-pill {
+  position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 15; pointer-events: none;
+  padding: 6px 14px; border-radius: 999px; font-size: 13px; background: rgba(60, 40, 8, 0.85); color: #ffcc55; border: 1px solid rgba(255, 204, 85, 0.4);
+}

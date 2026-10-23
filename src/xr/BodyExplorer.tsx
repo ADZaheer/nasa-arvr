@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Billboard, Text, useGLTF, useTexture } from '@react-three/drei'
-import { SRGBColorSpace, SphereGeometry, Vector2, type BufferGeometry, type Group, type Mesh } from 'three'
+import { MeshStandardMaterial, SRGBColorSpace, SphereGeometry, Vector2, type BufferGeometry, type Group, type Material, type Mesh } from 'three'
 import { useBodyContent, useSitesForBody } from './content'
 import { BODY_BY_ID } from './bodies'
 import { makeLumpyGeometry } from './geo'
@@ -17,15 +17,16 @@ import { useQuality } from './quality'
 import { Atmosphere } from './space'
 import { BennuEjecta } from './surface/particles'
 import { SceneReady } from './smooth'
+import { useMaterialFadeIn } from './fade'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
 const block = (e: ThreeEvent<PointerEvent | MouseEvent>) => e.stopPropagation()
 
-function BodyMesh({ geometry, children }: { geometry: BufferGeometry; children: React.ReactNode }) {
+function BodyMesh({ geometry, material, children }: { geometry: BufferGeometry; material?: Material; children?: React.ReactNode }) {
   const ref = useRef<Mesh>(null)
   useDwellOccluder(ref)
   return (
-    <mesh ref={ref} geometry={geometry} onPointerOver={block} onClick={block}>
+    <mesh ref={ref} geometry={geometry} material={material} onPointerOver={block} onClick={block}>
       {children}
     </mesh>
   )
@@ -33,28 +34,26 @@ function BodyMesh({ geometry, children }: { geometry: BufferGeometry; children: 
 
 const sphere = withBVH(new SphereGeometry(1, 96, 64))
 
-function TexturedPlanet({ url, relief }: { url: string; relief?: string }) {
-  const map = useTexture(url)
-  map.colorSpace = SRGBColorSpace
-  map.anisotropy = 8
+function TexturedPlanet({ url, relief, color }: { url: string; relief?: string; color: string }) {
+  // colour map + (Mars) MOLA relief normal map arrive together, then fade in over the plain-colour globe
+  const maps = useTexture(relief ? [url, relief] : [url])
+  const material = useMemo(() => {
+    const [map, normalMap] = maps
+    map.colorSpace = SRGBColorSpace
+    map.anisotropy = 8
+    if (normalMap) normalMap.anisotropy = 8
+    return new MeshStandardMaterial({ map, normalMap: normalMap ?? null, normalScale: new Vector2(1.2, 1.2), roughness: normalMap ? 0.95 : 1, metalness: 0 })
+  }, [maps])
+  useEffect(() => () => material.dispose(), [material])
+  useMaterialFadeIn(material)
   return (
-    <BodyMesh geometry={sphere}>
-      {relief ? (
-        <Suspense fallback={<meshStandardMaterial map={map} roughness={1} metalness={0} />}>
-          <ReliefMaterial map={map} relief={relief} />
-        </Suspense>
-      ) : (
-        <meshStandardMaterial map={map} roughness={1} metalness={0} />
-      )}
-    </BodyMesh>
+    <>
+      <mesh geometry={sphere} scale={0.996}>
+        <meshStandardMaterial color={color} roughness={1} />
+      </mesh>
+      <BodyMesh geometry={sphere} material={material} />
+    </>
   )
-}
-
-/** Real topography as lighting: normal map from the MGS MOLA laser-altimeter grid (scripts/build-assets.mjs). */
-function ReliefMaterial({ map, relief }: { map: ReturnType<typeof useTexture>; relief: string }) {
-  const normalMap = useTexture(relief)
-  normalMap.anisotropy = 8
-  return <meshStandardMaterial map={map as never} normalMap={normalMap} normalScale={new Vector2(1.2, 1.2)} roughness={0.95} metalness={0} />
 }
 
 function PlainPlanet({ color }: { color: string }) {
@@ -166,7 +165,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
         ) : content?.texture ? (
           <ErrorBoundary fallback={<PlainPlanet color={color} />}>
             <Suspense fallback={<PlainPlanet color={color} />}>
-              <TexturedPlanet url={content.texture} relief={id === 'mars' && q.marsRelief ? `/textures/mars_normal_${q.marsRelief}.png` : undefined} />
+              <TexturedPlanet url={content.texture} color={color} relief={id === 'mars' && q.marsRelief ? `/textures/mars_normal_${q.marsRelief}.png` : undefined} />
             </Suspense>
           </ErrorBoundary>
         ) : (

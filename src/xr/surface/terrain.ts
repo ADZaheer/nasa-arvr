@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, PlaneGeometry, RepeatWrapping, SRGBColorSpace } from 'three'
 import type { SiteContent, SiteTerrain } from '../types'
+import { reportProblem, useLoading } from '../loading'
 
 /** Ground height in metres at world (x east, z south), terrain centred on the origin. */
 export interface HeightField {
@@ -68,6 +69,7 @@ export function loadHeightField(t: SiteTerrain): Promise<HeightField> {
         return r.arrayBuffer()
       })
       .then((buf) => makeHeightField(t, new Uint16Array(buf)))
+    p.catch(() => hfCache.delete(t.url))
     hfCache.set(t.url, p)
   }
   return p
@@ -75,16 +77,20 @@ export function loadHeightField(t: SiteTerrain): Promise<HeightField> {
 
 export function useHeightField(site: SiteContent | null | undefined): HeightField | null {
   const [hf, setHf] = useState<{ url: string; hf: HeightField } | null>(null)
+  const retry = useLoading((s) => s.retry)
   useEffect(() => {
     if (!site) return
     let alive = true
     loadHeightField(site.terrain)
       .then((h) => alive && setHf({ url: site.terrain.url, hf: h }))
-      .catch((e) => console.warn('[surface]', e))
+      .catch((e) => {
+        console.warn('[surface]', e)
+        if (alive) reportProblem('failed', site.name)
+      })
     return () => {
       alive = false
     }
-  }, [site])
+  }, [site, retry])
   return site && hf?.url === site.terrain.url ? hf.hf : null
 }
 
