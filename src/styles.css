@@ -178,3 +178,17 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .menu-panel { animation: panel-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.1); transform-origin: top right; }
 @keyframes panel-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .info-card, .menu-panel, .mission-card { animation: none; } .btn, .chip { transition: none; } }
+
+/* ---- loading ---- */
+.loading-card {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(380px, calc(100vw - 32px)); z-index: 20;
+  display: grid; justify-items: center; gap: 10px; text-align: center; padding: 22px 20px;
+  background: rgba(4, 10, 14, 0.82); border: 1px solid rgba(43, 184, 176, 0.35); border-radius: 18px; pointer-events: none !important;
+}
+.loading-card strong { font-weight: 500; font-size: 16px; }
+.loading-card small { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.loading-bar { width: 100%; height: 6px; border-radius: 3px; background: #1b2c2e; overflow: hidden; }
+.loading-bar i { display: block; height: 100%; background: linear-gradient(90deg, #2bb8b0, #6fe7dc); transition: width 0.25s ease; }
+.loading-spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #1b2c2e; border-top-color: #2bb8b0; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; } }

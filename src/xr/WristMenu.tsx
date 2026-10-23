@@ -94,7 +94,7 @@ function WristAnchor({ space, isHand, controller }: { space: XRSpace; isHand: bo
 
 function MenuPanel3D() {
   const [tab, setTab] = useState<MenuTab>('travel')
-  const W = 2.6, H = 3.1
+  const W = 2.6, H = 3.5
   return (
     <group scale={0.07}>
       <mesh position={[0, 0, -0.01]}>

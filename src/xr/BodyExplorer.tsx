@@ -16,6 +16,7 @@ import { FONT, FONT_BOLD } from './font'
 import { useQuality } from './quality'
 import { Atmosphere } from './space'
 import { BennuEjecta } from './surface/particles'
+import { SceneReady } from './smooth'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
 const block = (e: ThreeEvent<PointerEvent | MouseEvent>) => e.stopPropagation()
@@ -175,6 +176,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
         {id === 'bennu' && q.bursts && <BennuEjecta surface={geometry ? (geometry.attributes.position.array as Float32Array) : null} />}
       </group>
 
+      {content !== undefined && <SceneReady />}
       {id === 'mars' && <Atmosphere color="#e3a07a" intensity={0.9} />}
       <Billboard position={[0, 1.38, 0]}>
         <Text font={FONT_BOLD} fontSize={0.16} color="#ffffff" anchorY="bottom" outlineWidth={0.006} outlineColor="#000">

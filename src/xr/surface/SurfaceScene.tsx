@@ -34,6 +34,7 @@ import { useGroundMaterial, useRockMaterial } from './materials'
 import { DustDevils, DustField, FootstepDust, emitPuff } from './particles'
 import { useQuality, type TierParams } from '../quality'
 import { Grabbables } from './Grabbables'
+import { SceneReady, comfort } from '../smooth'
 import { useXRInputSourceState } from '@react-three/xr'
 import { EYE_HEIGHT, input, player, world } from './player'
 import { withBVH } from '../bvh'
@@ -265,7 +266,10 @@ function Terrain({ site, hf, teleport, q }: { site: SiteContent; hf: HeightField
   return (
     <>
       {geometry && (
-        <mesh geometry={geometry} material={material} pointerEvents="none" receiveShadow />
+        <>
+          <mesh geometry={geometry} material={material} pointerEvents="none" receiveShadow />
+          <SceneReady />
+        </>
       )}
       {teleport && <TeleportCollider hf={hf} center={center} />}
     </>
@@ -635,6 +639,8 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
   const right = useXRInputSourceState('controller', 'right')
   const left = useXRInputSourceState('controller', 'left')
   const hop = useRef({ h: 0, v: 0, was: false })
+  const seated = useXRApp((s) => s.settings.seated)
+  const last = useRef({ x: 0, z: 0, yaw: 0, init: false })
   useFrame((_, dt) => {
     const o = origin.current
     if (!o) return
@@ -654,7 +660,20 @@ function VRWalker({ site, hf }: { site: SiteContent; hf: HeightField }) {
       hop.current.h = Math.max(0, hop.current.h + hop.current.v * Math.min(dt, 0.05))
       if (hop.current.h === 0) hop.current.v = 0
     }
-    o.position.y = ground + hop.current.h
+    o.position.y = ground + hop.current.h + (seated ? 0.5 : 0)
+    // comfort vignette: how fast the stick is moving/turning you (not your own head motion)
+    const L = last.current
+    if (L.init) {
+      const step = Math.min(dt, 0.05) || 0.016
+      const speed = Math.hypot(o.position.x - L.x, o.position.z - L.z) / step
+      let turn = Math.abs(o.rotation.y - L.yaw)
+      if (turn > Math.PI) turn = 2 * Math.PI - turn
+      comfort.motion = Math.min(1, speed / 2.5 + (turn > 0.2 ? 1 : turn / step / 1.5))
+    }
+    L.x = o.position.x
+    L.z = o.position.z
+    L.yaw = o.rotation.y
+    L.init = true
     const camera = viewCamera(gl, defaultCamera)
     camera.getWorldPosition(head)
     camera.getWorldDirection(dir)
@@ -733,6 +752,7 @@ function Diorama({ site, hf }: { site: SiteContent; hf: HeightField }) {
       <mesh geometry={geometry}>
         <meshStandardMaterial vertexColors roughness={1} />
       </mesh>
+      <SceneReady />
       <mesh position={[site.spawn.x * s, spawnY + 0.02, site.spawn.z * s]} rotation={[Math.PI, 0, 0]}>
         <coneGeometry args={[0.008, 0.03, 12]} />
         <meshBasicMaterial color="#4fd1ff" toneMapped={false} />

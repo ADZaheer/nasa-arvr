@@ -28,9 +28,13 @@ export interface XRSettings {
   musicVolume: number
   /** effects + ambience volume 0..1 */
   sfxVolume: number
+  /** VR comfort vignette while moving with the stick */
+  vignette: boolean
+  /** seated play: raises your viewpoint by 0.5 m in VR */
+  seated: boolean
 }
 
-export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8 }
+export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8, vignette: true, seated: false }
 
 /**
  * Shared app state for the XR module. The web viewer can read/write the same store

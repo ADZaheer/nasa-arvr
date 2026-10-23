@@ -9,6 +9,7 @@ import { useXRApp } from './store'
 import { viewCamera } from './viewCamera'
 import { applyMix, setAirlessSteps, setAmbience, updateListener, type Mood } from './feedback'
 import { useSiteContent } from './content'
+import { useLoading } from './loading'
 import type { TierParams } from './quality'
 
 /**
@@ -26,7 +27,8 @@ export function TransitionVeil({ sceneKey }: { sceneKey: string }) {
   useFrame(({ camera, gl }, dt) => {
     const m = ref.current
     if (!m) return
-    t.current = Math.max(0, t.current - Math.min(dt, 0.05) / 0.9)
+    // stay black while the new scene loads, then fade in
+    t.current = useLoading.getState().active ? 1 : Math.max(0, t.current - Math.min(dt, 0.05) / 0.9)
     material.opacity = t.current * t.current
     m.visible = t.current > 0.001
     viewCamera(gl, camera).getWorldPosition(m.position)

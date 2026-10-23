@@ -7,6 +7,7 @@ import { BODIES, BODY_BY_ID, KIND_COLORS } from './bodies'
 import { hasContent, useBodyContent, useSiteContent, useSitesForBody } from './content'
 import { InfoCardPanel, KIND_LABEL } from './InfoCard'
 import { MenuPanel } from './MenuPanel'
+import { useLoading } from './loading'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
 
@@ -159,6 +160,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {surface && inAR && <p className="notice">Tabletop model of {site?.name}. Exit AR and use Enter VR or Look around to stand on it.</p>}
 
       {(!session || inAR) && <MenuPanel />}
+      <LoadingCard />
       <MissionBanner />
       <InfoCardPanel />
       {toast && (
@@ -273,4 +275,31 @@ function MissionBanner() {
 function jumpHint(g: number) {
   if (g < 0.05) return 'no jumping here (you would reach escape speed!)'
   return `Space jump (${Math.round((g / 9.81) * 100)}% of Earth's gravity)`
+}
+
+const LOADING_TIPS = [
+  'Tip: point at a glowing pin and select it to learn about it.',
+  'Tip: on the surface, grab a loose rock and throw it in low gravity.',
+  'Tip: open the menu (left palm up in VR, or ⚙ Menu) for missions and travel.',
+  'Fact: Mars’ gravity is 38% of Earth’s; the Moon’s is 17%.',
+  'Fact: Bennu is so small that a gentle toss can send a pebble into space.',
+]
+
+/** On-screen loading card with progress while a scene is prepared. */
+function LoadingCard() {
+  const active = useLoading((s) => s.active)
+  const label = useLoading((s) => s.label)
+  const progress = useLoading((s) => s.progress)
+  const [tip] = useState(() => LOADING_TIPS[Math.floor(Math.random() * LOADING_TIPS.length)])
+  if (!active) return null
+  return (
+    <div className="loading-card" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label={`Preparing ${label}`}>
+      <div className="loading-spinner" aria-hidden />
+      <strong>Preparing {label}…</strong>
+      <div className="loading-bar">
+        <i style={{ width: `${Math.max(3, progress * 100)}%` }} />
+      </div>
+      <small>{tip}</small>
+    </div>
+  )
 }

@@ -8,6 +8,7 @@ import { useXRApp } from './store'
 import { useDwellTarget } from './dwell'
 import { FONT, FONT_BOLD } from './font'
 import { Sun } from './space'
+import { SceneReady } from './smooth'
 
 const GOLDEN = 2.39996
 
@@ -25,6 +26,7 @@ function hubPosition(b: BodyInfo, i: number): [number, number, number] {
 export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
   return (
     <group rotation={[tilt, 0, 0]}>
+      <SceneReady />
       {BODIES.filter((b) => b.orbit > 0 && !b.parent).map((b) => (
         <mesh key={`orbit-${b.id}`} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[b.orbit - 0.004, b.orbit + 0.004, 128]} />

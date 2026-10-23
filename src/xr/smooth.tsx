@@ -1,0 +1,166 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
+import { Text, useGLTF } from '@react-three/drei'
+import { useStore } from 'zustand'
+import { BackSide, Group, MeshBasicMaterial, ShaderMaterial } from 'three'
+import { useXRApp } from './store'
+import { xrStore } from './xrStore'
+import { viewCamera } from './viewCamera'
+import { beginScene, beginTask, endTask, useLoading } from './loading'
+import { useSitesForBody } from './content'
+import { FONT, FONT_BOLD } from './font'
+
+/** Motion of the VR player (0 = still, 1 = fast), written by the VR walker, read by the comfort vignette. */
+export const comfort = { motion: 0 }
+
+/**
+ * Starts loading tracking whenever the scene changes; the scene's own <SceneReady/> ends it once its
+ * essentials exist and shaders are compiled. A safety timeout ends it after 15 s regardless.
+ */
+export function SceneLoadTracker({ label, sceneKey }: { label: string; sceneKey: string }) {
+  useEffect(() => {
+    beginScene(label)
+    beginTask('scene')
+    const t = setTimeout(() => endTask('scene'), 15000)
+    return () => clearTimeout(t)
+  }, [sceneKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  return null
+}
+
+/** Render inside a scene once it has what it needs: compiles shaders up front (no first-frame hitch), then ends loading. */
+export function SceneReady() {
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
+  useEffect(() => {
+    let alive = true
+    const done = () => alive && endTask('scene')
+    // wait one frame so freshly mounted objects are in the scene graph
+    const id = requestAnimationFrame(() => {
+      const r = gl as unknown as { compileAsync?: (s: unknown, c: unknown) => Promise<void> }
+      if (r.compileAsync) r.compileAsync(scene, camera).then(done, done)
+      else {
+        gl.compile(scene, camera)
+        done()
+      }
+    })
+    return () => {
+      alive = false
+      cancelAnimationFrame(id)
+    }
+  }, [gl, scene, camera])
+  return null
+}
+
+/** While a scene loads in a headset: progress text floating in front of you inside the black veil. */
+export function LoadingPanelVR() {
+  const session = useStore(xrStore, (s) => s.session)
+  const active = useLoading((s) => s.active)
+  const label = useLoading((s) => s.label)
+  const progress = useLoading((s) => s.progress)
+  const g = useRef<Group>(null)
+  const mat = useMemo(() => new MeshBasicMaterial({ fog: false, toneMapped: false, depthTest: false, transparent: true }), [])
+  useFrame(({ camera, gl }) => {
+    const o = g.current
+    if (!o) return
+    const cam = viewCamera(gl, camera)
+    cam.getWorldPosition(o.position)
+    cam.getWorldQuaternion(o.quaternion)
+    o.translateZ(-0.45)
+  })
+  if (!session || !active) return null
+  return (
+    <group ref={g} renderOrder={10002}>
+      <Text font={FONT_BOLD} material={mat} fontSize={0.028} color="#ffffff" anchorX="center" anchorY="bottom" renderOrder={10002}>
+        {`Preparing ${label}…`}
+      </Text>
+      <mesh position={[0, -0.02, 0]} renderOrder={10002}>
+        <planeGeometry args={[0.24, 0.006]} />
+        <meshBasicMaterial color="#24393b" depthTest={false} toneMapped={false} />
+      </mesh>
+      <mesh position={[-0.12 + 0.12 * progress, -0.02, 0.001]} renderOrder={10003}>
+        <planeGeometry args={[0.24 * Math.max(0.02, progress), 0.006]} />
+        <meshBasicMaterial color="#2bb8b0" depthTest={false} toneMapped={false} />
+      </mesh>
+      <Text font={FONT} material={mat} position={[0, -0.04, 0]} fontSize={0.016} color="#8fd9d3" anchorX="center" anchorY="top" renderOrder={10002}>
+        {`${Math.round(progress * 100)}%`}
+      </Text>
+    </group>
+  )
+}
+
+/**
+ * Comfort vignette (VR): softly darkens the edges of your view while you move or turn with the stick,
+ * which reduces motion sickness (a standard technique in Quest apps). Off when you stand still.
+ */
+export function ComfortVignette() {
+  const enabled = useXRApp((s) => s.settings.vignette)
+  const session = useStore(xrStore, (s) => s.session)
+  const ref = useRef<Group>(null)
+  const level = useRef(0)
+  const material = useMemo(
+    () =>
+      new ShaderMaterial({
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        side: BackSide,
+        fog: false,
+        uniforms: { uAmount: { value: 0 } },
+        vertexShader: /* glsl */ `varying vec3 vDir; void main() { vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: /* glsl */ `
+          uniform float uAmount; varying vec3 vDir;
+          void main() {
+            float c = dot(normalize(vDir), vec3(0.0, 0.0, -1.0)); // 1 straight ahead
+            float inner = mix(0.98, 0.72, uAmount);
+            float a = smoothstep(inner, inner - 0.25, c) * uAmount;
+            gl_FragColor = vec4(0.0, 0.0, 0.0, a);
+          }`,
+      }),
+    [],
+  )
+  useEffect(() => () => material.dispose(), [material])
+  useFrame(({ camera, gl }, dt) => {
+    const o = ref.current
+    if (!o) return
+    const target = enabled ? Math.min(1, comfort.motion) : 0
+    level.current += (target - level.current) * Math.min(1, dt * 6)
+    material.uniforms.uAmount.value = level.current
+    o.visible = level.current > 0.01
+    const cam = viewCamera(gl, camera)
+    cam.getWorldPosition(o.position)
+    cam.getWorldQuaternion(o.quaternion)
+  })
+  if (!session) return null
+  return (
+    <group ref={ref} renderOrder={9999}>
+      <mesh material={material} renderOrder={9999} frustumCulled={false}>
+        <sphereGeometry args={[0.2, 32, 16]} />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * Streams the next likely scenes in the background: in a planet's orbit view, warms the HTTP cache with
+ * the terrain data and NASA models of its walkable sites, so landing is quick.
+ */
+export function Prefetcher() {
+  const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
+  const sites = useSitesForBody(siteId ? null : bodyId)
+  const [idle, setIdle] = useState(false)
+  useEffect(() => {
+    setIdle(false)
+    const t = setTimeout(() => setIdle(true), 3500)
+    return () => clearTimeout(t)
+  }, [bodyId, siteId])
+  useEffect(() => {
+    if (!idle) return
+    for (const s of sites) {
+      void fetch(s.terrain.url, { priority: 'low' } as RequestInit).catch(() => {})
+      for (const m of [...(s.rover ? [s.rover] : []), ...(s.models ?? [])]) useGLTF.preload(m.model)
+    }
+  }, [idle, sites])
+  return null
+}

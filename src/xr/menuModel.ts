@@ -69,6 +69,8 @@ export const COMFORT_CONTROLS: ControlSpec[] = [
     ],
   },
   { kind: 'slider', key: 'moveSpeed', label: 'Move speed', min: 0.5, max: 2, format: (v) => `${v.toFixed(1)}×` },
+  { kind: 'toggle', key: 'vignette', label: 'Comfort vignette (VR)' },
+  { kind: 'toggle', key: 'seated', label: 'Seated mode (VR)' },
   { kind: 'slider', key: 'labels', label: 'Labels', min: 0, max: 1, format: pct },
   { kind: 'toggle', key: 'pins', label: 'Pins & beacons' },
 ]

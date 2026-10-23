@@ -17,6 +17,9 @@ import { QualityGovernor } from './QualityGovernor'
 import { StarSky } from './space'
 import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
 import { MissionTracker } from './MissionTracker'
+import { ComfortVignette, LoadingPanelVR, Prefetcher, SceneLoadTracker } from './smooth'
+import { useSiteContent } from './content'
+import { BODY_BY_ID } from './bodies'
 import { useQuality } from './quality'
 
 /** Brightness setting → renderer tone-mapping exposure. */
@@ -102,6 +105,9 @@ export function XRRoot() {
   const showFps = useXRApp((s) => s.settings.showFps)
   const q = useQuality()
   const kind: SceneKind = siteId ? 'surface' : bodyId ? 'body' : 'hub'
+  const site = useSiteContent(siteId)
+  const seated = useXRApp((s) => s.settings.seated)
+  const sceneLabel = siteId ? (site?.name ?? 'the surface') : bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : 'the Solar System'
   const space = kind !== 'surface' && mode !== 'ar'
 
   return (
@@ -120,12 +126,16 @@ export function XRRoot() {
           <QualityGovernor />
           <HandStyler />
           <MissionTracker />
+          <SceneLoadTracker label={sceneLabel} sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
+          <LoadingPanelVR />
+          <ComfortVignette />
+          <Prefetcher />
           <SoundDirector kind={kind} />
           <ScreenEffects q={q} tier={q.tier} />
           <TransitionVeil sceneKey={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />
           {/* the surface VR walker has its own moving origin (with the wrist menu inside it) */}
           {(mode === 'vr' || mode === 'ar') && !(kind === 'surface' && mode === 'vr') && (
-            <XROrigin>
+            <XROrigin position={[0, seated ? 0.5 : 0, 0]}>
               <WristMenu />
             </XROrigin>
           )}
