@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useStore } from 'zustand'
-import { Quaternion, Ray, Sphere, Vector3, type Group, type Object3D } from 'three'
+import { Matrix4, Quaternion, Ray, Sphere, Vector3, type Group, type Object3D } from 'three'
 import { xrStore } from './xrStore'
 import { haptic } from './feedback'
 
@@ -33,7 +33,7 @@ export function useBodyManipulation(target: RefObject<Group | null>) {
   const grabs = useRef<Grab[]>([])
   const two = useRef<{ dist: number; scale: number; axis: Vector3 } | null>(null)
   const momentum = useRef({ axis: new Vector3(0, 1, 0), speed: 0 })
-  const v = useMemo(() => ({ c: new Vector3(), a: new Vector3(), b: new Vector3(), p: new Vector3(), q: new Quaternion(), s: new Vector3(), sphere: new Sphere(), ray: new Ray() }), [])
+  const v = useMemo(() => ({ c: new Vector3(), a: new Vector3(), b: new Vector3(), p: new Vector3(), q: new Quaternion(), s: new Vector3(), sphere: new Sphere(), ray: new Ray(), m: new Matrix4(), m2: new Matrix4() }), [])
 
   useEffect(() => {
     if (!session) return
@@ -55,8 +55,17 @@ export function useBodyManipulation(target: RefObject<Group | null>) {
       const near = p.distanceTo(v.c) < r * 1.35 + 0.12
       let pointing = false
       if (!near && !e.inputSource.hand) {
-        v.ray.origin.copy(p)
-        v.ray.direction.set(0, 0, -1).transformDirection(obj.matrixWorld)
+        // aim along the controller's pointing ray (target-ray space), not the grip's axis, which tilts down
+        v.m.copy(obj.matrixWorld)
+        const grip = e.inputSource.gripSpace
+        try {
+          const rel = grip ? e.frame.getPose(e.inputSource.targetRaySpace, grip) : null
+          if (rel) v.m.multiply(v.m2.fromArray(rel.transform.matrix))
+        } catch {
+          /* frame no longer active: fall back to the grip axis */
+        }
+        v.ray.origin.setFromMatrixPosition(v.m)
+        v.ray.direction.set(0, 0, -1).transformDirection(v.m)
         pointing = v.ray.intersectsSphere(v.sphere.set(v.c, r * 1.05))
       }
       if (!near && !pointing) return
