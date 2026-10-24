@@ -171,7 +171,8 @@ export function applyMix() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Generative music: slow pad chords + occasional bells, per mood.
+// Generative music, per mood: slow pad chords over a soft bass, bells, and in the B sections a gentle
+// arpeggio. A 2.5–3.5-minute form (A A B A' B) so it doesn't feel like a short loop; then it repeats.
 const MIDI = (n: number) => 440 * Math.pow(2, (n - 69) / 12)
 const PROGRESSIONS: Record<Mood, number[][]> = {
   space: [[48, 55, 62, 64, 71], [45, 52, 59, 60, 67], [41, 48, 55, 57, 64], [43, 50, 57, 59, 62]], // Cmaj9 Am9 Fmaj9 G6/9
@@ -179,6 +180,25 @@ const PROGRESSIONS: Record<Mood, number[][]> = {
   moon: [[40, 47, 55, 59], [36, 43, 52, 55], [38, 45, 50, 57], [40, 47, 54, 59]], // Em add9, Cmaj7, D sus, Em
   asteroid: [[37, 44, 49, 50], [39, 46, 50, 51], [36, 43, 47, 49], [38, 44, 49, 52]], // clustered, uneasy
 }
+/** Contrasting second section for each mood. */
+const B_SECTIONS: Record<Mood, number[][]> = {
+  space: [[41, 48, 55, 57, 64], [43, 50, 55, 59, 62], [40, 47, 55, 59, 62], [45, 52, 57, 60, 64]], // Fmaj9 G6/9 Em7 Am9
+  mars: [[43, 50, 57, 58, 62], [41, 48, 55, 57, 60], [46, 53, 57, 60, 65], [45, 52, 57, 61, 64]], // Gm9 Fadd9 Bbmaj7 A
+  moon: [[36, 43, 50, 55], [43, 50, 55, 59], [45, 52, 55, 59], [38, 45, 52, 57]], // C G Am D
+  asteroid: [[35, 42, 47, 48], [37, 44, 48, 49], [34, 41, 46, 47], [36, 43, 47, 49]],
+}
+type Section = 'A' | 'A2' | 'B' | 'rest'
+const FORM: Section[] = ['A', 'A', 'B', 'A2', 'B']
+function chordAt(m: Mood, i: number): { notes: number[]; section: Section } | null {
+  const section = FORM[Math.floor(i / 4) % FORM.length]
+  if (section === 'rest') return { notes: [], section }
+  const k = i % 4
+  if (section === 'B') return { notes: B_SECTIONS[m][k], section }
+  const a = PROGRESSIONS[m][k]
+  // A': the top voice lifts an octave, so the theme returns brighter
+  return { notes: section === 'A2' ? [...a.slice(0, -1), a[a.length - 1] + 12] : a, section }
+}
+
 let mood: Mood | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 let step = 0
@@ -211,6 +231,25 @@ function pad(c: AudioContext, freq: number, at: number, dur: number, bright: num
   g.connect(reverb!)
 }
 
+/** Soft plucked note for the arpeggio. */
+function pluck(c: AudioContext, freq: number, at: number, level: number) {
+  const o = c.createOscillator()
+  o.type = 'triangle'
+  o.frequency.value = freq
+  const f = c.createBiquadFilter()
+  f.type = 'lowpass'
+  f.frequency.value = 1800
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.0001, at)
+  g.gain.exponentialRampToValueAtTime(level, at + 0.015)
+  g.gain.exponentialRampToValueAtTime(0.0001, at + 1.6)
+  o.connect(f).connect(g)
+  g.connect(musicBus!)
+  g.connect(reverb!)
+  o.start(at)
+  o.stop(at + 1.7)
+}
+
 function bell(c: AudioContext, freq: number, at: number) {
   const o = c.createOscillator()
   o.type = 'sine'
@@ -232,19 +271,26 @@ function schedule() {
   const c = ctx
   if (!c || !mood || !on()) return
   const now = c.currentTime
-  const prog = PROGRESSIONS[mood]
   const chordLen = mood === 'moon' ? 12 : 9
   if (nextChord < now + 0.5) {
     const at = Math.max(now + 0.05, nextChord)
-    const chord = prog[step % prog.length]
-    const bright = mood === 'mars' ? 0.5 : mood === 'space' ? 0.8 : 0.25
-    for (const n of chord) pad(c, MIDI(n), at, chordLen, bright)
+    const cur = chordAt(mood, step)!
+    const bright = (mood === 'mars' ? 0.5 : mood === 'space' ? 0.8 : 0.25) + (cur.section === 'A2' ? 0.25 : 0)
+    for (const n of cur.notes) pad(c, MIDI(n), at, chordLen, bright)
+    // soft bass an octave under the root (not in the rests)
+    if (cur.notes.length) pad(c, MIDI(cur.notes[0] - 12), at, chordLen, 0.05)
+    // B sections: a slow arpeggio through the chord, rising then falling
+    if (cur.section === 'B' && mood !== 'asteroid') {
+      const tones = [...cur.notes.slice(1), ...cur.notes.slice(1, -1).reverse()]
+      const gap = mood === 'moon' ? 1.1 : 0.75
+      for (let i = 0; i * gap < chordLen - 1.5; i++) pluck(c, MIDI(tones[i % tones.length] + 12), at + 0.5 + i * gap, 0.022)
+    }
     step++
     nextChord = at + chordLen - 1.5 // overlap for smooth crossfades
   }
-  if (nextBell < now + 0.5 && mood !== 'asteroid') {
-    const chord = prog[(step + prog.length - 1) % prog.length]
-    const n = chord[Math.floor(Math.random() * chord.length)] + (Math.random() < 0.5 ? 24 : 12)
+  const ringing = chordAt(mood, Math.max(0, step - 1))!
+  if (nextBell < now + 0.5 && mood !== 'asteroid' && ringing.notes.length) {
+    const n = ringing.notes[Math.floor(Math.random() * ringing.notes.length)] + (Math.random() < 0.5 ? 24 : 12)
     bell(c, MIDI(n), Math.max(now + 0.05, nextBell))
     nextBell = now + (mood === 'moon' ? 5 : 2.5) + Math.random() * 4
   }

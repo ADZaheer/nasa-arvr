@@ -1,0 +1,166 @@
+{
+  "id": "gusev",
+  "body": "mars",
+  "name": "Gusev Crater",
+  "region": "Gusev Crater, Mars – Spirit's landing site",
+  "environment": {
+    "kind": "mars",
+    "gravity": 3.71,
+    "sky": "mars",
+    "rockScale": 1
+  },
+  "terrain": {
+    "url": "/terrain/gusev.bin",
+    "gridW": 384,
+    "gridH": 384,
+    "widthUnits": 74431.5,
+    "depthUnits": 76905.3,
+    "zMinUnits": -2150.391,
+    "zMaxUnits": -1530.865,
+    "metersPerUnit": 1,
+    "verticalMetersPerUnit": 1,
+    "detailAmplitude": 0.45,
+    "viewRadius": 120000
+  },
+  "terrainCredit": "Terrain: NASA MGS MOLA topography (MEGDR, 128 px/deg ≈ 460 m per sample) around Spirit’s landing site in Gusev Crater, from the NASA Planetary Data System. Near-ground detail, rocks, colours and sky are artistic.",
+  "spawn": {
+    "x": -4.8,
+    "z": -3.5,
+    "lookAt": {
+      "x": 4656,
+      "z": 3400
+    }
+  },
+  "sun": {
+    "azimuthDeg": 300,
+    "elevationDeg": 34
+  },
+  "fogDensity": 0.000026,
+  "dioramaExaggeration": 6,
+  "models": [
+    {
+      "name": "Spirit rover",
+      "model": "/models/opportunity.glb",
+      "x": 0,
+      "z": 0,
+      "yawDeg": 140,
+      "sizeM": 2.3,
+      "credit": "Rover model: NASA 3D Resources (Mars Exploration Rover; Spirit and Opportunity were identical twins)"
+    }
+  ],
+  "conditions": [
+    {
+      "label": "Gravity",
+      "value": "0.38 g (3.71 m/s²)"
+    },
+    {
+      "label": "Air",
+      "value": "Very thin, mostly carbon dioxide"
+    },
+    {
+      "label": "Equator at noon",
+      "value": "~24 °C at your feet, ~0 °C at your head"
+    },
+    {
+      "label": "Day length",
+      "value": "24.6 hours"
+    }
+  ],
+  "conditionsSource": {
+    "label": "NASA Science – Mars Facts",
+    "url": "https://science.nasa.gov/mars/facts/"
+  },
+  "hotspots": [
+    {
+      "id": "spirit-rover",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 0,
+        "z": 0,
+        "y": 1.2
+      },
+      "title": "Spirit rover",
+      "short": "Spirit landed here in Gusev Crater in January 2004, three weeks before its twin, Opportunity.",
+      "detail": "Spirit was planned to work for 90 sols (Mars days). It kept going for more than six years and drove about 7.7 km, until it got stuck in soft soil in 2009; its last message came in March 2010. The model is NASA’s Mars Exploration Rover, the design Spirit and Opportunity shared.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Spirit",
+        "url": "https://science.nasa.gov/mission/mer-spirit/"
+      },
+      "guidePrompt": "How did the Spirit rover keep working for six years when it was designed for 90 days?"
+    },
+    {
+      "id": "gusev-crater",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -1500,
+        "z": -1200
+      },
+      "title": "Gusev Crater",
+      "short": "A crater about 160 km wide. Scientists chose it because it might once have held a lake.",
+      "detail": "A long valley, Ma’adim Vallis, runs into Gusev’s rim, so scientists hoped to find lake sediments here. Spirit found the plains were mostly volcanic rock instead, but the nearby hills held clear signs that water had once altered the rocks.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Spirit",
+        "url": "https://science.nasa.gov/mission/mer-spirit/"
+      },
+      "guidePrompt": "Why did NASA send Spirit to Gusev Crater, and was there really a lake?"
+    },
+    {
+      "id": "columbia-hills",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 4656,
+        "z": 3400
+      },
+      "title": "Columbia Hills",
+      "short": "Low hills a few kilometres east-southeast of the landing site, named after the crew of Space Shuttle Columbia.",
+      "detail": "Spirit reached the hills in mid-2004 and climbed to the summit of Husband Hill in 2005. Their rocks showed much more evidence of water than the plains. In this elevation data the hills are smoothed out; the pin marks the highest nearby ground, so treat its position as approximate.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Spirit",
+        "url": "https://science.nasa.gov/mission/mer-spirit/"
+      },
+      "guidePrompt": "What did Spirit discover when it climbed Husband Hill in the Columbia Hills?"
+    },
+    {
+      "id": "home-plate",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 3300,
+        "z": 2400
+      },
+      "title": "Home Plate",
+      "short": "A layered volcanic plateau where Spirit found soil that is almost pure silica.",
+      "detail": "In 2007 Spirit’s stuck front wheel scraped up bright soil that turned out to be about 90% silica. On Earth, such deposits form around hot springs or steam vents, so Home Plate may once have been a warm, wet environment. The pin shows the general direction, not the exact spot.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Spirit",
+        "url": "https://science.nasa.gov/mission/mer-spirit/"
+      },
+      "guidePrompt": "Why does the silica Spirit found at Home Plate suggest hot springs on ancient Mars?"
+    },
+    {
+      "id": "gusev-whats-real",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -40,
+        "z": -30
+      },
+      "title": "What’s real in this scene?",
+      "short": "The crater floor and hills come from NASA’s MOLA laser altimeter; nearby rocks, colours and sky are artistic.",
+      "detail": "The elevation data has about 460 m between samples, so the wide plains and hills are real in shape but coarse. The ground at your feet and the rocks are generated detail. Spirit is shown with NASA’s Mars Exploration Rover model at real size.",
+      "kind": "illustration",
+      "source": {
+        "label": "NASA PDS – MGS MOLA MEGDR",
+        "url": "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html"
+      },
+      "guidePrompt": "How do scientists map the height of the Martian surface from orbit?"
+    }
+  ]
+}

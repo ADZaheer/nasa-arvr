@@ -1,0 +1,166 @@
+{
+  "id": "meridiani",
+  "body": "mars",
+  "name": "Eagle crater, Meridiani Planum",
+  "region": "Meridiani Planum, Mars – Opportunity's landing site",
+  "environment": {
+    "kind": "mars",
+    "gravity": 3.71,
+    "sky": "mars",
+    "rockScale": 1
+  },
+  "terrain": {
+    "url": "/terrain/meridiani.bin",
+    "gridW": 384,
+    "gridH": 384,
+    "widthUnits": 76860.9,
+    "depthUnits": 76905.3,
+    "zMinUnits": -1980.415,
+    "zMaxUnits": -1279.08,
+    "metersPerUnit": 1,
+    "verticalMetersPerUnit": 1,
+    "detailAmplitude": 0.45,
+    "viewRadius": 120000
+  },
+  "terrainCredit": "Terrain: NASA MGS MOLA topography (MEGDR, 128 px/deg ≈ 460 m per sample) around Opportunity’s landing site on Meridiani Planum, from the NASA Planetary Data System. Eagle crater itself is too small to appear in this data. Near-ground detail, rocks, colours and sky are artistic.",
+  "spawn": {
+    "x": -6,
+    "z": -0.5,
+    "lookAt": {
+      "x": 760,
+      "z": 60
+    }
+  },
+  "sun": {
+    "azimuthDeg": 160,
+    "elevationDeg": 40
+  },
+  "fogDensity": 0.00003,
+  "dioramaExaggeration": 10,
+  "models": [
+    {
+      "name": "Opportunity rover",
+      "model": "/models/opportunity.glb",
+      "x": 0,
+      "z": 0,
+      "yawDeg": 80,
+      "sizeM": 2.3,
+      "credit": "Rover model: NASA 3D Resources (Mars Exploration Rover; Spirit and Opportunity were identical twins)"
+    }
+  ],
+  "conditions": [
+    {
+      "label": "Gravity",
+      "value": "0.38 g (3.71 m/s²)"
+    },
+    {
+      "label": "Air",
+      "value": "Very thin, mostly carbon dioxide"
+    },
+    {
+      "label": "Equator at noon",
+      "value": "~24 °C at your feet, ~0 °C at your head"
+    },
+    {
+      "label": "Day length",
+      "value": "24.6 hours"
+    }
+  ],
+  "conditionsSource": {
+    "label": "NASA Science – Mars Facts",
+    "url": "https://science.nasa.gov/mars/facts/"
+  },
+  "hotspots": [
+    {
+      "id": "opp-landing",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 0,
+        "z": 0,
+        "y": 1.2
+      },
+      "title": "Opportunity’s landing site",
+      "short": "Opportunity bounced to a stop inside a tiny crater here in January 2004: a 300-million-mile hole in one.",
+      "detail": "Wrapped in airbags, the rover rolled into Eagle crater, only about 22 m across. Its walls exposed a ledge of layered bedrock right in front of the cameras, the first bedrock outcrop ever studied up close on Mars. Eagle crater is too small to show in this elevation data.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "Why was Opportunity’s landing in Eagle crater called a hole in one?"
+    },
+    {
+      "id": "blueberries",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -14,
+        "z": 10
+      },
+      "title": "Martian “blueberries”",
+      "short": "Small round grains of hematite that scientists nicknamed blueberries. They formed in water.",
+      "detail": "Opportunity found these BB-sized spheres spread across the ground and embedded in the rocks. Their chemistry and shape showed they grew inside rock soaked by groundwater, strong evidence that liquid water once soaked this area. The blueberries are not real fruit, and not blue: they only looked bluish in false-colour images.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "How did hematite blueberries help prove there was once water at Meridiani Planum?"
+    },
+    {
+      "id": "hematite-plains",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 1400,
+        "z": -2200
+      },
+      "title": "Plains of hematite",
+      "short": "Meridiani was chosen because orbiters saw grey hematite here, a mineral that often forms in water.",
+      "detail": "The Mars Global Surveyor spacecraft mapped a large patch of hematite from orbit. Opportunity was sent to check up close, and confirmed that the hematite was in the blueberries. The plains are very flat, which made them a safe place to land.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "Why did a mineral seen from orbit decide where NASA landed Opportunity?"
+    },
+    {
+      "id": "endurance-crater",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": 760,
+        "z": 60
+      },
+      "title": "Endurance crater",
+      "short": "A crater about 130 m wide, roughly 750 m east. Opportunity drove inside in 2004.",
+      "detail": "Endurance’s walls revealed a deeper stack of rock layers than Eagle crater, recording a longer history of water in the area. Opportunity spent about six months exploring it before driving on. The pin marks the approximate direction and distance.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "What did Opportunity learn from the rock layers inside Endurance crater?"
+    },
+    {
+      "id": "meridiani-whats-real",
+      "body": "mars",
+      "anchor": {
+        "type": "site",
+        "x": -40,
+        "z": -30
+      },
+      "title": "What’s real in this scene?",
+      "short": "The wide plains come from NASA’s MOLA laser altimeter; nearby rocks, colours and sky are artistic.",
+      "detail": "The elevation data has about 460 m between samples, so small craters such as Eagle and Endurance are not in the terrain. The ground at your feet and the rocks are generated detail. Opportunity is NASA’s Mars Exploration Rover model at real size.",
+      "kind": "illustration",
+      "source": {
+        "label": "NASA PDS – MGS MOLA MEGDR",
+        "url": "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html"
+      },
+      "guidePrompt": "How do scientists map the height of the Martian surface from orbit?"
+    }
+  ]
+}

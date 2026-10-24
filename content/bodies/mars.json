@@ -96,6 +96,44 @@
         "url": "https://science.nasa.gov/mars/facts/"
       },
       "guidePrompt": "What are Mars' polar ice caps made of and how do they change with the seasons?"
+    },
+    {
+      "id": "gusev-spirit",
+      "body": "mars",
+      "anchor": {
+        "type": "latlon",
+        "lat": -14.57,
+        "lon": 175.48
+      },
+      "title": "Gusev Crater – Spirit",
+      "short": "Spirit landed here in January 2004 and explored for more than six years.",
+      "detail": "Spirit drove about 7.7 km across the crater floor and up into the Columbia Hills, where it found rocks altered by water and soil almost pure in silica. Press “Stand here” to walk beside it.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Spirit",
+        "url": "https://science.nasa.gov/mission/mer-spirit/"
+      },
+      "guidePrompt": "What did the Spirit rover discover in Gusev Crater?",
+      "site": "gusev"
+    },
+    {
+      "id": "meridiani-opportunity",
+      "body": "mars",
+      "anchor": {
+        "type": "latlon",
+        "lat": -1.95,
+        "lon": 354.47
+      },
+      "title": "Meridiani Planum – Opportunity",
+      "short": "Opportunity landed here in January 2004 and drove more than 45 km in nearly 15 years.",
+      "detail": "Opportunity found hematite “blueberries” and layered rocks showing that liquid water once soaked these plains. Press “Stand here” to stand at its landing site.",
+      "kind": "fact",
+      "source": {
+        "label": "NASA Science – Opportunity",
+        "url": "https://science.nasa.gov/mission/mer-opportunity/"
+      },
+      "guidePrompt": "How did Opportunity show that Meridiani Planum was once wet?",
+      "site": "meridiani"
     }
   ]
 }

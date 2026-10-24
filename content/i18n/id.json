@@ -208,5 +208,65 @@
     "title": "Apa yang nyata di adegan ini?",
     "short": "Bentuk tanah berasal dari model ketinggian NASA; batu, warna, langit, dan tonjolan halus bersifat artistik.",
     "detail": "Bentuk kawah berasal dari model ketinggian cetak 3D NASA untuk Victoria, diskalakan sesuai lebar aslinya. Batu kecil, tekstur permukaan, pencahayaan, dan langit dibuat untuk memberi rasa berada di sana. Jarak bersifat perkiraan, dan kamu bisa melompat lebih tinggi di sini karena gravitasi Mars hanya 38% gravitasi Bumi."
+  },
+  "spirit-rover": {
+    "title": "Rover Spirit",
+    "short": "Spirit mendarat di Kawah Gusev ini pada Januari 2004, tiga minggu sebelum kembarannya, Opportunity.",
+    "detail": "Spirit direncanakan bekerja 90 sol (hari Mars). Ternyata rover ini bertahan lebih dari enam tahun dan menempuh sekitar 7,7 km, hingga terjebak di tanah lunak pada 2009; pesan terakhirnya datang pada Maret 2010. Modelnya adalah Mars Exploration Rover milik NASA, rancangan yang sama untuk Spirit dan Opportunity."
+  },
+  "gusev-crater": {
+    "title": "Kawah Gusev",
+    "short": "Kawah selebar sekitar 160 km. Ilmuwan memilihnya karena dulu mungkin pernah menjadi danau.",
+    "detail": "Sebuah lembah panjang, Ma’adim Vallis, bermuara ke bibir Gusev, sehingga ilmuwan berharap menemukan endapan danau di sini. Spirit mendapati dataran ini sebagian besar batuan vulkanik, tetapi bukit-bukit di dekatnya menyimpan tanda jelas bahwa air pernah mengubah batuannya."
+  },
+  "columbia-hills": {
+    "title": "Bukit Columbia",
+    "short": "Perbukitan rendah beberapa kilometer di timur-tenggara lokasi pendaratan, dinamai menurut awak pesawat ulang-alik Columbia.",
+    "detail": "Spirit tiba di perbukitan ini pada pertengahan 2004 dan mendaki puncak Husband Hill pada 2005. Batuannya menunjukkan jauh lebih banyak bukti air dibandingkan dataran. Dalam data ketinggian ini bukit-bukitnya tampak halus; pin menandai tanah tertinggi di dekatnya, jadi posisinya hanya perkiraan."
+  },
+  "home-plate": {
+    "title": "Home Plate",
+    "short": "Dataran tinggi vulkanik berlapis tempat Spirit menemukan tanah yang hampir murni silika.",
+    "detail": "Pada 2007 roda depan Spirit yang macet mengorek tanah terang yang ternyata sekitar 90% silika. Di Bumi, endapan seperti ini terbentuk di sekitar mata air panas atau lubang uap, jadi Home Plate mungkin dulu merupakan lingkungan yang hangat dan basah. Pin menunjukkan arah umum, bukan titik yang tepat."
+  },
+  "gusev-whats-real": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Dasar kawah dan perbukitan berasal dari altimeter laser MOLA milik NASA; batu di dekatmu, warna, dan langit bersifat artistik.",
+    "detail": "Data ketinggian ini berjarak sekitar 460 m antartitik, jadi dataran luas dan perbukitan nyata bentuknya tetapi kasar. Tanah di kakimu dan batu-batunya adalah detail buatan. Spirit ditampilkan dengan model Mars Exploration Rover milik NASA dalam ukuran asli."
+  },
+  "opp-landing": {
+    "title": "Lokasi pendaratan Opportunity",
+    "short": "Opportunity memantul lalu berhenti di dalam kawah mungil di sini pada Januari 2004: \"hole in one\" sejauh ratusan juta kilometer.",
+    "detail": "Terbungkus kantong udara, rover ini menggelinding masuk ke kawah Eagle yang lebarnya hanya sekitar 22 m. Dindingnya menyingkap tebing batuan dasar berlapis tepat di depan kamera, singkapan batuan dasar pertama yang diteliti dari dekat di Mars. Kawah Eagle terlalu kecil untuk tampak di data ketinggian ini."
+  },
+  "blueberries": {
+    "title": "\"Blueberry\" Mars",
+    "short": "Butiran bulat kecil dari hematit yang dijuluki ilmuwan \"blueberry\". Butiran ini terbentuk di dalam air.",
+    "detail": "Opportunity menemukan bola-bola seukuran mimis ini tersebar di tanah dan tertanam di batuan. Kimia dan bentuknya menunjukkan butiran ini tumbuh di dalam batuan yang direndam air tanah, bukti kuat bahwa air cair pernah membasahi daerah ini. Blueberry ini bukan buah sungguhan dan tidak biru: hanya tampak kebiruan di citra warna semu."
+  },
+  "hematite-plains": {
+    "title": "Dataran hematit",
+    "short": "Meridiani dipilih karena pengorbit melihat hematit abu-abu di sini, mineral yang sering terbentuk di dalam air.",
+    "detail": "Wahana Mars Global Surveyor memetakan bentangan hematit yang luas dari orbit. Opportunity dikirim untuk memeriksanya dari dekat, dan memastikan bahwa hematit itu ada di dalam blueberry. Dataran ini sangat datar, sehingga aman untuk pendaratan."
+  },
+  "endurance-crater": {
+    "title": "Kawah Endurance",
+    "short": "Kawah selebar sekitar 130 m, kira-kira 750 m di timur. Opportunity masuk ke dalamnya pada 2004.",
+    "detail": "Dinding Endurance menyingkap tumpukan lapisan batuan yang lebih dalam daripada kawah Eagle, merekam sejarah air yang lebih panjang di daerah ini. Opportunity menghabiskan sekitar enam bulan menjelajahinya sebelum melanjutkan perjalanan. Pin menandai perkiraan arah dan jaraknya."
+  },
+  "meridiani-whats-real": {
+    "title": "Apa yang nyata di adegan ini?",
+    "short": "Dataran luas ini berasal dari altimeter laser MOLA milik NASA; batu di dekatmu, warna, dan langit bersifat artistik.",
+    "detail": "Data ketinggian ini berjarak sekitar 460 m antartitik, jadi kawah kecil seperti Eagle dan Endurance tidak ada di medan ini. Tanah di kakimu dan batu-batunya adalah detail buatan. Opportunity adalah model Mars Exploration Rover milik NASA dalam ukuran asli."
+  },
+  "gusev-spirit": {
+    "title": "Kawah Gusev – Spirit",
+    "short": "Spirit mendarat di sini pada Januari 2004 dan menjelajah lebih dari enam tahun.",
+    "detail": "Spirit menempuh sekitar 7,7 km melintasi dasar kawah hingga ke Bukit Columbia, tempat ia menemukan batuan yang diubah oleh air dan tanah yang hampir murni silika. Tekan “Berdiri di sini” untuk berjalan di sampingnya."
+  },
+  "meridiani-opportunity": {
+    "title": "Meridiani Planum – Opportunity",
+    "short": "Opportunity mendarat di sini pada Januari 2004 dan menempuh lebih dari 45 km selama hampir 15 tahun.",
+    "detail": "Opportunity menemukan \"blueberry\" hematit dan batuan berlapis yang menunjukkan bahwa air cair pernah membasahi dataran ini. Tekan “Berdiri di sini” untuk berdiri di lokasi pendaratannya."
   }
 }

@@ -144,6 +144,26 @@ export const MISSIONS: Mission[] = [
       { id: 'g-walk', title: 'Walk 100 metres', hint: 'Explore the crater floor.', check: (c) => c.walked > 100 },
     ],
   },
+  {
+    id: 'gusev',
+    title: 'Spirit in Gusev Crater',
+    scene: 'site:gusev',
+    goals: [
+      { id: 'gu-spirit', title: 'Walk up to Spirit', hint: 'The rover stands right beside you.', check: (c) => c.distTo(0, 0) < 3.5 },
+      { id: 'gu-hills', title: 'Face the Columbia Hills', hint: 'Turn east-southeast toward the hills beacon.', check: (c) => c.facing(4656, 3400) < 12 },
+      { id: 'gu-silica', title: 'Learn what Spirit found at Home Plate', hint: 'Find the Home Plate beacon.', check: hot('home-plate') },
+    ],
+  },
+  {
+    id: 'meridiani',
+    title: 'Opportunity’s hole in one',
+    scene: 'site:meridiani',
+    goals: [
+      { id: 'me-rover', title: 'Walk up to Opportunity', hint: 'The rover stands right beside you.', check: (c) => c.distTo(0, 0) < 3.5 },
+      { id: 'me-berries', title: 'Find the Martian “blueberries”', hint: 'A beacon a few steps away.', check: hot('blueberries') },
+      { id: 'me-endurance', title: 'Face Endurance crater', hint: 'Turn east toward its beacon.', check: (c) => c.facing(760, 60) < 12 },
+    ],
+  },
 ]
 
 export function sceneKeyOf(bodyId: string | null, siteId: string | null): Mission['scene'] {

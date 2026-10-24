@@ -27,6 +27,8 @@ export const DESTINATIONS: Destination[] = [
   { id: 'victoria', label: 'Victoria Crater', go: () => app().selectSite('victoria', 'mars'), active: (s) => s.siteId === 'victoria' },
   { id: 'gale', label: 'Gale Crater', go: () => app().selectSite('gale', 'mars'), active: (s) => s.siteId === 'gale' },
   { id: 'jezero', label: 'Jezero Crater', go: () => app().selectSite('jezero', 'mars'), active: (s) => s.siteId === 'jezero' },
+  { id: 'gusev', label: 'Gusev (Spirit)', go: () => app().selectSite('gusev', 'mars'), active: (s) => s.siteId === 'gusev' },
+  { id: 'meridiani', label: 'Meridiani (Opportunity)', go: () => app().selectSite('meridiani', 'mars'), active: (s) => s.siteId === 'meridiani' },
   { id: 'moon', label: 'Moon (orbit)', go: () => app().selectBody('moon'), active: (s) => s.bodyId === 'moon' && !s.siteId },
   { id: 'apollo11', label: 'Apollo 11 site', go: () => app().selectSite('apollo11', 'moon'), active: (s) => s.siteId === 'apollo11' },
   { id: 'bennu-surface', label: 'Bennu surface', go: () => app().selectSite('bennu-nightingale', 'bennu'), active: (s) => s.siteId === 'bennu-nightingale' },

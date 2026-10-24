@@ -39,8 +39,9 @@ import { useQuality } from './quality'
 /** Dev builds: window.__scene for inspection. */
 function DebugHandle() {
   const scene = useThree((s) => s.scene)
+  const get = useThree((s) => s.get)
   useEffect(() => {
-    if (import.meta.env.DEV) (window as unknown as { __scene: unknown }).__scene = scene
+    if (import.meta.env.DEV) Object.assign(window, { __scene: scene, __r3f: get })
   }, [scene])
   return null
 }
