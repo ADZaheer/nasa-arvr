@@ -32,6 +32,15 @@ export const DESTINATIONS: Destination[] = [
   { id: 'bennu-surface', label: 'Bennu surface', go: () => app().selectSite('bennu-nightingale', 'bennu'), active: (s) => s.siteId === 'bennu-nightingale' },
 ]
 
+/** "View in my room": what to place on your table or floor. */
+export const ROOM_CHOICES: { id: string; label: string; body: string | null }[] = [
+  { id: 'hub', label: 'Solar System', body: null },
+  { id: 'mars', label: 'Mars', body: 'mars' },
+  { id: 'moon', label: 'Moon', body: 'moon' },
+  { id: 'bennu', label: 'Bennu', body: 'bennu' },
+  { id: 'rover', label: 'Opportunity (life-size)', body: null },
+]
+
 export type SliderSpec = { kind: 'slider'; key: keyof XRSettings; label: string; min: number; max: number; format: (v: number) => string; surfaceOnly?: boolean }
 export type ToggleSpec = { kind: 'toggle'; key: keyof XRSettings; label: string }
 export type ChoiceSpec = { kind: 'choice'; key: keyof XRSettings; label: string; options: { value: string; label: string }[] }

@@ -9,7 +9,8 @@ export const TARGET_HZ = 72
  * give screen taps in handheld AR, and the default gaze pointer covers gaze-only headsets.
  * Our own 1.5 s dwell (GazeDwell) works on top of these in every immersive mode.
  */
-export const xrStore = createXRStore({
+type StoreOptions = NonNullable<Parameters<typeof createXRStore>[0]>
+const options: StoreOptions = {
   // no-headset testing is handled by ./emulator.ts (?emulate), which can override desktop Chrome's navigator.xr
   emulate: false,
   // performance: steady 72 Hz, maximum fixed foveated rendering (cheaper pixels at the edge of the lenses)
@@ -32,9 +33,27 @@ export const xrStore = createXRStore({
   // keep the session lean; these are not needed for the expedition
   planeDetection: false,
   meshDetection: false,
+  depthSensing: false,
   anchors: false,
   layers: false,
-})
+}
+export const xrStore = createXRStore(options)
+
+/** A headset browser (Meta Quest), as opposed to a phone: AR is then passthrough "View in my room". */
+export const IS_HEADSET = typeof navigator !== 'undefined' && /OculusBrowser|Quest|Pico|Wolvic/i.test(navigator.userAgent)
+
+/**
+ * Enter VR, or "View in my room" (passthrough AR). Room features are only requested for AR: plane
+ * detection (better placement on tables and floors) and GPU depth sensing, which three.js uses to let
+ * real things, such as your hands and furniture, hide virtual objects behind them. The store reads these
+ * options when a session starts, so they are switched just before.
+ */
+export function enterImmersive(mode: 'vr' | 'ar') {
+  const room = mode === 'ar'
+  options.planeDetection = room
+  options.depthSensing = room
+  return mode === 'vr' ? xrStore.enterVR() : xrStore.enterAR()
+}
 
 // Debug handle in dev builds: window.__xrStore
 if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __xrStore: typeof xrStore }).__xrStore = xrStore

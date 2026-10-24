@@ -8,12 +8,13 @@ import { viewCamera } from './viewCamera'
 import { BODY_BY_ID } from './bodies'
 import { useSiteContent } from './content'
 import { FONT, FONT_BOLD } from './font'
-import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
+import { ROOM_CHOICES, AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 import { Appear, Button, Choice3D, GlassPanel, Icon, Label, Slider3D, TEAL, Tile, Toggle3D, UI, roundedRect, uiMat, type IconName } from './ui3d'
 
 const TAB_ICON: Record<MenuTab, IconName> = { travel: 'travel', missions: 'missions', display: 'visuals', comfort: 'comfort', audio: 'audio', info: 'info' }
 import { ALL_GOALS } from './missions'
 import { t } from './i18n'
+import { enterImmersive, xrStore } from './xrStore'
 import { resetControllerHints } from './ControllerHints'
 import { activeMissions } from './MissionTracker'
 
@@ -178,15 +179,64 @@ function MissionsPage() {
   )
 }
 
+/** Passthrough: what to place in your room, and "Move it" to place it again. */
+function RoomPage() {
+  const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
+  const model = useXRApp((s) => s.arModel)
+  const placed = useXRApp((s) => s.arAnchor !== null)
+  const app = useXRApp.getState
+  return (
+    <>
+      <Label text={t('Place in your room')} position={[-1.15, 0, 0.005]} size={UI.type.small} color={UI.accentHover} bold />
+      {ROOM_CHOICES.map((c, i) => {
+        const on = c.id === 'rover' ? model === 'rover' : model === 'scene' && !siteId && bodyId === c.body
+        return (
+          <Button
+            key={c.id}
+            label={t(c.label)}
+            icon={c.id === 'rover' ? 'walk' : 'travel'}
+            active={on}
+            onPress={() => {
+              if (c.id === 'rover') app().setArModel('rover')
+              else {
+                app().setArModel('scene')
+                app().selectBody(c.body)
+              }
+            }}
+            position={[0, -0.32 - i * 0.33, 0]}
+            width={2.28}
+            height={0.28}
+          />
+        )
+      })}
+      <Label text={placed ? '' : t('Look at a table or the floor, then pinch or pull the trigger to place it.')} position={[-1.15, -2.05, 0.005]} size={UI.type.tiny} color={UI.muted} maxWidth={2.3} />
+      {placed && <Button label={t('Move it')} icon="recenter" onPress={() => app().setArAnchor(null)} position={[0, -2.1, 0]} width={2.28} height={0.28} />}
+    </>
+  )
+}
+
+/** From VR: leave the headset view and open passthrough (needs a fresh session). */
+function enterRoomView() {
+  const session = xrStore.getState().session
+  const go = () =>
+    enterImmersive('ar').catch(() => useXRApp.getState().showToast(t('Could not open the room view. Use the "View in my room" button on the page.')))
+  if (session) session.end().then(go, go)
+  else void go()
+}
+
 function TravelPage() {
   const bodyId = useXRApp((s) => s.bodyId)
   const siteId = useXRApp((s) => s.siteId)
+  const mode = useXRApp((s) => s.mode)
+  if (mode === 'ar') return <RoomPage />
   return (
     <>
       {DESTINATIONS.map((d, i) => (
         <Tile key={d.id} label={t(d.label)} active={d.active({ bodyId, siteId })} onPress={d.go} position={[i % 2 ? 0.58 : -0.58, -Math.floor(i / 2) * 0.33, 0]} width={1.12} height={0.28} />
       ))}
-      <Button label={t('Guided tour')} icon="play" tone="accent" onPress={() => useXRApp.getState().setTourStep(0)} position={[0, -Math.ceil(DESTINATIONS.length / 2) * 0.33 - 0.08, 0]} width={2.28} height={0.3} />
+      <Button label={t('Guided tour')} icon="play" tone="accent" onPress={() => useXRApp.getState().setTourStep(0)} position={[-0.58, -Math.ceil(DESTINATIONS.length / 2) * 0.33 - 0.08, 0]} width={1.12} height={0.3} />
+      <Button label={t('View in my room')} icon="room" onPress={enterRoomView} position={[0.58, -Math.ceil(DESTINATIONS.length / 2) * 0.33 - 0.08, 0]} width={1.12} height={0.3} />
     </>
   )
 }

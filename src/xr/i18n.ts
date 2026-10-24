@@ -247,6 +247,15 @@ const ID: Record<string, string> = {
   'Exit tour': 'Keluar tur',
   'Start the guided tour': 'Mulai tur berpemandu',
   'View in my room': 'Lihat di ruanganku',
+  'Place in your room': 'Taruh di ruanganmu',
+  'Opportunity (life-size)': 'Opportunity (ukuran asli)',
+  'Opportunity rover · real size': 'Rover Opportunity · ukuran asli',
+  'About 2.3 m wide and 1.5 m tall. Landed on Mars in 2004, planned for 90 days, drove more than 45 km in nearly 15 years.': 'Lebar sekitar 2,3 m dan tinggi 1,5 m. Mendarat di Mars pada 2004, direncanakan 90 hari, menempuh lebih dari 45 km selama hampir 15 tahun.',
+  'Look at a table or the floor, then pinch or pull the trigger to place it.': 'Lihat ke meja atau lantai, lalu cubit atau tarik pelatuk untuk menaruhnya.',
+  'Move it': 'Pindahkan',
+  'Could not open the room view. Use the "View in my room" button on the page.': 'Tampilan ruangan tidak bisa dibuka. Gunakan tombol "Lihat di ruanganku" di halaman.',
+  Mars: 'Mars',
+  Bennu: 'Bennu',
 
   // ---- sites, bodies and suit readout ----
   'Tranquility Base': 'Pangkalan Tranquility',

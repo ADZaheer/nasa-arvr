@@ -75,6 +75,9 @@ export interface XRAppState {
   tourStep: number | null
   tourPaused: boolean
   setTourStep: (n: number | null) => void
+  /** what "View in my room" shows: the current scene as a tabletop model, or a life-size rover */
+  arModel: 'scene' | 'rover'
+  setArModel: (m: 'scene' | 'rover') => void
   /** bumped by "Re-centre view": the VR origin turns you to face the scene again */
   recenter: number
   requestRecenter: () => void
@@ -141,6 +144,8 @@ export const useXRApp = create<XRAppState>((set) => ({
   tourPaused: false,
   setTourStep: (tourStep) => set({ tourStep, tourPaused: false }),
   recenter: 0,
+  arModel: 'scene',
+  setArModel: (arModel) => set({ arModel, arAnchor: null }),
   requestRecenter: () => set((s) => ({ recenter: s.recenter + 1 })),
   autoTier: detectTier(),
   goalsDone: loadJSON(GOALS_KEY, {}),

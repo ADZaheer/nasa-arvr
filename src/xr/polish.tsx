@@ -73,14 +73,19 @@ export function HandStyler() {
     () => new MeshStandardMaterial({ color: '#6fe7dc', emissive: '#1d8f87', emissiveIntensity: 0.7, roughness: 0.35, metalness: 0, transparent: true, opacity: 0.82 }),
     [],
   )
+  // passthrough: draw nothing, but write depth, so virtual objects behind your real hands are hidden
+  const occluder = useMemo(() => new MeshBasicMaterial({ colorWrite: false, depthWrite: true }), [])
+  const ar = useXRApp((s) => s.mode === 'ar')
   useFrame(({ clock }) => {
     if (!session || clock.elapsedTime - last.current < 1) return
     last.current = clock.elapsedTime
+    const style = ar ? 'occluder' : 'teal'
     scene.traverse((o) => {
       const m = o as SkinnedMesh
-      if (m.isSkinnedMesh && !m.userData.tealHand) {
-        m.material = material
-        m.userData.tealHand = true
+      if (m.isSkinnedMesh && m.userData.handStyle !== style) {
+        m.material = ar ? occluder : material
+        m.renderOrder = ar ? -10 : 0
+        m.userData.handStyle = style
       }
     })
   })

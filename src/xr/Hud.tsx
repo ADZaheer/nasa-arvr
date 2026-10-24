@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from 'zustand'
-import { xrStore } from './xrStore'
+import { IS_HEADSET, enterImmersive, xrStore } from './xrStore'
 import { useXRApp } from './store'
 import { requestGyroPermission, useDeviceCaps } from './device'
 import { BODIES, BODY_BY_ID, KIND_COLORS } from './bodies'
@@ -11,6 +11,7 @@ import { retryScene, useLoading } from './loading'
 import { PROBLEM_TEXT } from './smooth'
 import { t, useT } from './i18n'
 import { TourCaption } from './TourUI'
+import { ROOM_CHOICES } from './menuModel'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
 
@@ -49,7 +50,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
   }
   const enter = (m: 'vr' | 'ar') => {
     app().setGyroEnabled(false)
-    ;(m === 'vr' ? xrStore.enterVR() : xrStore.enterAR()).catch((e) => app().showToast(`Could not start ${m.toUpperCase()}: ${e?.message ?? e}`))
+    enterImmersive(m).catch((e) => app().showToast(`Could not start ${m.toUpperCase()}: ${e?.message ?? e}`))
   }
 
   const surface = !!siteId
@@ -86,7 +87,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
           )}
           {!session && caps.ar && (
             <button className="btn btn--primary" onClick={() => enter('ar')}>
-              {t('Enter AR')}
+              {IS_HEADSET ? t('View in my room') : t('Enter AR')}
             </button>
           )}
           {!session && caps.gyro && !gyroEnabled && (
@@ -114,6 +115,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
 
       {!caps.secure && <p className="notice notice--warn">Open this page over HTTPS: WebXR and motion sensors are disabled on insecure pages.</p>}
       {inAR && !placed && <p className="notice">{t('Point your phone at a table and tap to place the model.')}</p>}
+      {inAR && <RoomChoices />}
 
       {!bodyId && !surface && !inAR && (
         <nav className="body-chips" aria-label="Destinations">
@@ -353,5 +355,29 @@ function TourButton() {
     <button className="btn btn--accent" onClick={() => useXRApp.getState().setTourStep(0)} title={t('Start the guided tour')}>
       ▶ {t('Guided tour')}
     </button>
+  )
+}
+
+/** In AR (phone): what to place in the room. */
+function RoomChoices() {
+  const bodyId = useXRApp((s) => s.bodyId)
+  const siteId = useXRApp((s) => s.siteId)
+  const model = useXRApp((s) => s.arModel)
+  const app = useXRApp.getState
+  const pick = (body: string | null) => {
+    app().setArModel('scene')
+    app().selectBody(body)
+  }
+  return (
+    <nav className="body-chips room-chips" aria-label={t('Place in your room')}>
+      {ROOM_CHOICES.map((c) => {
+        const on = c.id === 'rover' ? model === 'rover' : model === 'scene' && !siteId && bodyId === c.body
+        return (
+          <button key={c.id} className={`chip${on ? ' chip--live' : ''}`} aria-pressed={on} onClick={() => (c.id === 'rover' ? app().setArModel('rover') : pick(c.body))}>
+            {t(c.label)}
+          </button>
+        )
+      })}
+    </nav>
   )
 }

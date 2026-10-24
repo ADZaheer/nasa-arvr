@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { Suspense, useEffect, useRef, type ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { XR, XRDomOverlay, XROrigin, useXR } from '@react-three/xr'
@@ -24,6 +24,8 @@ import { ErrorBoundary } from './ErrorBoundary'
 import { reportProblem, useLoading } from './loading'
 import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
 import { ControllerHints } from './ControllerHints'
+import { RoomRover } from './RoomRover'
+import { IS_HEADSET } from './xrStore'
 
 /** Rendered instead of a scene that crashed: turns it into the clear "Couldn't load" card. */
 function SceneFailed({ what }: { what: string }) {
@@ -107,6 +109,7 @@ function CameraRig({ kind }: { kind: SceneKind }) {
 function Stage({ kind, children }: { kind: SceneKind; children: ReactNode }) {
   const mode = useXRApp((s) => s.mode)
   const anchor = useXRApp((s) => s.arAnchor)
+  const rover = useXRApp((s) => s.arModel === 'rover')
   const hub = kind === 'hub'
   let position: [number, number, number] = [0, 0, 0]
   let scale = 1
@@ -120,8 +123,13 @@ function Stage({ kind, children }: { kind: SceneKind; children: ReactNode }) {
   else if (mode === 'vr') {
     position = [0, 1.3, hub ? -1.3 : -1.05]
     scale = hub ? 0.3 : 0.36
+  } else if (mode === 'ar' && rover) {
+    // life-size: real metres, standing on the floor where you placed it
+    visible = anchor !== null
+    if (anchor) position = [anchor[0], anchor[1], anchor[2]]
   } else if (mode === 'ar') {
-    scale = hub ? 0.06 : 0.11
+    // a headset sees the table from further away than a phone, so the model is bigger there
+    scale = IS_HEADSET ? (hub ? 0.12 : 0.2) : hub ? 0.06 : 0.11
     visible = anchor !== null
     if (anchor) position = [anchor[0], anchor[1] + (hub ? 0.06 : scale + 0.04), anchor[2]]
   }
@@ -149,6 +157,7 @@ export function XRRoot() {
   const sceneLabel = siteId ? (site?.name ?? 'the surface') : bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : 'the Solar System'
   const space = kind !== 'surface' && mode !== 'ar'
   const retry = useLoading((s) => s.retry)
+  const arModel = useXRApp((s) => s.arModel)
 
   return (
     <div className="xr-root">
@@ -203,7 +212,11 @@ export function XRRoot() {
           {mode === 'ar' && <ARPlacement />}
           <Stage kind={kind}>
             <ErrorBoundary key={`${kind}:${bodyId}:${siteId}:${retry}`} fallback={<SceneFailed what={sceneLabel} />}>
-            {kind === 'surface' ? (
+            {mode === 'ar' && arModel === 'rover' ? (
+              <Suspense fallback={null}>
+                <RoomRover />
+              </Suspense>
+            ) : kind === 'surface' ? (
               <SurfaceScene key={siteId} siteId={siteId!} mode={mode} />
             ) : bodyId ? (
               <BodyExplorer key={bodyId} id={bodyId} vr={mode === 'vr'} />
