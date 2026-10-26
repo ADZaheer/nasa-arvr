@@ -104,7 +104,9 @@ export interface XRAppState {
   setGyroEnabled: (on: boolean) => void
   setArAnchor: (p: [number, number, number] | null) => void
   setLastGuideRequest: (r: GuideRequest) => void
-  showToast: (msg: string | null) => void
+  showToast: (msg: string | null, ms?: number) => void
+  /** AR session without hit-testing (some phones): models are placed in front of you instead */
+  arNoHitTest: boolean
 }
 
 const SETTINGS_KEY = 'cosmic-xr-settings'
@@ -196,11 +198,12 @@ export const useXRApp = create<XRAppState>((set) => ({
   setGyroEnabled: (gyroEnabled) => set({ gyroEnabled }),
   setArAnchor: (arAnchor) => set({ arAnchor }),
   setLastGuideRequest: (lastGuideRequest) => set({ lastGuideRequest }),
-  showToast: (toast) => {
+  showToast: (toast, ms = 3000) => {
     clearTimeout(toastTimer)
     set({ toast })
-    if (toast) toastTimer = setTimeout(() => set({ toast: null }), 3000)
+    if (toast) toastTimer = setTimeout(() => set({ toast: null }), ms)
   },
+  arNoHitTest: false,
 }))
 
 // Debug handle in dev builds: window.__xrApp.getState()

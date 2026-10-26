@@ -220,7 +220,7 @@ function RoomPage() {
 function enterRoomView() {
   const session = xrStore.getState().session
   const go = () =>
-    enterImmersive('ar').catch(() => useXRApp.getState().showToast(t('Could not open the room view. Use the "View in my room" button on the page.')))
+    enterImmersive('ar').catch(() => useXRApp.getState().showToast(t('Could not open the room view. Use the "View in my room" button on the page.'), 8000))
   if (session) session.end().then(go, go)
   else void go()
 }

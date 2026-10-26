@@ -48,11 +48,44 @@ export const IS_HEADSET = typeof navigator !== 'undefined' && /OculusBrowser|Que
  * real things, such as your hands and furniture, hide virtual objects behind them. The store reads these
  * options when a session starts, so they are switched just before.
  */
-export function enterImmersive(mode: 'vr' | 'ar') {
-  const room = mode === 'ar'
-  options.planeDetection = room
-  options.depthSensing = room
-  return mode === 'vr' ? xrStore.enterVR() : xrStore.enterAR()
+export async function enterImmersive(mode: 'vr' | 'ar') {
+  // Every extra is optional, but some phones still refuse a session that merely asks for an extra they
+  // can't provide (e.g. Chrome on Android rejects GPU depth sensing with "the specified session
+  // configuration is not supported"). So try the richest set first and fall back step by step.
+  const presets: Partial<StoreOptions>[] =
+    mode === 'vr'
+      ? [{ planeDetection: false, depthSensing: false, hitTest: true, domOverlay: true, handTracking: true }, BARE]
+      : [
+          ...(IS_HEADSET ? [{ planeDetection: true, depthSensing: true, hitTest: true, domOverlay: true, handTracking: true }] : []),
+          { planeDetection: false, depthSensing: false, hitTest: true, domOverlay: true, handTracking: true },
+          { planeDetection: false, depthSensing: false, hitTest: true, domOverlay: false, handTracking: false },
+          BARE,
+        ]
+  let last: unknown
+  for (const p of presets) {
+    Object.assign(options, p)
+    try {
+      return await (mode === 'vr' ? xrStore.enterVR() : xrStore.enterAR())
+    } catch (e) {
+      last = e
+      // only "this combination isn't supported" is worth retrying with fewer extras
+      if ((e as { name?: string })?.name !== 'NotSupportedError') break
+    }
+  }
+  throw last
+}
+const BARE: Partial<StoreOptions> = { planeDetection: false, depthSensing: false, hitTest: false, domOverlay: false, handTracking: false }
+
+/** A plain-language explanation (and what to try) for a failed VR/AR start. */
+export function xrErrorMessage(e: unknown, mode: 'vr' | 'ar'): string {
+  const name = (e as { name?: string })?.name
+  if (name === 'NotSupportedError')
+    return mode === 'ar'
+      ? 'This device’s browser can’t open AR. Try Chrome, and update “Google Play Services for AR” in the Play Store. You can still use Look around.'
+      : 'This device’s browser can’t open VR. On Meta Quest, use the built-in Browser.'
+  if (name === 'SecurityError' || name === 'NotAllowedError') return 'The browser blocked it. Allow camera and motion access for this site, then try again.'
+  if (name === 'InvalidStateError') return 'Another AR or VR view is already open. Close it and try again.'
+  return mode === 'ar' ? 'AR could not start on this device. You can still use Look around.' : 'VR could not start on this device.'
 }
 
 // Debug handle in dev builds: window.__xrStore

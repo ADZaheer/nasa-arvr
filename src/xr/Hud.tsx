@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from 'zustand'
-import { IS_HEADSET, enterImmersive, xrStore } from './xrStore'
+import { IS_HEADSET, enterImmersive, xrErrorMessage, xrStore } from './xrStore'
 import { useXRApp } from './store'
 import { requestGyroPermission, useDeviceCaps } from './device'
 import { BODIES, BODY_BY_ID, KIND_COLORS } from './bodies'
@@ -28,6 +28,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
   const gyroEnabled = useXRApp((s) => s.gyroEnabled)
   const placed = useXRApp((s) => s.arAnchor !== null)
   const toast = useXRApp((s) => s.toast)
+  const noHitTest = useXRApp((s) => s.arNoHitTest)
   const content = useBodyContent(siteId ? null : bodyId)
   const site = useSiteContent(siteId)
   const sites = useSitesForBody(siteId ? null : bodyId)
@@ -50,7 +51,10 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
   }
   const enter = (m: 'vr' | 'ar') => {
     app().setGyroEnabled(false)
-    enterImmersive(m).catch((e) => app().showToast(`Could not start ${m.toUpperCase()}: ${e?.message ?? e}`))
+    enterImmersive(m).catch((e) => {
+      console.warn('[xr] could not start', m, e)
+      app().showToast(t(xrErrorMessage(e, m)), 9000)
+    })
   }
 
   const surface = !!siteId
@@ -113,8 +117,11 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
         </div>
       </header>
 
+      {caps.checked && caps.secure && !caps.ar && !caps.vr && caps.gyro && !session && !gyroEnabled && (
+        <p className="notice">{t('This device can’t do AR in the browser. Use Look around instead.')}</p>
+      )}
       {!caps.secure && <p className="notice notice--warn">Open this page over HTTPS: WebXR and motion sensors are disabled on insecure pages.</p>}
-      {inAR && !placed && <p className="notice">{t('Point your phone at a table and tap to place the model.')}</p>}
+      {inAR && !placed && <p className="notice">{noHitTest ? t('Tap to place the model in front of you.') : t('Point your phone at a table and tap to place the model.')}</p>}
       {inAR && <RoomChoices />}
 
       {!bodyId && !surface && !inAR && (
