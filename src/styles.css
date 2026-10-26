@@ -229,3 +229,25 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 @media (prefers-reduced-motion: reduce) { .tour-caption { animation: none; } }
 
 .room-chips { top: auto; bottom: 96px; }
+
+/* ---- ways to explore ---- */
+.mode-picker {
+  position: fixed; left: 50%; top: 64px; transform: translateX(-50%); z-index: 30; width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 88px); overflow: auto; padding: 14px; text-align: left;
+  background: rgba(6, 14, 22, 0.95); border: 1px solid rgba(43, 184, 176, 0.45); border-radius: 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.mode-picker header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.mode-picker header strong { font-size: 17px; font-weight: 500; }
+.mode-list { display: grid; gap: 8px; }
+.mode {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+  background: rgba(29, 42, 74, 0.55); border: 1px solid var(--line); border-radius: 14px;
+}
+.mode:hover:not(:disabled) { background: rgba(59, 91, 219, 0.45); }
+.mode--primary { background: rgba(43, 184, 176, 0.22); border-color: rgba(43, 184, 176, 0.7); }
+.mode:disabled { opacity: 0.5; cursor: not-allowed; }
+.mode__icon { font-size: 26px; line-height: 1; flex: none; }
+.mode__text { display: grid; gap: 3px; }
+.mode__text b { font-weight: 500; font-size: 15px; }
+.mode__text small { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+@media (max-width: 600px) { .mode-picker { top: 112px; max-height: calc(100vh - 128px); } }

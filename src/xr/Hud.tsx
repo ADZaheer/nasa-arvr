@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from 'zustand'
-import { IS_HEADSET, enterImmersive, xrErrorMessage, xrStore } from './xrStore'
+import { xrStore } from './xrStore'
 import { useXRApp } from './store'
-import { requestGyroPermission, useDeviceCaps } from './device'
+import { useDeviceCaps } from './device'
 import { BODIES, BODY_BY_ID, KIND_COLORS } from './bodies'
 import { hasContent, useBodyContent, useSiteContent, useSitesForBody } from './content'
 import { InfoCardPanel, KIND_LABEL } from './InfoCard'
@@ -11,6 +11,7 @@ import { retryScene, useLoading } from './loading'
 import { PROBLEM_TEXT } from './smooth'
 import { t, useT } from './i18n'
 import { TourCaption } from './TourUI'
+import { ModePickerToggle } from './ModePicker'
 import { ROOM_CHOICES } from './menuModel'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
@@ -45,17 +46,6 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
   }, [inAR])
 
   const app = useXRApp.getState
-  const startGyro = async () => {
-    if (await requestGyroPermission()) app().setGyroEnabled(true)
-    else app().showToast('Motion access was denied, so using touch controls')
-  }
-  const enter = (m: 'vr' | 'ar') => {
-    app().setGyroEnabled(false)
-    enterImmersive(m).catch((e) => {
-      console.warn('[xr] could not start', m, e)
-      app().showToast(t(xrErrorMessage(e, m)), 9000)
-    })
-  }
 
   const surface = !!siteId
   const name = site?.name ?? (bodyId ? (content?.name ?? BODY_BY_ID[bodyId]?.name ?? bodyId) : null)
@@ -84,21 +74,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
         </div>
         <div className="hud__modes">
           {!session && !inAR && <TourButton />}
-          {!session && caps.vr && (
-            <button className="btn btn--primary" onClick={() => enter('vr')}>
-              {t('Enter VR')}
-            </button>
-          )}
-          {!session && caps.ar && (
-            <button className="btn btn--primary" onClick={() => enter('ar')}>
-              {IS_HEADSET ? t('View in my room') : t('Enter AR')}
-            </button>
-          )}
-          {!session && caps.gyro && !gyroEnabled && (
-            <button className="btn" onClick={startGyro}>
-              {t('Look around (motion)')}
-            </button>
-          )}
+          {!session && !inAR && <ModePickerToggle caps={caps} />}
           {!session && gyroEnabled && (
             <button className="btn" onClick={() => app().setGyroEnabled(false)}>
               {t('Touch controls')}
@@ -117,10 +93,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
         </div>
       </header>
 
-      {caps.checked && caps.secure && !caps.ar && !caps.vr && caps.gyro && !session && !gyroEnabled && (
-        <p className="notice">{t('This device can’t do AR in the browser. Use Look around instead.')}</p>
-      )}
-      {!caps.secure && <p className="notice notice--warn">Open this page over HTTPS: WebXR and motion sensors are disabled on insecure pages.</p>}
+      {!caps.secure && <p className="notice notice--warn">{t('Open this page with a secure link (https://). VR, AR and phone motion only work there.')}</p>}
       {inAR && !placed && <p className="notice">{noHitTest ? t('Tap to place the model in front of you.') : t('Point your phone at a table and tap to place the model.')}</p>}
       {inAR && <RoomChoices />}
 
