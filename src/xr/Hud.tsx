@@ -64,11 +64,11 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
         <div className="hud__title">
           {surface ? (
             <button className="btn btn--ghost" onClick={() => app().selectBody(site?.body ?? bodyId)}>
-              {t('◂ Back to orbit')}
+              ◂<span className="lbl-long"> {t('Back to orbit')}</span>
             </button>
           ) : bodyId ? (
             <button className="btn btn--ghost" onClick={() => app().selectBody(null)}>
-              {t('◂ Solar System')}
+              ◂<span className="lbl-long"> {t('Solar System')}</span>
             </button>
           ) : (
             <span className="brand">AR Cosmic Expedition</span>
@@ -314,7 +314,7 @@ function TourButton() {
   if (running) return null
   return (
     <button className="btn btn--accent" onClick={() => useXRApp.getState().setTourStep(0)} title={t('Start the guided tour')}>
-      ▶ {t('Guided tour')}
+      ▶<span className="lbl-long"> {t('Guided tour')}</span><span className="lbl-short"> {t('Tour')}</span>
     </button>
   )
 }

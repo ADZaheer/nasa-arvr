@@ -165,7 +165,8 @@ export function ModePickerToggle({ caps }: { caps: DeviceCaps }) {
   return (
     <>
       <button className="btn btn--primary" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        {t('Ways to explore')} ▾
+        <span className="lbl-long">{t('Ways to explore')}</span>
+        <span className="lbl-short">{t('Explore')}</span> ▾
       </button>
       {open && !held && caps.checked && <ModePicker caps={caps} onClose={() => setOpen(false)} />}
     </>

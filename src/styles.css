@@ -120,35 +120,11 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 }
 
 /* ---- expedition menu (on-screen twin of the VR wrist menu) ---- */
-.menu-fab { position: absolute; top: max(60px, calc(env(safe-area-inset-top) + 52px)); right: 16px; }
-.menu-panel {
-  position: absolute; top: max(60px, calc(env(safe-area-inset-top) + 52px)); right: 16px; width: min(320px, calc(100vw - 32px));
-  max-height: calc(100% - 140px); overflow: auto; z-index: 5;
-  background: rgba(6, 23, 25, 0.94); border: 1px solid rgba(43, 184, 176, 0.45); border-radius: 14px; padding: 10px 12px 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-}
-.menu-panel header { display: flex; justify-content: space-between; align-items: center; color: #2bb8b0; }
-.menu-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 8px 0 10px; }
-.menu-tabs button, .menu-list button, .seg button {
+.seg button {
   font: inherit; font-size: 13px; color: #dff7f5; background: #0c2a2e; border: 1px solid transparent; border-radius: 8px; padding: 7px 6px; cursor: pointer;
 }
-.menu-tabs button.on, .menu-list button.on, .seg button.on { background: #2bb8b0; color: #021c1e; font-weight: 500; }
-.menu-list { display: grid; gap: 6px; }
-.menu-list button { text-align: left; padding: 9px 10px; }
-.menu-controls { display: grid; gap: 12px; font-size: 13px; }
-.menu-controls label { display: grid; gap: 4px; }
-.menu-controls label.row { grid-template-columns: 1fr auto; align-items: center; }
-.menu-controls label.off { opacity: 0.5; }
-.menu-controls em { float: right; font-style: normal; color: #2bb8b0; }
-.menu-controls input[type='range'] { width: 100%; accent-color: #2bb8b0; }
-.menu-controls input[type='checkbox'] { width: 20px; height: 20px; accent-color: #2bb8b0; }
+.seg button.on { background: #2bb8b0; color: #021c1e; font-weight: 500; }
 .seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 4px; margin-top: 4px; }
-.menu-info { margin: 0; display: grid; gap: 8px; font-size: 13px; }
-.menu-info dt { color: #8fd9d3; font-size: 11px; }
-.menu-info dd { margin: 0; }
-.menu-info a { color: #8fb4ff; }
-.menu-tip { margin: 10px 0 0; font-size: 11px; color: var(--muted); }
-@media (max-width: 600px) { .menu-fab, .menu-panel { top: 104px; } }
 
 /* ---- missions ---- */
 .mission-card {
@@ -162,11 +138,6 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .mission-card strong { font-size: 16px; font-weight: 500; }
 .mission-card span { font-size: 13px; color: #c3d6d4; }
 @keyframes card-in { from { opacity: 0; transform: translate(-50%, -8px) scale(0.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
-.menu-missions h4 { margin: 4px 0; font-size: 12px; color: #8fd9d3; text-transform: uppercase; letter-spacing: 0.05em; }
-.menu-missions ul { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; font-size: 13px; }
-.menu-missions li small { display: block; margin-left: 20px; color: var(--muted); font-size: 11px; }
-.menu-missions li.done { color: #5ee39a; }
-.menu-missions footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
 @media (max-width: 600px) { .mission-card { top: 150px; } }
 
 /* ---- interaction polish ---- */
@@ -175,7 +146,6 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .btn:active, .chip:active, .menu-tabs button:active, .menu-list button:active, .seg button:active { transform: scale(0.97); }
 .btn:focus-visible, .chip:focus-visible, .menu-panel button:focus-visible { outline: 2px solid #4fd1ff; outline-offset: 2px; }
 .info-card { animation: panel-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15); }
-.menu-panel { animation: panel-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.1); transform-origin: top right; }
 @keyframes panel-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .info-card, .menu-panel, .mission-card { animation: none; } .btn, .chip { transition: none; } }
 
@@ -206,8 +176,6 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
   position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 15; pointer-events: none;
   padding: 6px 14px; border-radius: 999px; font-size: 13px; background: rgba(60, 40, 8, 0.85); color: #ffcc55; border: 1px solid rgba(255, 204, 85, 0.4);
 }
-.seg--lang { margin-left: auto; margin-right: 8px; }
-.seg--lang button { padding: 2px 8px; font-size: 12px; }
 
 /* ---- guided tour ---- */
 .tour-caption {
@@ -261,8 +229,6 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 
 .tour-caption .said { color: #6fe7dc; }
 
-.offline-save { display: grid; gap: 4px; margin: 10px 0; }
-.offline-save small { color: var(--muted); font-size: 12px; }
 
 /* ---- kiosk attract loop ---- */
 .attract {
@@ -274,7 +240,6 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .attract__sub { max-width: 560px; color: #d6e4ea; font-size: 15px; text-shadow: 0 1px 8px #000; }
 @keyframes attract-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .attract__cta { animation: none; } }
-.kiosk-toggle small { display: block; color: var(--muted); font-size: 12px; }
 
 /* =========================================================================================
    Motion system: one set of easings and durations for everything that moves on screen.
@@ -316,7 +281,6 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .hint { animation: fade-in 900ms var(--ease-out) 600ms both; }
 
 /* panels */
-.menu-panel { animation: slide-in-right var(--dur-mid) var(--ease-out) both; }
 .mode-picker { animation: pop-in var(--dur-mid) var(--ease-spring) both; transform-origin: top center; }
 .mode-picker .mode { animation: rise-in var(--dur-mid) var(--ease-out) both; }
 .mode-picker .mode:nth-child(2) { animation-delay: 50ms; }
