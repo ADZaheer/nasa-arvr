@@ -22,6 +22,7 @@ export interface Destination {
 const app = () => useXRApp.getState()
 export const DESTINATIONS: Destination[] = [
   { id: 'hub', label: 'Solar System', go: () => app().selectBody(null), active: (s) => !s.bodyId && !s.siteId },
+  { id: 'spherex', label: 'SPHEREx sky (table)', go: () => app().selectBody('spherex'), active: (s) => s.bodyId === 'spherex' },
   { id: 'mars', label: 'Mars (orbit)', go: () => app().selectBody('mars'), active: (s) => s.bodyId === 'mars' && !s.siteId },
   { id: 'bennu', label: 'Bennu (orbit)', go: () => app().selectBody('bennu'), active: (s) => s.bodyId === 'bennu' && !s.siteId },
   { id: 'victoria', label: 'Victoria Crater', go: () => app().selectSite('victoria', 'mars'), active: (s) => s.siteId === 'victoria' },

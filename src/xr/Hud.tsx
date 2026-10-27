@@ -102,6 +102,9 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {!bodyId && !surface && !inAR && (
         <nav className="body-chips" aria-label="Destinations">
           <span className="badge">{t('Not to scale')}</span>
+          <button className="chip chip--live" onClick={() => app().selectBody('spherex')}>
+            {t('SPHEREx sky (table)')}
+          </button>
           {BODIES.map((b) => (
             <button key={b.id} className={`chip${hasContent(b.id) ? ' chip--live' : ''}`} onClick={() => app().selectBody(b.id)}>
               {b.name}

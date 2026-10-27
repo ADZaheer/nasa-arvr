@@ -26,6 +26,7 @@ import { reportProblem, useLoading } from './loading'
 import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
 import { ControllerHints } from './ControllerHints'
 import { RoomRover } from './RoomRover'
+import { SpherexTable } from './SpherexTable'
 import { IS_HEADSET } from './xrStore'
 
 /** Rendered instead of a scene that crashed: turns it into the clear "Couldn't load" card. */
@@ -94,16 +95,19 @@ function CameraRig({ kind }: { kind: SceneKind }) {
   const mode = useXRApp((s) => s.mode)
   const camera = useThree((s) => s.camera)
   const hub = kind === 'hub'
+  const table = useXRApp((s) => s.bodyId === 'spherex')
   useEffect(() => {
     if (kind === 'surface') return
     if (mode === 'desktop') {
-      camera.position.set(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
-      camera.lookAt(0, 0, 0)
+      // the SPHEREx plate lies on a table: look down at it from above, like standing over it
+      if (table) camera.position.set(0, 2.9, 2.9)
+      else camera.position.set(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
+      camera.lookAt(0, table ? -0.3 : 0, 0)
     } else if (mode === 'gyro') {
       camera.position.set(0, 0, 0)
     }
-  }, [mode, hub, kind, camera])
-  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} autoRotate={hub} autoRotateSpeed={0.25} /> : null
+  }, [mode, hub, kind, camera, table])
+  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} autoRotate={hub} autoRotateSpeed={0.25} target={[0, table ? -0.3 : 0, 0]} /> : null
 }
 
 /** Where the scene sits for each mode. Hub/body content is authored with body radius = 1 (hub radius ≈ 3.2);
@@ -226,6 +230,8 @@ export function XRRoot() {
               </Suspense>
             ) : kind === 'surface' ? (
               <SurfaceScene key={siteId} siteId={siteId!} mode={mode} />
+            ) : bodyId === 'spherex' ? (
+              <SpherexTable mode={mode} />
             ) : bodyId ? (
               <BodyExplorer key={bodyId} id={bodyId} vr={mode === 'vr'} />
             ) : (

@@ -44,6 +44,8 @@ export function ModePicker({ caps, onClose }: { caps: DeviceCaps; onClose: () =>
   // AR shows the place you're looking at as a table-top model; from the Solar System that is Mars
   const arBody = bodyId ?? 'mars'
   const arName = siteId ? walk.name : t(BODY_BY_ID[arBody]?.name ?? arBody)
+  const viewHere = !!bodyId && !siteId
+  const hereName = bodyId ? t(BODY_BY_ID[bodyId]?.name ?? bodyId) : ''
 
   const go = (fn: () => void) => () => {
     onClose()
@@ -70,12 +72,13 @@ export function ModePicker({ caps, onClose }: { caps: DeviceCaps; onClose: () =>
     {
       id: 'vr',
       icon: '🥽',
-      title: t('Walk on {x} in VR', { x: walk.name }),
-      desc: t('Stand there in full 360° with a VR headset such as Meta Quest.'),
+      // in an orbit view or the SPHEREx table, VR shows this same view; elsewhere it puts you on the ground
+      title: viewHere ? t('View {x} in VR', { x: hereName }) : t('Walk on {x} in VR', { x: walk.name }),
+      desc: viewHere ? t('See it in 3D all around you with a VR headset such as Meta Quest.') : t('Stand there in full 360° with a VR headset such as Meta Quest.'),
       disabled: insecure ?? (caps.vr ? undefined : t('No VR headset on this device')),
       run: go(() => {
         app().setGyroEnabled(false)
-        app().selectSite(walk.id, walk.body)
+        if (!viewHere) app().selectSite(walk.id, walk.body)
         enterImmersive('vr').catch(failed('vr'))
       }),
     },

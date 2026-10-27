@@ -28,6 +28,8 @@ export const BODIES: BodyInfo[] = [
 ]
 
 export const BODY_BY_ID = Object.fromEntries(BODIES.map((b) => [b.id, b])) as Record<string, BodyInfo>
+/** Not a body: the SPHEREx sky-on-a-table scene, reached like one (/xr/body/spherex). */
+BODY_BY_ID.spherex = { id: 'spherex', name: 'SPHEREx sky', kind: 'planet', color: '#4fe3d6', orbit: 0, size: 0 }
 
 export const KIND_COLORS = {
   fact: '#4fd1ff',
