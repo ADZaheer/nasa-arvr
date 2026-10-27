@@ -18,7 +18,9 @@ import { Atmosphere } from './space'
 import { BennuEjecta } from './surface/particles'
 import { SceneReady } from './smooth'
 import { useMaterialFadeIn } from './fade'
-import { useT } from './i18n'
+import { t as tr, useT } from './i18n'
+import { layersFor, type DataLayer } from './layers'
+import { Choice3D, Label, UI, roundedRect, uiMat } from './ui3d'
 import { manipulation, useBodyManipulation } from './BodyManipulator'
 
 /** The body blocks pointer rays and gaze, so pins on the far side cannot be picked through it. */
@@ -145,6 +147,10 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
   useEffect(() => useXRApp.setState({ shapeIsIllustration: illustration }), [illustration])
   const paused = useXRApp((s) => s.hotspotId !== null || s.hoveredId !== null)
   const t = useT()
+  const layers = layersFor(id)
+  const layerId = useXRApp((s) => s.layer[id] ?? layers[0]?.id)
+  const layer = layers.find((l) => l.id === layerId)
+  const layerUrl = layer?.url
 
   useFrame((_, dt) => {
     if (spin.current && !paused && !manipulation.active) spin.current.rotation.y += dt * 0.06
@@ -171,7 +177,7 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
         ) : content?.texture ? (
           <ErrorBoundary fallback={<PlainPlanet color={color} />}>
             <Suspense fallback={<PlainPlanet color={color} />}>
-              <TexturedPlanet url={content.texture} color={color} relief={id === 'mars' && q.marsRelief ? `/textures/mars_normal_${q.marsRelief}.png` : undefined} />
+              <TexturedPlanet url={layerUrl ?? content.texture} color={color} relief={id === 'mars' && q.marsRelief ? `/textures/mars_normal_${q.marsRelief}.png` : undefined} />
             </Suspense>
           </ErrorBoundary>
         ) : (
@@ -196,12 +202,33 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
       {vr && (
         <>
           <InfoCard3D />
+          {layers.length > 1 && <LayerPicker3D body={id} layers={layers} active={layerId} />}
           <Button3D label={t('Solar System')} icon="back" position={[0, -1.35, 0.2]} width={0.6} height={0.13} onClick={() => useXRApp.getState().selectBody(null)} />
           {sites.map((s, i) => (
             <Button3D key={s.id} icon="walk" label={t('Stand at {x}', { x: s.name })} position={[-1.55, 0.3 - i * 0.18, 0.3]} width={0.95} height={0.13} color="#b5562b" onClick={() => useXRApp.getState().selectSite(s.id, s.body)} />
           ))}
         </>
       )}
+    </group>
+  )
+}
+
+/** VR: switch NASA image layers on the globe, with the legend and credit of the one shown. */
+function LayerPicker3D({ body, layers, active }: { body: string; layers: DataLayer[]; active?: string }) {
+  const layer = layers.find((l) => l.id === active) ?? layers[0]
+  return (
+    <group position={[1.55, -0.85, 0.3]} rotation={[0, -0.45, 0]} scale={0.32}>
+      <Choice3D label={tr('NASA image layer')} value={layer.id} options={layers.map((l) => ({ value: l.id, label: tr(l.label) }))} onChange={(v) => useXRApp.getState().setLayer(body, v)} position={[0, 0, 0]} width={2.4} />
+      {layer.legend && (
+        <group position={[0, -0.45, 0]}>
+          {layer.legend.stops.map((c, i) => (
+            <mesh key={c} geometry={roundedRect(2.4 / layer.legend!.stops.length, 0.09, 0.01)} material={uiMat(c)} position={[-1.2 + (2.4 / layer.legend!.stops.length) * (i + 0.5), 0, 0]} />
+          ))}
+          <Label text={layer.legend.min} position={[-1.2, -0.14, 0.005]} size={UI.type.tiny} />
+          <Label text={layer.legend.max} position={[1.2, -0.14, 0.005]} size={UI.type.tiny} anchorX="right" />
+        </group>
+      )}
+      <Label text={tr(layer.credit)} position={[-1.2, layer.legend ? -0.36 : -0.32, 0.005]} size={UI.type.tiny} color={UI.muted} maxWidth={2.4} />
     </group>
   )
 }

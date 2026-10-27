@@ -75,6 +75,9 @@ export interface XRAppState {
   tourStep: number | null
   tourPaused: boolean
   setTourStep: (n: number | null) => void
+  /** selected NASA image layer per body (e.g. mars: 'elevation') */
+  layer: Record<string, string>
+  setLayer: (body: string, layer: string) => void
   /** what "View in my room" shows: the current scene as a tabletop model, or a life-size rover */
   arModel: 'scene' | 'rover'
   setArModel: (m: 'scene' | 'rover') => void
@@ -147,6 +150,8 @@ export const useXRApp = create<XRAppState>((set) => ({
   setTourStep: (tourStep) => set({ tourStep, tourPaused: false }),
   recenter: 0,
   arModel: 'scene',
+  layer: {},
+  setLayer: (body, layer) => set((s) => ({ layer: { ...s.layer, [body]: layer } })),
   setArModel: (arModel) => set({ arModel, arAnchor: null }),
   requestRecenter: () => set((s) => ({ recenter: s.recenter + 1 })),
   autoTier: detectTier(),

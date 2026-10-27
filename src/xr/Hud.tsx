@@ -12,6 +12,7 @@ import { PROBLEM_TEXT } from './smooth'
 import { t, useT } from './i18n'
 import { TourCaption } from './TourUI'
 import { ModePickerToggle } from './ModePicker'
+import { layersFor } from './layers'
 import { ROOM_CHOICES } from './menuModel'
 import { input, player } from './surface/player'
 import type { HotspotKind, SiteContent } from './types'
@@ -48,6 +49,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
   const app = useXRApp.getState
 
   const surface = !!siteId
+  const layerCredit = useXRApp((s) => (bodyId && layersFor(bodyId).length > 1 ? (s.layer[bodyId] ?? 'colour') : null))
   const name = site?.name ?? (bodyId ? (content?.name ?? BODY_BY_ID[bodyId]?.name ?? bodyId) : null)
   const shapeIsIllustration = useXRApp((s) => s.shapeIsIllustration)
   const credit = surface
@@ -126,7 +128,10 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
                 <i style={{ background: KIND_COLORS[k] }} /> {t(KIND_LABEL[k])}
               </span>
             ))}
-            {credit && <small className="credit">{credit}</small>}
+            {credit && !layerCredit && <small className="credit">{credit}</small>}
+          </div>
+          <LayerPicker bodyId={bodyId} />
+          <div className="legend legend--credit">
           </div>
         </>
       )}
@@ -359,5 +364,34 @@ function RoomChoices() {
         )
       })}
     </nav>
+  )
+}
+
+/** On screen: switch NASA image layers on the globe (legend + credit of the one shown). */
+function LayerPicker({ bodyId }: { bodyId: string }) {
+  const layers = layersFor(bodyId)
+  const active = useXRApp((s) => s.layer[bodyId] ?? layers[0]?.id)
+  if (layers.length < 2) return null
+  const layer = layers.find((l) => l.id === active) ?? layers[0]
+  return (
+    <section className="layer-picker" aria-label={t('NASA image layer')}>
+      <span>{t('NASA image layer')}</span>
+      <div className="seg">
+        {layers.map((l) => (
+          <button key={l.id} className={l.id === layer.id ? 'on' : ''} aria-pressed={l.id === layer.id} onClick={() => useXRApp.getState().setLayer(bodyId, l.id)}>
+            {t(l.label)}
+          </button>
+        ))}
+      </div>
+      {layer.legend && (
+        <div className="layer-legend">
+          <i style={{ background: `linear-gradient(90deg, ${layer.legend.stops.join(', ')})` }} />
+          <small>
+            {layer.legend.min} <span>{layer.legend.max}</span>
+          </small>
+        </div>
+      )}
+      <small className="credit">{t(layer.credit)}</small>
+    </section>
   )
 }
