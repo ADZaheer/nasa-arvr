@@ -19,6 +19,7 @@ import { BennuEjecta } from './surface/particles'
 import { SceneReady } from './smooth'
 import { useMaterialFadeIn } from './fade'
 import { t as tr, useT } from './i18n'
+import { HOLO, HoloOrbit } from './holo'
 import { layersFor, type DataLayer } from './layers'
 import { Choice3D, Label, UI, roundedRect, uiMat } from './ui3d'
 import { manipulation, useBodyManipulation } from './BodyManipulator'
@@ -189,6 +190,10 @@ export function BodyExplorer({ id, vr }: { id: string; vr: boolean }) {
       </group>
 
       {content !== undefined && <SceneReady />}
+      {/* the Solar System chart's language: a faint orbit ring with ticks around the body */}
+      <group rotation={[0.22, 0, 0]}>
+        <HoloOrbit radius={1.55} color={HOLO.teal} />
+      </group>
       {id === 'mars' && <Atmosphere color="#e3a07a" intensity={0.9} />}
       <Billboard position={[0, 1.38, 0]}>
         <Text font={FONT_BOLD} fontSize={0.16} color="#ffffff" anchorY="bottom" outlineWidth={0.006} outlineColor="#000">

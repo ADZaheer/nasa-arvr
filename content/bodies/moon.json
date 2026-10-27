@@ -3,7 +3,7 @@
   "name": "Moon",
   "type": "moon",
   "texture": "/textures/moon.jpg",
-  "textureCredit": "NASA 3D Resources (Moon global colour map), public domain",
+  "textureCredit": "NASA/GSFC/Arizona State University: LRO LROC colour map (NASA SVS CGI Moon Kit), public domain",
   "hotspots": [
     {
       "id": "moon-apollo11",

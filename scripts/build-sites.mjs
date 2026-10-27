@@ -10,6 +10,7 @@ import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial, Raycaster, Ve
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { computeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh'
 import { MeshoptSimplifier } from 'meshoptimizer'
+import sharp from 'sharp'
 
 const src = process.argv[2]
 if (!src) throw new Error('usage: node scripts/build-sites.mjs <sourceDir>')
@@ -118,8 +119,10 @@ const range = (a) => a.reduce(([lo, hi], v) => [Math.min(lo, v), Math.max(hi, v)
 }
 
 for (const [from, to] of [['nasa/perseverance.glb', 'perseverance.glb'], ['nasa/lunar-module.glb', 'lunar-module.glb'], ['nasa/osiris-rex.glb', 'osiris-rex.glb']]) copyFileSync(join(src, from), join('public/models', to))
-copyFileSync(join(src, 'nasa/moon.jpg'), 'public/textures/moon.jpg')
-console.log('models + moon texture copied')
+// Moon globe: LRO LROC global colour map from the NASA SVS CGI Moon Kit (equirectangular, 2048×1024)
+//   https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_poles_2k.tif → <sourceDir>/moon/
+await sharp(join(src, 'moon/lroc_color_poles_2k.tif')).removeAlpha().jpeg({ quality: 86, mozjpeg: true }).toFile('public/textures/moon.jpg')
+console.log('models copied, moon texture converted')
 
 function writeGLB(path, g, rgb) {
   const P = g.attributes.position.array, Nn = g.attributes.normal.array

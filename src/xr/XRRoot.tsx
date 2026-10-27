@@ -14,7 +14,6 @@ import { SurfaceScene } from './surface/SurfaceScene'
 import { PERF, PerfHud, PerfProbe } from './PerfMeter'
 import { WristMenu } from './WristMenu'
 import { QualityGovernor } from './QualityGovernor'
-import { StarSky } from './space'
 import { HoloBackdrop } from './holo'
 import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
 import { MissionTracker } from './MissionTracker'
@@ -202,21 +201,18 @@ export function XRRoot() {
           {(mode === 'vr' || mode === 'ar') && !(kind === 'surface' && mode === 'vr') && (
             <PlayerOrigin seated={seated} kind={kind} />
           )}
-          {space && kind === 'hub' && (
+          {/* every space view (Solar System, planets, Moon, Bennu, SPHEREx table) shares the chart's own sky */}
+          {space && (
             <>
               <color attach="background" args={['#070b1f']} />
               <HoloBackdrop q={q} />
             </>
           )}
-          {space && kind !== 'hub' && (
-            <>
-              <color attach="background" args={['#05060f']} />
-              <StarSky size={q.stars} />
-            </>
-          )}
           {(kind !== 'surface' || mode === 'ar') && (
             <>
               <ambientLight intensity={0.35} />
+              {/* soft teal/violet fill so night sides read against the chart sky instead of going pure black */}
+              {kind === 'body' && <hemisphereLight args={['#4fe3d6', '#3a2a7a', 0.45]} />}
               <directionalLight position={[5, 2, 4]} intensity={2.4} />
             </>
           )}
