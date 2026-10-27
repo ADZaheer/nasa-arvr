@@ -98,6 +98,7 @@ export const COMFORT_CONTROLS: ControlSpec[] = [
 ]
 export const AUDIO_CONTROLS: ControlSpec[] = [
   { kind: 'toggle', key: 'sound', label: 'Sound & music' },
+  { kind: 'toggle', key: 'narration', label: 'Tour narration' },
   { kind: 'slider', key: 'musicVolume', label: 'Music', min: 0, max: 1, format: pct },
   { kind: 'slider', key: 'sfxVolume', label: 'Effects & ambience', min: 0, max: 1, format: pct },
 ]

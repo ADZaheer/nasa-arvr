@@ -258,3 +258,5 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .layer-legend i { display: block; height: 8px; border-radius: 4px; }
 .layer-legend small { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
 .legend--credit:empty { display: none; }
+
+.tour-caption .said { color: #6fe7dc; }

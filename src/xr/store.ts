@@ -36,11 +36,13 @@ export interface XRSettings {
   locomotion: 'teleport' | 'smooth'
   /** extra height in metres (VR), e.g. for short users or children */
   heightOffset: number
+  /** read the guided tour aloud (only while Sound is on) */
+  narration: boolean
   /** interface + info-pin language */
   lang: 'en' | 'id'
 }
 
-export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8, vignette: true, seated: false, locomotion: 'teleport', heightOffset: 0, lang: typeof navigator !== 'undefined' && /^id|^in/i.test(navigator.language) ? 'id' : 'en' }
+export const DEFAULT_SETTINGS: XRSettings = { labels: 1, pins: true, exposure: 1, haze: 1, moveSpeed: 1, turn: 'snap30', showFps: false, quality: 'auto', timeOfDay: 0.38, sound: false, musicVolume: 0.6, sfxVolume: 0.8, vignette: true, seated: false, locomotion: 'teleport', heightOffset: 0, narration: true, lang: typeof navigator !== 'undefined' && /^id|^in/i.test(navigator.language) ? 'id' : 'en' }
 
 /**
  * Shared app state for the XR module. The web viewer can read/write the same store
