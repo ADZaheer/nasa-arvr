@@ -6,6 +6,9 @@ import '@fontsource/roboto/500.css'
 import './styles.css'
 import { RouteSync, XRRoot, onAskGuide } from './xr'
 import { EMULATE, startEmulator } from './xr/emulator'
+import { registerServiceWorker } from './xr/offline'
+
+registerServiceWorker()
 
 // Until the AI guide (another team's module) is wired in, log what it would receive.
 onAskGuide((req) => console.info('[ask-guide]', req))

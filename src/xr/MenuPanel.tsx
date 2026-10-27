@@ -6,6 +6,8 @@ import { ALL_GOALS } from './missions'
 import { activeMissions } from './MissionTracker'
 import { LANGS, t, useT } from './i18n'
 import { resetControllerHints } from './ControllerHints'
+import { saveForOffline, useOffline } from './offline'
+import { useKiosk } from './kiosk'
 import { AUDIO_CONTROLS, COMFORT_CONTROLS, DESTINATIONS, DISPLAY_CONTROLS, INFO_SOURCE, MENU_TABS, infoLines, type ControlSpec, type MenuTab } from './menuModel'
 
 /** On-screen version of the wrist menu (desktop, phone, phone AR via the DOM overlay). Same options. */
@@ -168,6 +170,8 @@ function Info() {
           <dd>{l.value}</dd>
         </div>
       ))}
+      <OfflineSave />
+      <KioskToggle />
       <small>
         {t('Time source: {x}', { x: '' })}
         <a href={INFO_SOURCE.url} target="_blank" rel="noopener noreferrer">
@@ -175,5 +179,33 @@ function Info() {
         </a>
       </small>
     </dl>
+  )
+}
+
+/** Download everything now, so the expedition works even if the venue Wi-Fi drops. */
+function OfflineSave() {
+  const { supported, progress, ready, error, sizeMB } = useOffline()
+  if (!supported) return null
+  return (
+    <div className="offline-save">
+      <button className="btn" disabled={progress !== null} onClick={() => void saveForOffline()}>
+        {progress !== null ? t('Saving… {n}%', { n: Math.round(progress * 100) }) : ready ? `✓ ${t('Saved for offline')}` : t('Save for offline')}
+      </button>
+      <small>{error ? t('Saving stopped. Check your connection and try again.') : t('Keeps the whole expedition on this device ({n} MB) so it works without internet.', { n: sizeMB ?? '~40' })}</small>
+    </div>
+  )
+}
+
+/** Exhibition stand mode: resets for the next visitor after 2 minutes idle and plays a looping preview. */
+function KioskToggle() {
+  const on = useKiosk((s) => s.enabled)
+  return (
+    <label className="row kiosk-toggle">
+      <span>
+        {t('Kiosk mode (exhibition stand)')}
+        <small>{t('After 2 minutes idle: reset for the next visitor and play a looping preview.')}</small>
+      </span>
+      <input type="checkbox" checked={on} onChange={(e) => useKiosk.getState().setEnabled(e.target.checked)} />
+    </label>
   )
 }

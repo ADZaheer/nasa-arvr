@@ -27,6 +27,7 @@ import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
 import { ControllerHints } from './ControllerHints'
 import { RoomRover } from './RoomRover'
 import { SpherexTable } from './SpherexTable'
+import { AttractOverlay, KioskDirector } from './kiosk'
 import { IS_HEADSET } from './xrStore'
 
 /** Rendered instead of a scene that crashed: turns it into the clear "Couldn't load" card. */
@@ -248,6 +249,8 @@ export function XRRoot() {
         </XR>
       </Canvas>
       {mode !== 'ar' && <Hud />}
+      <KioskDirector />
+      <AttractOverlay />
       {(PERF || showFps) && <PerfHud />}
     </div>
   )

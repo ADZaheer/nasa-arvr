@@ -260,3 +260,18 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 .legend--credit:empty { display: none; }
 
 .tour-caption .said { color: #6fe7dc; }
+
+.offline-save { display: grid; gap: 4px; margin: 10px 0; }
+.offline-save small { color: var(--muted); font-size: 12px; }
+
+/* ---- kiosk attract loop ---- */
+.attract {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-content: center; justify-items: center; gap: 14px; padding: 24px;
+  background: radial-gradient(ellipse at center, rgba(7, 11, 31, 0.15), rgba(7, 11, 31, 0.75)); border: 0; color: #fff; font: inherit; cursor: pointer; text-align: center;
+}
+.attract__title { font-size: clamp(26px, 6vw, 54px); font-weight: 500; letter-spacing: 0.04em; text-shadow: 0 2px 18px #000; }
+.attract__cta { font-size: clamp(18px, 3.5vw, 28px); padding: 14px 30px; border-radius: 999px; background: #2bb8b0; color: #03201e; animation: attract-pulse 2.2s ease-in-out infinite; }
+.attract__sub { max-width: 560px; color: #d6e4ea; font-size: 15px; text-shadow: 0 1px 8px #000; }
+@keyframes attract-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .attract__cta { animation: none; } }
+.kiosk-toggle small { display: block; color: var(--muted); font-size: 12px; }
