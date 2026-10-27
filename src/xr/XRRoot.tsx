@@ -15,6 +15,7 @@ import { PERF, PerfHud, PerfProbe } from './PerfMeter'
 import { WristMenu } from './WristMenu'
 import { QualityGovernor } from './QualityGovernor'
 import { StarSky } from './space'
+import { HoloBackdrop } from './holo'
 import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './polish'
 import { MissionTracker } from './MissionTracker'
 import { ComfortVignette, LoadingPanelVR, Prefetcher, ProblemPanelVR, SceneLoadTracker, recenterOrigin } from './smooth'
@@ -102,7 +103,7 @@ function CameraRig({ kind }: { kind: SceneKind }) {
       camera.position.set(0, 0, 0)
     }
   }, [mode, hub, kind, camera])
-  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} /> : null
+  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} autoRotate={hub} autoRotateSpeed={0.25} /> : null
 }
 
 /** Where the scene sits for each mode. Hub/body content is authored with body radius = 1 (hub radius ≈ 3.2);
@@ -196,7 +197,13 @@ export function XRRoot() {
           {(mode === 'vr' || mode === 'ar') && !(kind === 'surface' && mode === 'vr') && (
             <PlayerOrigin seated={seated} kind={kind} />
           )}
-          {space && (
+          {space && kind === 'hub' && (
+            <>
+              <color attach="background" args={['#070b1f']} />
+              <HoloBackdrop q={q} />
+            </>
+          )}
+          {space && kind !== 'hub' && (
             <>
               <color attach="background" args={['#05060f']} />
               <StarSky size={q.stars} />

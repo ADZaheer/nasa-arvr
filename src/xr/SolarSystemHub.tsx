@@ -1,48 +1,68 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Billboard, Text } from '@react-three/drei'
-import { DoubleSide, type Group, type Mesh } from 'three'
+import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, IcosahedronGeometry, SphereGeometry, Vector3, type Group, type Mesh } from 'three'
 import { BODIES, type BodyInfo } from './bodies'
 import { hasContent } from './content'
 import { useXRApp } from './store'
 import { useDwellTarget } from './dwell'
 import { FONT, FONT_BOLD } from './font'
-import { Sun } from './space'
 import { SceneReady } from './smooth'
 import { useT } from './i18n'
+import { useQuality } from './quality'
+import { HOLO, HOLO_STYLES, HoloMotes, HoloOrbit, HoloSun, holoUniforms, makeHoloPlanetMaterial } from './holo'
 
 const GOLDEN = 2.39996
+/** Orbit drift, radians per second at orbit radius 1 (outer planets slower). Purely decorative. */
+const DRIFT = 0.035
+const MOON_OFFSET = new Vector3(0.17, 0.04, 0.05)
 
-function hubPosition(b: BodyInfo, i: number): [number, number, number] {
-  if (b.parent) {
-    const pi = BODIES.findIndex((x) => x.id === b.parent)
-    const [px, py, pz] = hubPosition(BODIES[pi], pi)
-    return [px + 0.17, py + 0.04, pz + 0.05]
-  }
-  const a = i * GOLDEN
-  return [Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit]
+function orbitAngle(i: number, b: BodyInfo, t: number) {
+  return i * GOLDEN + (t * DRIFT) / Math.pow(Math.max(b.orbit, 0.5), 1.5)
 }
 
-/** Body picker. Sizes and distances are deliberately NOT to scale. */
+/** Body picker, drawn as a stylised mission-control chart. Sizes and distances are deliberately NOT to scale. */
 export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
   const t = useT()
+  const q = useQuality()
+  const root = useRef<Group>(null)
+  const hovered = useXRApp((s) => s.hoveredId)
+  const groups = useRef<Record<string, Group | null>>({})
+
+  useFrame(({ clock }) => {
+    // the Sun sits at the hub centre: planets are lit from there
+    root.current?.getWorldPosition(holoUniforms.uSun.value)
+    const time = clock.elapsedTime
+    BODIES.forEach((b, i) => {
+      const g = groups.current[b.id]
+      if (!g || b.parent || b.orbit === 0) return
+      const a = orbitAngle(i, b, time)
+      g.position.set(Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit)
+    })
+    for (const b of BODIES) {
+      const g = groups.current[b.id]
+      const p = b.parent ? groups.current[b.parent] : null
+      if (g && p) g.position.copy(p.position).add(MOON_OFFSET)
+    }
+  })
+
   return (
-    <group rotation={[tilt, 0, 0]}>
+    <group ref={root} rotation={[tilt, 0, 0]}>
       <SceneReady />
       {BODIES.filter((b) => b.orbit > 0 && !b.parent).map((b) => (
-        <mesh key={`orbit-${b.id}`} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[b.orbit - 0.004, b.orbit + 0.004, 128]} />
-          <meshBasicMaterial color={b.kind === 'asteroid' ? '#5a5146' : '#33415e'} side={DoubleSide} transparent opacity={0.6} />
-        </mesh>
+        <HoloOrbit key={`orbit-${b.id}`} radius={b.orbit} color={b.kind === 'asteroid' ? HOLO.amber : hasContent(b.id) ? HOLO.teal : HOLO.violet} active={hovered === `hub:${b.id}`} />
       ))}
-      {BODIES.map((b, i) => {
-        return <HubBody key={b.id} b={b} position={hubPosition(b, i)} />
-      })}
+      <HoloMotes q={q} />
+      {BODIES.map((b) => (
+        <group key={b.id} ref={(g) => void (groups.current[b.id] = g)}>
+          <HubBody b={b} />
+        </group>
+      ))}
       <Billboard position={[0, 0.95, 0]}>
-        <Text font={FONT_BOLD} fontSize={0.2} color="#ffffff" anchorY="bottom">
+        <Text font={FONT_BOLD} fontSize={0.2} letterSpacing={0.04} color="#ffffff" anchorY="bottom" outlineWidth={0.004} outlineColor="#000">
           {t('Choose a destination')}
         </Text>
-        <Text font={FONT} position={[0, -0.04, 0]} fontSize={0.09} color="#ffcc55" anchorY="top">
+        <Text font={FONT} position={[0, -0.04, 0]} fontSize={0.085} color={HOLO.amber} anchorY="top">
           {t('Not to scale: sizes and distances are exaggerated')}
         </Text>
       </Billboard>
@@ -50,7 +70,49 @@ export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
   )
 }
 
-function HubBody({ b, position }: { b: BodyInfo; position: [number, number, number] }) {
+const unitSphere = new SphereGeometry(1, 48, 32)
+/** Bennu as a faceted little rubble pile, so it reads as an asteroid at a glance. */
+const facetRock = (() => {
+  const g = new IcosahedronGeometry(1, 1).toNonIndexed()
+  const p = g.attributes.position
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i)
+    const k = 0.85 + 0.15 * Math.sin(x * 5.1 + y * 3.7 + z * 4.3)
+    p.setXYZ(i, x * k, y * k * 0.92, z * k)
+  }
+  g.computeVertexNormals()
+  return g
+})()
+
+/** Rotating dashed ring: "you can go here". */
+function ExploreMarker({ radius }: { radius: number }) {
+  const ref = useRef<Group>(null)
+  const geom = useMemo(() => {
+    const pts: number[] = []
+    const N = 24
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2, a1 = ((i + 0.55) / N) * Math.PI * 2
+      pts.push(Math.cos(a0) * radius, 0, Math.sin(a0) * radius, Math.cos(a1) * radius, 0, Math.sin(a1) * radius)
+    }
+    const g = new BufferGeometry()
+    g.setAttribute('position', new BufferAttribute(new Float32Array(pts), 3))
+    return g
+  }, [radius])
+  useEffect(() => () => geom.dispose(), [geom])
+  useFrame((_, dt) => {
+    if (ref.current) ref.current.rotation.y += dt * 0.5
+  })
+  return (
+    <group ref={ref} rotation={[0.25, 0, 0]}>
+      <lineSegments geometry={geom}>
+        <lineBasicMaterial color={HOLO.teal} transparent opacity={0.9} blending={AdditiveBlending} depthWrite={false} toneMapped={false} />
+      </lineSegments>
+    </group>
+  )
+}
+
+function HubBody({ b }: { b: BodyInfo }) {
+  const t = useT()
   const [hover, setHover] = useState(false)
   const labels = useXRApp((s) => s.settings.labels)
   const hit = useRef<Mesh>(null)
@@ -58,41 +120,44 @@ function HubBody({ b, position }: { b: BodyInfo; position: [number, number, numb
   const explorable = hasContent(b.id)
   const select = useCallback(() => useXRApp.getState().selectBody(b.id), [b.id])
   useDwellTarget(hit, select)
+  const style = HOLO_STYLES[b.id]
+  const material = useMemo(() => (style ? makeHoloPlanetMaterial(style) : null), [style])
+  useEffect(() => () => material?.dispose(), [material])
+  const scale = useRef(1)
   useFrame((_, dt) => {
-    if (spin.current) spin.current.rotation.y += dt * 0.3
+    const s = spin.current
+    if (!s) return
+    s.rotation.y += dt * 0.3
+    scale.current += ((hover ? 1.25 : 1) - scale.current) * Math.min(1, dt * 10)
+    s.scale.setScalar(scale.current)
+    if (material) material.uniforms.uHover.value += ((hover ? 1 : 0) - material.uniforms.uHover.value) * Math.min(1, dt * 8)
   })
-  const s = hover ? 1.25 : 1
+  const r = Math.max(b.size, 0.05)
 
   return (
-    <group position={position}>
-      {b.kind === 'star' && <Sun radius={b.size} />}
-      <group ref={spin} scale={s}>
-        <mesh>
-          <sphereGeometry args={[b.size, 32, 24]} />
-          <meshStandardMaterial color={b.color} roughness={1} emissive={b.color} emissiveIntensity={hover ? 0.35 : 0.12} visible={b.kind !== 'star'} />
-        </mesh>
+    <group>
+      {b.kind === 'star' && <HoloSun radius={b.size} />}
+      <group ref={spin}>
+        {material && <mesh geometry={style?.facets ? facetRock : unitSphere} material={material} scale={b.size} />}
         {b.rings && (
           <mesh rotation={[-Math.PI / 2 + 0.4, 0, 0]}>
             <ringGeometry args={[b.size * 1.3, b.size * 2.1, 64]} />
-            <meshBasicMaterial color="#cdb987" side={DoubleSide} transparent opacity={0.6} />
+            <meshBasicMaterial color="#e8d3a0" side={DoubleSide} transparent opacity={0.45} toneMapped={false} />
           </mesh>
         )}
       </group>
-      {explorable && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[Math.max(b.size, 0.05) * 1.6, Math.max(b.size, 0.05) * 1.6 + 0.012, 48]} />
-          <meshBasicMaterial color="#4fd1ff" side={DoubleSide} toneMapped={false} />
-        </mesh>
-      )}
+      {explorable && <ExploreMarker radius={r * 1.7} />}
       <mesh
         ref={hit}
         onPointerOver={(e) => {
           e.stopPropagation()
           setHover(true)
+          useXRApp.getState().setHovered(`hub:${b.id}`)
           document.body.style.cursor = 'pointer'
         }}
         onPointerOut={() => {
           setHover(false)
+          if (useXRApp.getState().hoveredId === `hub:${b.id}`) useXRApp.getState().setHovered(null)
           document.body.style.cursor = ''
         }}
         onClick={(e) => {
@@ -103,20 +168,26 @@ function HubBody({ b, position }: { b: BodyInfo; position: [number, number, numb
         <sphereGeometry args={[Math.max(b.size * 1.5, 0.11), 12, 12]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <Billboard position={[0, -Math.max(b.size, 0.05) - 0.06, 0]}>
+      <Billboard position={[0, -r - 0.06, 0]}>
         <Text
-          font={hover ? FONT_BOLD : FONT}
+          font={FONT_BOLD}
           fillOpacity={hover ? 1 : labels}
           outlineOpacity={hover ? 1 : labels}
           visible={hover || labels > 0.02}
           fontSize={hover ? 0.1 : 0.075}
-          color={explorable ? '#ffffff' : '#aab4cc'}
+          letterSpacing={0.08}
+          color={explorable ? HOLO.teal : '#c7cde6'}
           anchorY="top"
           outlineWidth={0.004}
           outlineColor="#000"
         >
-          {b.name + (explorable ? ' ●' : '')}
+          {t(b.name).toUpperCase()}
         </Text>
+        {explorable && (
+          <Text font={FONT} position={[0, -0.075, 0]} fillOpacity={hover ? 1 : labels * 0.85} visible={hover || labels > 0.02} fontSize={0.042} color="#e9f7f5" anchorY="top" outlineWidth={0.003} outlineColor="#000">
+            {hover ? `▶ ${t('explore')}` : t('explore')}
+          </Text>
+        )}
       </Billboard>
     </group>
   )
