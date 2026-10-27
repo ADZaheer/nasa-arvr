@@ -53,9 +53,9 @@ export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
         <HoloOrbit key={`orbit-${b.id}`} radius={b.orbit} color={b.kind === 'asteroid' ? HOLO.amber : hasContent(b.id) ? HOLO.teal : HOLO.violet} active={hovered === `hub:${b.id}`} />
       ))}
       <HoloMotes q={q} />
-      {BODIES.map((b) => (
+      {BODIES.map((b, i) => (
         <group key={b.id} ref={(g) => void (groups.current[b.id] = g)}>
-          <HubBody b={b} />
+          <HubBody b={b} order={i} />
         </group>
       ))}
       <Billboard position={[0, 0.95, 0]}>
@@ -111,7 +111,12 @@ function ExploreMarker({ radius }: { radius: number }) {
   )
 }
 
-function HubBody({ b }: { b: BodyInfo }) {
+/** easeOutBack: a little overshoot, so bodies "pop" into place */
+const backOut = (x: number) => 1 + 2.4 * Math.pow(x - 1, 3) + 1.4 * Math.pow(x - 1, 2)
+const REDUCED = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
+
+function HubBody({ b, order }: { b: BodyInfo; order: number }) {
+  const born = useRef(-1)
   const t = useT()
   const [hover, setHover] = useState(false)
   const labels = useXRApp((s) => s.settings.labels)
@@ -124,12 +129,16 @@ function HubBody({ b }: { b: BodyInfo }) {
   const material = useMemo(() => (style ? makeHoloPlanetMaterial(style) : null), [style])
   useEffect(() => () => material?.dispose(), [material])
   const scale = useRef(1)
-  useFrame((_, dt) => {
+  useFrame(({ clock }, dt) => {
     const s = spin.current
     if (!s) return
+    if (born.current < 0) born.current = clock.elapsedTime
     s.rotation.y += dt * 0.3
     scale.current += ((hover ? 1.25 : 1) - scale.current) * Math.min(1, dt * 10)
-    s.scale.setScalar(scale.current)
+    // staggered entrance (Sun first, then outward) and a gentle idle float
+    const k = REDUCED ? 1 : Math.min(1, Math.max(0, (clock.elapsedTime - born.current - 0.15 - order * 0.07) / 0.55))
+    s.scale.setScalar(scale.current * (k >= 1 ? 1 : Math.max(0.0001, backOut(k))))
+    s.position.y = REDUCED ? 0 : Math.sin(clock.elapsedTime * 0.7 + order * 1.3) * 0.012
     if (material) material.uniforms.uHover.value += ((hover ? 1 : 0) - material.uniforms.uHover.value) * Math.min(1, dt * 8)
   })
   const r = Math.max(b.size, 0.05)

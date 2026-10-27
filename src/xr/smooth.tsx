@@ -7,7 +7,7 @@ import { useXRApp } from './store'
 import { xrStore } from './xrStore'
 import { viewCamera } from './viewCamera'
 import { beginScene, beginTask, endTask, reportProblem, retryScene, useLoading, type Problem } from './loading'
-import { Appear, Button, GlassPanel, Icon, Label, UI } from './ui3d'
+import { Appear, Button, GlassPanel, Icon, Label, UI, roundedFrame, roundedRect, uiMat } from './ui3d'
 import { useSitesForBody } from './content'
 import { FONT, FONT_BOLD } from './font'
 import { t } from './i18n'
@@ -62,18 +62,28 @@ export function LoadingPanelVR() {
   const label = useLoading((s) => s.label)
   const progress = useLoading((s) => s.progress)
   const g = useRef<Group>(null)
+  const arm = useRef<Group>(null)
   const mat = useMemo(() => new MeshBasicMaterial({ fog: false, toneMapped: false, depthTest: false, transparent: true }), [])
-  useFrame(({ camera, gl }) => {
+  useFrame(({ camera, gl }, dt) => {
     const o = g.current
     if (!o) return
     const cam = viewCamera(gl, camera)
     cam.getWorldPosition(o.position)
     cam.getWorldQuaternion(o.quaternion)
     o.translateZ(-0.45)
+    if (arm.current) arm.current.rotation.z -= dt * 2.4
   })
   if (!session || !active) return null
   return (
     <group ref={g} renderOrder={10002}>
+      {/* the same little orbit as the on-screen loader: a sun, a ring and a planet going round */}
+      <group position={[0, 0.062, 0]}>
+        <mesh geometry={roundedFrame(0.07, 0.07, 0.035, 0.0018)} material={uiMat(UI.accent, 0.8, true)} renderOrder={10002} />
+        <mesh geometry={roundedRect(0.014, 0.014, 0.007)} material={uiMat('#ffb54a', 1, true)} renderOrder={10003} />
+        <group ref={arm}>
+          <mesh geometry={roundedRect(0.01, 0.01, 0.005)} material={uiMat('#e0612a', 1, true)} position={[0, 0.035, 0]} renderOrder={10003} />
+        </group>
+      </group>
       <Text font={FONT_BOLD} material={mat} fontSize={0.028} color="#ffffff" anchorX="center" anchorY="bottom" renderOrder={10002}>
         {t('Preparing {x}…', { x: t(label) })}
       </Text>

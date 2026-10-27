@@ -5,6 +5,8 @@ import { useSiteContent, useSitesForBody } from './content'
 import { requestGyroPermission, type DeviceCaps } from './device'
 import { IS_HEADSET, enterImmersive, xrErrorMessage } from './xrStore'
 import { t } from './i18n'
+import { useIntro } from './Intro'
+import { cameraMotion } from './cameraMotion'
 
 /**
  * "How do you want to explore?" — every way in, in plain words: what it is, what you need, and where it
@@ -145,6 +147,13 @@ export function ModePickerToggle({ caps }: { caps: DeviceCaps }) {
       return atHub
     }
   })
+  // right after the intro, let the camera's flight in finish before the choices appear
+  const [held, setHeld] = useState(() => useIntro.getState().open || cameraMotion.request === 'intro')
+  useEffect(() => {
+    if (!held) return
+    const id = setTimeout(() => setHeld(false), 2200)
+    return () => clearTimeout(id)
+  }, [held])
   useEffect(() => {
     if (!open) return
     try {
@@ -158,7 +167,7 @@ export function ModePickerToggle({ caps }: { caps: DeviceCaps }) {
       <button className="btn btn--primary" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         {t('Ways to explore')} ▾
       </button>
-      {open && caps.checked && <ModePicker caps={caps} onClose={() => setOpen(false)} />}
+      {open && !held && caps.checked && <ModePicker caps={caps} onClose={() => setOpen(false)} />}
     </>
   )
 }

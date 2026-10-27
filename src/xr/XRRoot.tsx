@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef, type ReactNode } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { XR, XRDomOverlay, XROrigin, useXR } from '@react-three/xr'
 import { xrStore } from './xrStore'
@@ -19,7 +19,9 @@ import { HandStyler, ScreenEffects, SoundDirector, TransitionVeil } from './poli
 import { MissionTracker } from './MissionTracker'
 import { ComfortVignette, LoadingPanelVR, Prefetcher, ProblemPanelVR, SceneLoadTracker, recenterOrigin } from './smooth'
 import { viewCamera } from './viewCamera'
-import type { Group } from 'three'
+import { Vector3, type Group } from 'three'
+import { cameraMotion, easeInOutCubic, easeOutCubic, prefersReducedMotion } from './cameraMotion'
+import { IntroScreen, useIntro } from './Intro'
 import { ErrorBoundary } from './ErrorBoundary'
 import { reportProblem, useLoading } from './loading'
 import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
@@ -94,19 +96,59 @@ function PlayerOrigin({ seated, kind }: { seated: boolean; kind: SceneKind }) {
 function CameraRig({ kind }: { kind: SceneKind }) {
   const mode = useXRApp((s) => s.mode)
   const camera = useThree((s) => s.camera)
+  const controls = useThree((s) => s.controls) as unknown as { enabled: boolean } | null
   const hub = kind === 'hub'
   const table = useXRApp((s) => s.bodyId === 'spherex')
+  const sceneKey = useXRApp((s) => `${s.bodyId}:${s.siteId}`)
+  const anim = useRef<{ t: number; dur: number; from: Vector3; to: Vector3; look: Vector3; ease: (x: number) => number } | null>(null)
+  const pose = useRef({ to: new Vector3(), look: new Vector3() })
+
   useEffect(() => {
     if (kind === 'surface') return
     if (mode === 'desktop') {
       // the SPHEREx plate lies on a table: look down at it from above, like standing over it
-      if (table) camera.position.set(0, 2.9, 2.9)
-      else camera.position.set(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
-      camera.lookAt(0, table ? -0.3 : 0, 0)
+      const to = table ? new Vector3(0, 2.9, 2.9) : new Vector3(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
+      const look = new Vector3(0, table ? -0.3 : 0, 0)
+      pose.current = { to, look }
+      if (prefersReducedMotion()) {
+        camera.position.copy(to)
+        camera.lookAt(look)
+        return
+      }
+      // arrive: glide in from further out instead of cutting in
+      const from = to.clone().multiplyScalar(1.9).add(new Vector3(0, 0.8, 0))
+      camera.position.copy(from)
+      camera.lookAt(look)
+      anim.current = { t: 0, dur: 1.1, from, to, look, ease: easeOutCubic }
     } else if (mode === 'gyro') {
       camera.position.set(0, 0, 0)
     }
-  }, [mode, hub, kind, camera, table])
+  }, [mode, hub, kind, camera, table, sceneKey])
+
+  useFrame(({ clock }, dt) => {
+    if (mode !== 'desktop' || kind === 'surface') return
+    const req = cameraMotion.request
+    if (req) {
+      cameraMotion.request = null
+      const { to, look } = pose.current
+      anim.current = { t: 0, dur: req === 'intro' && !prefersReducedMotion() ? 2.6 : 0.7, from: camera.position.clone(), to: to.clone(), look: look.clone(), ease: easeInOutCubic }
+    }
+    if (useIntro.getState().open && hub) {
+      // behind the title card: a slow drift far out in the chart's sky
+      const a = clock.elapsedTime * 0.05
+      camera.position.set(Math.sin(a) * 26, 12, Math.cos(a) * 26)
+      camera.lookAt(0, 0, 0)
+      if (controls) controls.enabled = false
+      return
+    }
+    const m = anim.current
+    if (!m) return
+    m.t = Math.min(1, m.t + Math.min(dt, 0.05) / m.dur)
+    camera.position.lerpVectors(m.from, m.to, m.ease(m.t))
+    camera.lookAt(m.look)
+    if (controls) controls.enabled = m.t >= 1
+    if (m.t >= 1) anim.current = null
+  })
   return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} autoRotate={hub} autoRotateSpeed={0.25} target={[0, table ? -0.3 : 0, 0]} /> : null
 }
 
@@ -163,6 +205,7 @@ export function XRRoot() {
   const sceneLabel = siteId ? (site?.name ?? 'the surface') : bodyId ? (BODY_BY_ID[bodyId]?.name ?? bodyId) : 'the Solar System'
   const space = kind !== 'surface' && mode !== 'ar'
   const retry = useLoading((s) => s.retry)
+  const introOpen = useIntro((s) => s.open)
   const arModel = useXRApp((s) => s.arModel)
 
   return (
@@ -244,9 +287,11 @@ export function XRRoot() {
           )}
         </XR>
       </Canvas>
-      {mode !== 'ar' && <Hud />}
+      {/* re-keyed per scene so the HUD's entrance animation plays each time you arrive somewhere */}
+      {mode !== 'ar' && !introOpen && <Hud key={`${kind}:${bodyId ?? ''}:${siteId ?? ''}`} />}
       <KioskDirector />
       <AttractOverlay />
+      <IntroScreen />
       {(PERF || showFps) && <PerfHud />}
     </div>
   )
