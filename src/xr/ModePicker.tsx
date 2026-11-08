@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useXRApp } from './store'
 import { BODY_BY_ID } from './bodies'
 import { useSiteContent, useSitesForBody } from './content'
@@ -168,7 +169,16 @@ export function ModePickerToggle({ caps }: { caps: DeviceCaps }) {
         <span className="lbl-long">{t('Ways to explore')}</span>
         <span className="lbl-short">{t('Explore')}</span> ▾
       </button>
-      {open && !held && caps.checked && <ModePicker caps={caps} onClose={() => setOpen(false)} />}
+      {/* rendered on <body>, not inside the (animated) top bar: an ancestor with a transform becomes the
+          containing block of position:fixed, which pushed the sheet off the top of the screen on iPhone */}
+      {open && !held && caps.checked &&
+        createPortal(
+          <>
+            <div className="mode-backdrop" onClick={() => setOpen(false)} aria-hidden />
+            <ModePicker caps={caps} onClose={() => setOpen(false)} />
+          </>,
+          document.body,
+        )}
     </>
   )
 }

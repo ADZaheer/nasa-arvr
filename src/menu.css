@@ -250,3 +250,18 @@ label.setting-card { cursor: pointer; }
   .hud__title .btn { min-width: 44px; min-height: 40px; }
   .legend > span { display: none; }
 }
+
+/* ---- explore choices: always on screen ----
+   Portalled to <body>. Desktop: card under the top bar. Phones: a bottom sheet bounded by the visible
+   viewport (vh fallback for browsers without dvh), scrolling inside, never above the top bar. */
+.mode-backdrop { position: fixed; inset: 0; z-index: 29; background: rgba(3, 6, 18, 0.35); animation: fade-in var(--dur-mid) ease both; }
+.mode-picker { z-index: 30; max-height: calc(100vh - 88px); max-height: calc(100dvh - 88px); overflow-y: auto; overscroll-behavior: contain; color: var(--text); font-family: Roboto, system-ui, sans-serif; }
+.mode-picker header { position: sticky; top: -14px; margin: -14px -14px 10px; padding: 14px 14px 8px; background: inherit; z-index: 1; }
+@media (max-width: 640px) {
+  .mode-picker {
+    top: auto; bottom: 0; left: 0; right: 0; transform: none; width: auto;
+    max-height: calc(100vh - 120px); max-height: calc(100dvh - env(safe-area-inset-top) - 72px);
+    border-radius: 22px 22px 0 0; padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .mode-picker header .icon-btn { min-width: 44px; min-height: 44px; }
+}
