@@ -1,0 +1,16 @@
+# Working rules for AI agents on this repo (read HANDOFF.md first, then docs/PLAN.md)
+
+- Work only on D:. npm cache is D:\npm-cache (set npm_config_cache). Never write to C:.
+- Commits are authored by the owner only: no Co-Authored-By lines and no AI attribution in commits, PRs or code.
+- Make small commits, one task each. Run `npm run build` before every commit.
+- Before deploying:
+  - Run `npm run build`.
+  - Check phone-size screenshots (360x800, 390x844) and desktop.
+  - Test `?emulate` VR/AR and `npm run smoke:xr` against a preview on port 4173.
+  - Then deploy with `npx --yes vercel@65.0.0 deploy --prod --yes`, run `git push origin main`, and stop local servers.
+- Performance: keep 72 fps on Quest 3 at Medium. Respect the quality tiers and prefers-reduced-motion. Sound is off by default.
+- Every new UI string goes through t() with an Indonesian translation in src/xr/i18n.ts.
+- Use only NASA public-domain / CC0 assets, and credit each one in the UI.
+- Be honest: label content as Fact / Illustration / Candidate (unconfirmed). Never claim a discovery; user flags stay "Unverified".
+- Never commit or push secrets, tokens or .env files. Never add collaborators, apps, deploy keys or GitHub Actions.
+- Do not start multiplayer (Phase E) until the owner asks.
