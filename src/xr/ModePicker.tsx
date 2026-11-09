@@ -15,7 +15,7 @@ import { cameraMotion } from './cameraMotion'
  * where a button went. Each option's action matches its label (e.g. "Walk on Mars in VR" lands you on Mars).
  */
 type Option = {
-  id: 'screen' | 'vr' | 'ar' | 'look'
+  id: 'screen' | 'vr' | 'ar' | 'look' | 'hub-vr' | 'hub-ar'
   icon: string
   title: string
   desc: string
@@ -60,7 +60,37 @@ export function ModePicker({ caps, onClose }: { caps: DeviceCaps; onClose: () =>
   }
   const insecure = caps.secure ? undefined : t('Needs a secure link (https://)')
 
+  // At the Solar System itself, VR and AR first offer the Solar System (it used to jump to Mars only)
+  const atHub = !bodyId && !siteId
+  const hubOptions: Option[] = atHub
+    ? [
+        {
+          id: 'hub-vr',
+          icon: '🥽',
+          title: t('Solar System in VR'),
+          desc: t('See it in 3D all around you with a VR headset such as Meta Quest.'),
+          disabled: insecure ?? (caps.vr ? undefined : t('No VR headset on this device')),
+          run: go(() => {
+            app().setGyroEnabled(false)
+            enterImmersive('vr').catch(failed('vr'))
+          }),
+        },
+        {
+          id: 'hub-ar',
+          icon: IS_HEADSET ? '🏠' : '📱',
+          title: IS_HEADSET ? t('Solar System in my room') : t('Solar System on your table (AR)'),
+          desc: t('Point your camera at a table to place a small 3D model of it. You stay in your room.'),
+          disabled: insecure ?? (caps.ar ? undefined : t('This device’s browser can’t do AR')),
+          run: go(() => {
+            app().setGyroEnabled(false)
+            app().setArModel('scene')
+            enterImmersive('ar').catch(failed('ar'))
+          }),
+        },
+      ]
+    : []
   const options: Option[] = [
+    ...hubOptions,
     {
       id: 'screen',
       icon: '🖥️',

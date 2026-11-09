@@ -65,7 +65,7 @@ export async function enterImmersive(mode: 'vr' | 'ar') {
   for (const p of presets) {
     Object.assign(options, p)
     try {
-      return await (mode === 'vr' ? xrStore.enterVR() : xrStore.enterAR())
+      return await enterWhenReady(mode)
     } catch (e) {
       last = e
       // only "this combination isn't supported" is worth retrying with fewer extras
@@ -73,6 +73,18 @@ export async function enterImmersive(mode: 'vr' | 'ar') {
     }
   }
   throw last
+}
+/** The 3D view may still be starting (a tap right after the page opens, or a heavy scene loading on a
+ *  headset): then the XR store is "not connected to three.js" yet. Wait for it instead of failing. */
+async function enterWhenReady(mode: 'vr' | 'ar') {
+  for (let i = 0; ; i++) {
+    try {
+      return await (mode === 'vr' ? xrStore.enterVR() : xrStore.enterAR())
+    } catch (e) {
+      if (i >= 20 || !String((e as Error)?.message).includes('not connected')) throw e
+      await new Promise((r) => setTimeout(r, 400))
+    }
+  }
 }
 const BARE: Partial<StoreOptions> = { planeDetection: false, depthSensing: false, hitTest: false, domOverlay: false, handTracking: false }
 
