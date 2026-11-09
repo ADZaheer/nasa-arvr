@@ -41,8 +41,19 @@ export function SceneReady() {
     // wait one frame so freshly mounted objects are in the scene graph
     const id = requestAnimationFrame(() => {
       const r = gl as unknown as { compileAsync?: (s: unknown, c: unknown) => Promise<void> }
-      if (r.compileAsync) r.compileAsync(scene, camera).then(done, done)
-      else {
+      if (r.compileAsync) {
+        // compileAsync can hang in XR contexts: add a 5s timeout safety net
+        const timeout = setTimeout(done, 5000)
+        r.compileAsync(scene, camera)
+          .then(() => {
+            clearTimeout(timeout)
+            done()
+          })
+          .catch(() => {
+            clearTimeout(timeout)
+            done()
+          })
+      } else {
         gl.compile(scene, camera)
         done()
       }
