@@ -27,6 +27,7 @@ import { reportProblem, useLoading } from './loading'
 import { TourDirector, TourPanelVR, TourStartVR } from './TourUI'
 import { ControllerHints } from './ControllerHints'
 import { RoomRover } from './RoomRover'
+import { TimeVR } from './TimeVR'
 import { SpherexTable } from './SpherexTable'
 import { AttractOverlay, KioskDirector } from './kiosk'
 import { IS_HEADSET } from './xrStore'
@@ -231,9 +232,14 @@ export function XRRoot() {
           <TourDirector />
           <TourPanelVR />
           {mode === 'vr' && kind === 'hub' && (
-            <group position={[0, 1.02, -0.85]} rotation={[-0.35, 0, 0]}>
-              <TourStartVR />
-            </group>
+            <>
+              <group position={[0, 1.02, -0.85]} rotation={[-0.35, 0, 0]}>
+                <TourStartVR />
+              </group>
+              <group position={[0.62, 1.0, -0.9]} rotation={[-0.35, -0.45, 0]}>
+                <TimeVR />
+              </group>
+            </>
           )}
           <ComfortVignette />
           <Prefetcher />

@@ -265,3 +265,45 @@ label.setting-card { cursor: pointer; }
   }
   .mode-picker header .icon-btn { min-width: 44px; min-height: 44px; }
 }
+
+/* ---- time machine (Solar System) ---- */
+.time-pill {
+  position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: calc(44px + env(safe-area-inset-bottom)); z-index: 5;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; cursor: pointer; font: inherit; font-size: 13.5px; color: var(--text);
+  background: rgba(10, 22, 36, 0.8); border: 1px solid rgba(79, 227, 214, 0.35); border-radius: 999px; backdrop-filter: blur(12px);
+  animation: rise-in var(--dur-slow) var(--ease-out) 300ms both;
+}
+.time-pill__dot { width: 8px; height: 8px; border-radius: 50%; background: #8f7cff; }
+.time-pill__dot[data-live='true'] { background: #5ee39a; box-shadow: 0 0 8px #5ee39a; }
+.time-panel {
+  position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: calc(44px + env(safe-area-inset-bottom)); z-index: 6; width: min(420px, calc(100vw - 32px));
+  display: grid; gap: 10px; padding: 14px 16px; color: var(--text);
+  background: linear-gradient(180deg, rgba(16, 28, 48, 0.94), rgba(8, 14, 30, 0.96)); border: 1px solid rgba(79, 227, 214, 0.22); border-radius: 20px;
+  backdrop-filter: blur(16px); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5); animation: rise-in var(--dur-mid) var(--ease-out) both;
+}
+.time-panel header { display: flex; align-items: center; gap: 10px; }
+.time-panel header strong { font-weight: 500; font-size: 16px; flex: 1; }
+.time-panel .menu-close { width: 36px; height: 36px; font-size: 20px; }
+.time-live { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(143, 124, 255, 0.18); color: #c9bfff; font-variant-numeric: tabular-nums; }
+.time-live.on { background: rgba(94, 227, 154, 0.15); color: #5ee39a; }
+.time-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.time-range { appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; }
+.time-range::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #8f7cff var(--pct), rgba(255, 255, 255, 0.12) var(--pct)); }
+.time-range::-moz-range-track { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); }
+.time-range::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(143, 124, 255, 0.3); }
+.time-buttons { display: grid; grid-template-columns: repeat(4, auto); gap: 6px; justify-content: start; }
+.time-moments { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.time-moments::-webkit-scrollbar { display: none; }
+.time-moments .chip { flex: none; white-space: nowrap; }
+.light-time { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.04); }
+.light-time > div { display: grid; gap: 2px; min-width: 0; }
+.light-time b { font-weight: 500; font-size: 14px; }
+.light-time small { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) {
+  .time-pill { left: 12px; bottom: calc(22px + env(safe-area-inset-bottom)); }
+  .time-panel { left: 0; right: 0; bottom: 0; width: auto; border-radius: 22px 22px 0 0; padding-bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 32; }
+  .time-buttons { grid-template-columns: repeat(4, 1fr); }
+  .light-time { flex-direction: column; align-items: stretch; }
+  .hud:has(.time-panel) .menu-fab { opacity: 0; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) { .time-pill, .time-panel { animation: none; } }

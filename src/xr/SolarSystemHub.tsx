@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Billboard, Text } from '@react-three/drei'
-import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, IcosahedronGeometry, SphereGeometry, Vector3, type Group, type Mesh } from 'three'
+import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, IcosahedronGeometry, MeshBasicMaterial, SphereGeometry, Vector3, type Group, type Mesh } from 'three'
 import { BODIES, type BodyInfo } from './bodies'
 import { hasContent } from './content'
 import { useXRApp } from './store'
@@ -10,15 +10,20 @@ import { FONT, FONT_BOLD } from './font'
 import { SceneReady } from './smooth'
 import { useT } from './i18n'
 import { useQuality } from './quality'
+import { currentDate, PLAY_DAYS_PER_SECOND, useTime } from './timeMachine'
+import { helioLongitude } from './ephemeris'
 import { HOLO, HOLO_STYLES, HoloMotes, HoloOrbit, HoloSun, holoUniforms, makeHoloPlanetMaterial } from './holo'
 
-const GOLDEN = 2.39996
-/** Orbit drift, radians per second at orbit radius 1 (outer planets slower). Purely decorative. */
-const DRIFT = 0.035
 const MOON_OFFSET = new Vector3(0.17, 0.04, 0.05)
+const TWO_PI = Math.PI * 2
 
-function orbitAngle(i: number, b: BodyInfo, t: number) {
-  return i * GOLDEN + (t * DRIFT) / Math.pow(Math.max(b.orbit, 0.5), 1.5)
+/**
+ * Each planet is drawn at its REAL direction from the Sun on the chosen date (JPL elements, ./ephemeris);
+ * distances stay compressed and sizes exaggerated, as the label says. Viewed from above ecliptic north:
+ * longitude grows counter-clockwise.
+ */
+function hubXZ(radius: number, lon: number): [number, number] {
+  return [Math.cos(lon) * radius, -Math.sin(lon) * radius]
 }
 
 /** Body picker, drawn as a stylised mission-control chart. Sizes and distances are deliberately NOT to scale. */
@@ -28,17 +33,32 @@ export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
   const root = useRef<Group>(null)
   const hovered = useXRApp((s) => s.hoveredId)
   const groups = useRef<Record<string, Group | null>>({})
+  // shown angle per body, easing toward the real one so scrubbing the date glides instead of jumping
+  const shown = useRef<Record<string, number>>({})
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, dt) => {
     // the Sun sits at the hub centre: planets are lit from there
     root.current?.getWorldPosition(holoUniforms.uSun.value)
-    const time = clock.elapsedTime
-    BODIES.forEach((b, i) => {
+    const time = useTime.getState()
+    if (time.playing && time.date !== null) time.setDate(time.date + Math.min(dt, 0.1) * PLAY_DAYS_PER_SECOND * 86400000)
+    const date = currentDate()
+    BODIES.forEach((b) => {
       const g = groups.current[b.id]
       if (!g || b.parent || b.orbit === 0) return
-      const a = orbitAngle(i, b, time)
-      g.position.set(Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit)
+      const target = helioLongitude(b.id, date) ?? 0
+      let cur = shown.current[b.id]
+      if (cur === undefined || time.playing) cur = target
+      else {
+        let d = (target - cur) % TWO_PI
+        if (d > Math.PI) d -= TWO_PI
+        if (d < -Math.PI) d += TWO_PI
+        cur += d * Math.min(1, dt * 6)
+      }
+      shown.current[b.id] = cur
+      const [x, z] = hubXZ(b.orbit, cur)
+      g.position.set(x, 0, z)
     })
+    void clock
     for (const b of BODIES) {
       const g = groups.current[b.id]
       const p = b.parent ? groups.current[b.parent] : null
@@ -53,6 +73,7 @@ export function SolarSystemHub({ tilt = 0 }: { tilt?: number }) {
         <HoloOrbit key={`orbit-${b.id}`} radius={b.orbit} color={b.kind === 'asteroid' ? HOLO.amber : hasContent(b.id) ? HOLO.teal : HOLO.violet} active={hovered === `hub:${b.id}`} />
       ))}
       <HoloMotes q={q} />
+      <MessagePulse groups={groups} />
       {BODIES.map((b, i) => (
         <group key={b.id} ref={(g) => void (groups.current[b.id] = g)}>
           <HubBody b={b} order={i} />
@@ -199,5 +220,45 @@ function HubBody({ b, order }: { b: BodyInfo; order: number }) {
         )}
       </Billboard>
     </group>
+  )
+}
+
+/** "Send a message to Mars": a glowing pulse travels from Earth to Mars (shown 60× faster than light). */
+function MessagePulse({ groups }: { groups: React.RefObject<Record<string, Group | null>> }) {
+  const dot = useRef<Mesh>(null)
+  const ring = useRef<Mesh>(null)
+  const v = useMemo(() => new Vector3(), [])
+  useFrame(() => {
+    const m = useTime.getState().message
+    const d = dot.current, r = ring.current
+    if (!d || !r) return
+    const earth = groups.current?.earth, mars = groups.current?.mars
+    if (!m || !earth || !mars) {
+      d.visible = r.visible = false
+      return
+    }
+    const k = (performance.now() - m.sentAt) / m.durationMs
+    d.visible = k < 1
+    if (k < 1) d.position.copy(v.copy(earth.position).lerp(mars.position, k))
+    // arrival flash on Mars, then clear
+    r.visible = k >= 1 && k < 1.6
+    if (r.visible) {
+      r.position.copy(mars.position)
+      r.scale.setScalar(0.05 + (k - 1) * 0.4)
+      ;(r.material as MeshBasicMaterial).opacity = 1 - (k - 1) / 0.6
+    }
+    if (k >= 1.6) useTime.setState({ message: null })
+  })
+  return (
+    <>
+      <mesh ref={dot} visible={false}>
+        <sphereGeometry args={[0.022, 12, 8]} />
+        <meshBasicMaterial color={HOLO.teal} toneMapped={false} />
+      </mesh>
+      <mesh ref={ring} visible={false} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.8, 1, 32]} />
+        <meshBasicMaterial color={HOLO.teal} transparent toneMapped={false} depthWrite={false} side={DoubleSide} />
+      </mesh>
+    </>
   )
 }

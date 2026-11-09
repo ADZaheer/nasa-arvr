@@ -13,6 +13,7 @@ import { t, useT } from './i18n'
 import { TourCaption } from './TourUI'
 import { ModePickerToggle } from './ModePicker'
 import { LoadingScreen } from './LoadingScreen'
+import { TimePanel } from './TimePanel'
 import { layersFor } from './layers'
 import { ROOM_CHOICES } from './menuModel'
 import { input, player } from './surface/player'
@@ -156,6 +157,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
       {surface && inAR && <p className="notice">Tabletop model of {site?.name}. Exit AR and use Enter VR or Look around to stand on it.</p>}
 
       {(!session || inAR) && <MenuPanel />}
+      {!bodyId && !surface && !inAR && <TimePanel />}
       <LoadingScreen />
       <ProblemCard />
       {!inAR && <TourCaption />}
