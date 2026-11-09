@@ -137,6 +137,11 @@ Verified only in the emulator or at desktop/phone browser sizes. These **still n
   - The session presets fall back if the phone rejects options.
   - The device previously showed "specified configuration is not supported".
 
+Rules learnt from VR/AR bugs (commit 8c3e9d0):
+- Never use `window.requestAnimationFrame` for anything that must run in VR/AR. It stops during an immersive session; use `useFrame` instead.
+- Gaze dwell runs in VR/AR/gyro. A target already in front of you when a scene opens won't fire until you look away (`ARM_MS` in `GazeDwell.tsx`). The Sun is not a dwell target.
+- `npm run smoke:xr` visits every place in VR and AR with window frames blocked. Run it before each deploy.
+
 Known issues:
 - The browser pane used for agent testing does not register the service worker, and its screenshots are often stale. Verify with DOM queries.
 - If the in-app browser pane is hidden, the 3D canvas never starts (300×150 canvas), so XR "fails" there. Use the Playwright smoke test instead.
