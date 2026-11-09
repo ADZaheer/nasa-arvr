@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Raycaster, Vector3, type Group, type Object3D } from 'three'
-import { DWELL_MS, dwellOccluders, dwellTargets } from './dwell'
+import { DWELL_MS, dwellBorn, dwellOccluders, dwellTargets } from './dwell'
 import { viewCamera } from './viewCamera'
 
 function visibleInTree(o: Object3D | null): boolean {
@@ -13,6 +13,9 @@ function visibleInTree(o: Object3D | null): boolean {
  * Gaze dwell: a reticle at the centre of view; looking at a dwell target for 1.5 s selects it.
  * Works in VR (head gaze), handheld AR (screen centre) and phone gyro mode.
  */
+/** A target seen within this long after it appeared needs the gaze to leave and come back first. */
+const ARM_MS = 2500
+
 export function GazeDwell({ enabled, distance = 1 }: { enabled: boolean; distance?: number }) {
   const defaultCamera = useThree((s) => s.camera)
   const gl = useThree((s) => s.gl)
@@ -46,7 +49,9 @@ export function GazeDwell({ enabled, distance = 1 }: { enabled: boolean; distanc
     if (target !== s.target) {
       s.target = target
       s.start = now
-      s.fired = false
+      // right after a scene opens you are looking at whatever is in front of you (in the Solar System that
+      // is the Sun): don't select it until the gaze has moved off it once
+      s.fired = !!target && now - (dwellBorn.get(target) ?? 0) < ARM_MS
     }
     let p = target && !s.fired ? Math.min(1, (now - s.start) / DWELL_MS) : 0
     if (target && p >= 1 && !s.fired) {

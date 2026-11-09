@@ -11,4 +11,7 @@ export async function startEmulator(): Promise<void> {
   device.installRuntime({ forceInstall: true })
   device.installDevUI(DevUI)
   ;(window as unknown as { __xrDevice: unknown }).__xrDevice = device
+  // for automated tests (scripts/smoke-xr.mjs): read loading state and change scenes from outside
+  const [{ useLoading }, { useXRApp }] = await Promise.all([import('./loading'), import('./store')])
+  ;(window as unknown as { __xrTest: unknown }).__xrTest = { useLoading, useXRApp }
 }

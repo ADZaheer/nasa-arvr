@@ -35,34 +35,36 @@ export function SceneReady() {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const camera = useThree((s) => s.camera)
+  // Wait for the renderer's next frame so freshly mounted objects are in the scene graph. This must be a
+  // useFrame tick, not window.requestAnimationFrame: inside a VR/AR session the browser stops calling the
+  // window's animation frames (only the XR session's run), so the scene never finished loading there and
+  // the "trouble loading" card appeared after 15 s on every scene opened in VR/AR.
+  const pending = useRef(true)
   useEffect(() => {
-    let alive = true
-    const done = () => alive && endTask('scene')
-    // wait one frame so freshly mounted objects are in the scene graph
-    const id = requestAnimationFrame(() => {
-      const r = gl as unknown as { compileAsync?: (s: unknown, c: unknown) => Promise<void> }
-      if (r.compileAsync) {
-        // compileAsync can hang in XR contexts: add a 5s timeout safety net
-        const timeout = setTimeout(done, 5000)
-        r.compileAsync(scene, camera)
-          .then(() => {
-            clearTimeout(timeout)
-            done()
-          })
-          .catch(() => {
-            clearTimeout(timeout)
-            done()
-          })
-      } else {
-        gl.compile(scene, camera)
-        done()
-      }
-    })
+    pending.current = true
     return () => {
-      alive = false
-      cancelAnimationFrame(id)
+      pending.current = false
     }
   }, [gl, scene, camera])
+  useFrame(() => {
+    if (!pending.current) return
+    pending.current = false
+    const done = () => endTask('scene')
+    const r = gl as unknown as { compileAsync?: (s: unknown, c: unknown) => Promise<void> }
+    if (!r.compileAsync) {
+      gl.compile(scene, camera)
+      done()
+      return
+    }
+    // compileAsync can hang in XR contexts: end loading after 5 s regardless
+    const timeout = setTimeout(done, 5000)
+    r.compileAsync(scene, camera)
+      .catch(() => {})
+      .finally(() => {
+        clearTimeout(timeout)
+        done()
+      })
+  })
   return null
 }
 

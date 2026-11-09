@@ -145,7 +145,7 @@ function HubBody({ b, order }: { b: BodyInfo; order: number }) {
   const spin = useRef<Group>(null)
   const explorable = hasContent(b.id)
   const select = useCallback(() => useXRApp.getState().selectBody(b.id), [b.id])
-  useDwellTarget(hit, select)
+  useDwellTarget(hit, select, b.id !== 'sun')
   const style = HOLO_STYLES[b.id]
   const material = useMemo(() => (style ? makeHoloPlanetMaterial(style) : null), [style])
   useEffect(() => () => material?.dispose(), [material])
