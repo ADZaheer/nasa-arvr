@@ -1,0 +1,27 @@
+{
+  "target": {
+    "name": "15 Eunomia",
+    "kind": "asteroid",
+    "source": "JPL Horizons (positions at each exposure)"
+  },
+  "a": {
+    "u": 0.5143080632467112,
+    "v": 0.4772072419595681,
+    "mjd": 61040.090007416,
+    "obsId": "2026W01_1A_0441_1"
+  },
+  "b": {
+    "u": 0.4790259940733604,
+    "v": 0.5161264195378613,
+    "mjd": 61040.163252254,
+    "obsId": "2026W01_1A_0454_4"
+  },
+  "gapHours": 1.76,
+  "center": {
+    "ra": 184.26182469106988,
+    "dec": -13.26674119015983
+  },
+  "fieldDeg": 0.256,
+  "detector": "SPHEREx D3 (near-infrared, about 1.6–2.4 µm)",
+  "credit": "NASA/JPL-Caltech/IPAC: SPHEREx Level-2 spectral images (IRSA), reprojected; asteroid positions from JPL Horizons"
+}

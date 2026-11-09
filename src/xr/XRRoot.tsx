@@ -100,6 +100,8 @@ function CameraRig({ kind }: { kind: SceneKind }) {
   const controls = useThree((s) => s.controls) as unknown as { enabled: boolean } | null
   const hub = kind === 'hub'
   const table = useXRApp((s) => s.bodyId === 'spherex')
+  // phone held upright: the on-screen SPHEREx panel covers the bottom, so back off and aim lower
+  const narrow = useThree((s) => s.size.width < 640 && s.size.width < s.size.height)
   const sceneKey = useXRApp((s) => `${s.bodyId}:${s.siteId}`)
   const anim = useRef<{ t: number; dur: number; from: Vector3; to: Vector3; look: Vector3; ease: (x: number) => number } | null>(null)
   const pose = useRef({ to: new Vector3(), look: new Vector3() })
@@ -108,8 +110,8 @@ function CameraRig({ kind }: { kind: SceneKind }) {
     if (kind === 'surface') return
     if (mode === 'desktop') {
       // the SPHEREx plate lies on a table: look down at it from above, like standing over it
-      const to = table ? new Vector3(0, 2.9, 2.9) : new Vector3(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
-      const look = new Vector3(0, table ? -0.3 : 0, 0)
+      const to = table ? (narrow ? new Vector3(0, 5.4, 4.6) : new Vector3(0, 3.6, 3.5)) : new Vector3(0, hub ? 2.8 : 0.4, hub ? 6.4 : 3.4)
+      const look = new Vector3(0, table ? -0.3 : 0, table && narrow ? 1.3 : 0)
       pose.current = { to, look }
       if (prefersReducedMotion()) {
         camera.position.copy(to)
@@ -124,7 +126,7 @@ function CameraRig({ kind }: { kind: SceneKind }) {
     } else if (mode === 'gyro') {
       camera.position.set(0, 0, 0)
     }
-  }, [mode, hub, kind, camera, table, sceneKey])
+  }, [mode, hub, kind, camera, table, narrow, sceneKey])
 
   useFrame(({ clock }, dt) => {
     if (mode !== 'desktop' || kind === 'surface') return
@@ -150,7 +152,7 @@ function CameraRig({ kind }: { kind: SceneKind }) {
     if (controls) controls.enabled = m.t >= 1
     if (m.t >= 1) anim.current = null
   })
-  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} autoRotate={hub} autoRotateSpeed={0.25} target={[0, table ? -0.3 : 0, 0]} /> : null
+  return mode === 'desktop' && kind !== 'surface' ? <OrbitControls makeDefault enablePan={false} enableDamping minDistance={1.6} maxDistance={14} autoRotate={hub} autoRotateSpeed={0.25} target={[0, table ? -0.3 : 0, table && narrow ? 1.3 : 0]} /> : null
 }
 
 /** Where the scene sits for each mode. Hub/body content is authored with body radius = 1 (hub radius ≈ 3.2);

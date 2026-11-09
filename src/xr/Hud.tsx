@@ -14,6 +14,7 @@ import { TourCaption } from './TourUI'
 import { ModePickerToggle } from './ModePicker'
 import { LoadingScreen } from './LoadingScreen'
 import { TimePanel } from './TimePanel'
+import { SpherexPanel } from './SpherexPanel'
 import { layersFor } from './layers'
 import { ROOM_CHOICES } from './menuModel'
 import { input, player } from './surface/player'
@@ -158,6 +159,7 @@ export function Hud({ inAR = false }: { inAR?: boolean }) {
 
       {(!session || inAR) && <MenuPanel />}
       {!bodyId && !surface && !inAR && <TimePanel />}
+      {bodyId === 'spherex' && !inAR && <SpherexPanel />}
       <LoadingScreen />
       <ProblemCard />
       {!inAR && <TourCaption />}
